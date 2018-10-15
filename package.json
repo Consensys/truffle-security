@@ -4,8 +4,7 @@
   "version": "0.9.0",
   "description": "Add vulnerability and weakness analysis via the Mythril Platform",
   "dependencies": {
-    "armlet": ">=0.1.8",
-    "eslint": "^4.19.1",
+    "armlet": ">=0.1.9",
     "node-dir": "0.1.17",
     "remix-lib": ">=0.3.0"
   },
@@ -15,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rocky/truffle-analyze.git"
+    "url": "https://github.com/consensys/truffle-analyze.git"
   },
   "keywords": [
     "ethereum",
     "truffle",
     "mythril"
   ],
-  "homepage": "https://github.com/rocky/truffle-analyze",
+  "homepage": "https://github.com/consensys/truffle-analyze",
   "bugs": {
     "url": "https://github.com/ConsenSys/truffle-analyzes/issues"
   },
@@ -31,11 +30,11 @@
     {
       "name": "Rocky Bernstein",
       "email": "rocky.bernstein@consensys.net",
-      "url": "https://github.com/rocky"
     }
   ],
   "license": "MIT",
   "devDependencies": {
+    "eslint": ">=4.19.1",
     "ipfsd-ctl": "^0.21.0",
     "truffle-blockchain-utils": "^0.0.5"
   },
