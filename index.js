@@ -24,7 +24,7 @@ function getFormatter(style) {
 }
 
 const Analyze = {
-  run: function(options, callback) {
+  run: function(options, done) {
     var Config = require("truffle-config");
     var config = Config.detect(options);
     const root_dir = config.working_directory;
@@ -59,7 +59,7 @@ const Analyze = {
       buildJsonPath = path.join(buildDir, buildJson);
 
     } catch (err) {
-      callback(err);
+      done(err);
     }
 
     // console.log(`Reading ${buildJsonPath}`);
@@ -77,9 +77,9 @@ const Analyze = {
         let esIssues = mythril.issues2Eslint(issues, buildObj, options);
         // console.log(esIssues); // debug
         esReporter.printReport(esIssues, solidityFile, formatter, console.log);
-        callback(null, [], []);
+        done(null, [], []);
       }).catch(err => {
-        callback(err);
+        done(err);
       });
   }
 }

@@ -4,9 +4,12 @@
   "version": "0.9.0",
   "description": "Add vulnerability and weakness analysis via the Mythril Platform",
   "dependencies": {
-    "armlet": ">=0.1.9",
+    "armlet": ">=0.2.0",
     "node-dir": "0.1.17",
-    "remix-lib": ">=0.3.0"
+    "remix-lib": ">=0.3.0",
+    "truffle-workflow-compile": "2.0.0-beta.1",
+    "truffle-config": "^1.1.0-beta.1",
+    "configstore": ">=4.0.0"
   },
   "scripts": {
     "pretest": "eslint --rulesdir=tools/eslint-rules lib test",
