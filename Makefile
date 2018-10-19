@@ -3,7 +3,7 @@
 
 #: Run lint and then tests
 check: lint
-	npx mocha test
+	npx mocha test/test*.js
 
 #: same thing as "make check"
 test: check
