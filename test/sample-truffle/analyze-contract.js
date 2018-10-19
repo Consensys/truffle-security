@@ -6,6 +6,4 @@ const options = {
     _: []
 };
 
-Analyze.run(options, function(result) {
-    console.log(result);
-});
+Analyze.run(options, function() {});

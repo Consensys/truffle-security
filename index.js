@@ -63,28 +63,19 @@ const Analyze = {
     }
 
     // console.log(`Reading ${buildJsonPath}`);
+
     let client = new armlet.Client(
       {
+        // NOTE: authentication is changing in the next API release
         apiKey: process.env.MYTHRIL_API_KEY,
         userEmail: process.env.MYTHRIL_API_KEY || 'bogus@example.com'
       });
 
     const buildObj = JSON.parse(fs.readFileSync(buildJsonPath, 'utf8'));
 
-    buildObj.analysisMode = 'full';
-
-    // Add/remap some fields because the Mythril Platform API doesn't
-    // align with truffle's JSON
-
-    buildObj.sourceList = [buildObj.contractName]
-    buildObj.sources = {}
-    buildObj.sources[buildObj.contractName] = [buildObj.source]
-    for (let field of ['source', 'compiler', 'networks', 'schemaVersion', 'updatedAt']) {
-      delete buildObj[field]
-    }
-
     // console.log(JSON.stringify(buildObj, null, 4));
-    options.data = buildObj;
+    options.data = mythril.truffle2MythrilJSON(buildObj);
+    options.data.analysisMode = options.analysisMode || 'full';
 
     client.analyze(options)
       .then(issues => {
