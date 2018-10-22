@@ -89,9 +89,7 @@ describe('mythril', function() {
                 'SimpleDAO'
             ],
             'sources': {
-                'SimpleDAO': [
-                    '/*\n * @source: http://blockchain.unica.it/projects/ethereum-survey/attacks.html#simpledao\n * @author: Atzei N., Bartoletti M., Cimoli T\n * Modified by Josselin Feist\n */\npragma solidity 0.4.25;\n\ncontract SimpleDAO {\n  mapping (address => uint) public credit;\n\n  function donate(address to) payable public{\n    credit[to] += msg.value;\n  }\n\n  function withdraw(uint amount) public{\n    if (credit[msg.sender]>= amount) {\n      require(msg.sender.call.value(amount)());\n      credit[msg.sender]-=amount;\n    }\n  }\n\n  function queryCredit(address to) view public returns(uint){\n    return credit[to];\n  }\n}\n'
-                ]
+                'SimpleDAO': '/*\n * @source: http://blockchain.unica.it/projects/ethereum-survey/attacks.html#simpledao\n * @author: Atzei N., Bartoletti M., Cimoli T\n * Modified by Josselin Feist\n */\npragma solidity 0.4.25;\n\ncontract SimpleDAO {\n  mapping (address => uint) public credit;\n\n  function donate(address to) payable public{\n    credit[to] += msg.value;\n  }\n\n  function withdraw(uint amount) public{\n    if (credit[msg.sender]>= amount) {\n      require(msg.sender.call.value(amount)());\n      credit[msg.sender]-=amount;\n    }\n  }\n\n  function queryCredit(address to) view public returns(uint){\n    return credit[to];\n  }\n}\n'
             }
         };
         assert.deepEqual(mythrilJSON, expected);
