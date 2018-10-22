@@ -1,13 +1,15 @@
 {
   "name": "truffle-analyze",
   "namespace": "consensys",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Add vulnerability and weakness analysis via the Mythril Platform",
   "dependencies": {
-    "armlet": ">=0.1.8",
-    "eslint": "^4.19.1",
+    "armlet": ">=0.2.1",
     "node-dir": "0.1.17",
-    "remix-lib": ">=0.3.0"
+    "remix-lib": ">=0.3.0",
+    "truffle-workflow-compile": "2.0.0-beta.1",
+    "truffle-config": "^1.1.0-beta.1",
+    "configstore": ">=4.0.0"
   },
   "scripts": {
     "pretest": "eslint --rulesdir=tools/eslint-rules lib test",
@@ -15,14 +17,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rocky/truffle-analyze.git"
+    "url": "https://github.com/consensys/truffle-analyze.git"
   },
   "keywords": [
     "ethereum",
     "truffle",
     "mythril"
   ],
-  "homepage": "https://github.com/rocky/truffle-analyze",
+  "homepage": "https://github.com/consensys/truffle-analyze",
   "bugs": {
     "url": "https://github.com/ConsenSys/truffle-analyzes/issues"
   },
@@ -30,12 +32,12 @@
   "authors": [
     {
       "name": "Rocky Bernstein",
-      "email": "rocky.bernstein@consensys.net",
-      "url": "https://github.com/rocky"
+      "email": "rocky.bernstein@consensys.net"
     }
   ],
   "license": "MIT",
   "devDependencies": {
+    "eslint": ">=4.19.1",
     "ipfsd-ctl": "^0.21.0",
     "truffle-blockchain-utils": "^0.0.5"
   },

@@ -1,0 +1,1710 @@
+{
+    "contracts": {
+        "test.sol": {
+            "PublicStorageArray": {
+                "abi": [
+                    {
+                        "constant": true,
+                        "inputs": [
+                            {
+                                "name": "",
+                                "type": "uint256"
+                            }
+                        ],
+                        "name": "states",
+                        "outputs": [
+                            {
+                                "name": "",
+                                "type": "bytes32"
+                            }
+                        ],
+                        "payable": false,
+                        "stateMutability": "view",
+                        "type": "function"
+                    }
+                ],
+                "evm": {
+                    "bytecode": {
+                        "linkReferences": {},
+                        "object": "6080604052602060405190810160405280600060010260001916600019168152506000906001610030929190610043565b5034801561003d57600080fd5b506100bb565b828054828255906000526020600020908101928215610085579160200282015b82811115610084578251829060001916905591602001919060010190610063565b5b5090506100929190610096565b5090565b6100b891905b808211156100b457600081600090555060010161009c565b5090565b90565b60d8806100c96000396000f300608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063017a9105146044575b600080fd5b348015604f57600080fd5b50606c60048036038101908080359060200190929190505050608a565b60405180826000191660001916815260200191505060405180910390f35b600081815481101515609857fe5b9060005260206000200160009150905054815600a165627a7a723058203f52b45e2b366f986d4dcd5fe6d02299c2925f94a582ade8674a6682c2d1d4b00029",
+                        "opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x20 PUSH1 0x40 MLOAD SWAP1 DUP2 ADD PUSH1 0x40 MSTORE DUP1 PUSH1 0x0 PUSH1 0x1 MUL PUSH1 0x0 NOT AND PUSH1 0x0 NOT AND DUP2 MSTORE POP PUSH1 0x0 SWAP1 PUSH1 0x1 PUSH2 0x30 SWAP3 SWAP2 SWAP1 PUSH2 0x43 JUMP JUMPDEST POP CALLVALUE DUP1 ISZERO PUSH2 0x3D JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH2 0xBB JUMP JUMPDEST DUP3 DUP1 SLOAD DUP3 DUP3 SSTORE SWAP1 PUSH1 0x0 MSTORE PUSH1 0x20 PUSH1 0x0 KECCAK256 SWAP1 DUP2 ADD SWAP3 DUP3 ISZERO PUSH2 0x85 JUMPI SWAP2 PUSH1 0x20 MUL DUP3 ADD JUMPDEST DUP3 DUP2 GT ISZERO PUSH2 0x84 JUMPI DUP3 MLOAD DUP3 SWAP1 PUSH1 0x0 NOT AND SWAP1 SSTORE SWAP2 PUSH1 0x20 ADD SWAP2 SWAP1 PUSH1 0x1 ADD SWAP1 PUSH2 0x63 JUMP JUMPDEST JUMPDEST POP SWAP1 POP PUSH2 0x92 SWAP2 SWAP1 PUSH2 0x96 JUMP JUMPDEST POP SWAP1 JUMP JUMPDEST PUSH2 0xB8 SWAP2 SWAP1 JUMPDEST DUP1 DUP3 GT ISZERO PUSH2 0xB4 JUMPI PUSH1 0x0 DUP2 PUSH1 0x0 SWAP1 SSTORE POP PUSH1 0x1 ADD PUSH2 0x9C JUMP JUMPDEST POP SWAP1 JUMP JUMPDEST SWAP1 JUMP JUMPDEST PUSH1 0xD8 DUP1 PUSH2 0xC9 PUSH1 0x0 CODECOPY PUSH1 0x0 RETURN STOP PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x4 CALLDATASIZE LT PUSH1 0x3F JUMPI PUSH1 0x0 CALLDATALOAD PUSH29 0x100000000000000000000000000000000000000000000000000000000 SWAP1 DIV PUSH4 0xFFFFFFFF AND DUP1 PUSH4 0x17A9105 EQ PUSH1 0x44 JUMPI JUMPDEST PUSH1 0x0 DUP1 REVERT JUMPDEST CALLVALUE DUP1 ISZERO PUSH1 0x4F JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x6C PUSH1 0x4 DUP1 CALLDATASIZE SUB DUP2 ADD SWAP1 DUP1 DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 ADD SWAP1 SWAP3 SWAP2 SWAP1 POP POP POP PUSH1 0x8A JUMP JUMPDEST PUSH1 0x40 MLOAD DUP1 DUP3 PUSH1 0x0 NOT AND PUSH1 0x0 NOT AND DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 RETURN JUMPDEST PUSH1 0x0 DUP2 DUP2 SLOAD DUP2 LT ISZERO ISZERO PUSH1 0x98 JUMPI INVALID JUMPDEST SWAP1 PUSH1 0x0 MSTORE PUSH1 0x20 PUSH1 0x0 KECCAK256 ADD PUSH1 0x0 SWAP2 POP SWAP1 POP SLOAD DUP2 JUMP STOP LOG1 PUSH6 0x627A7A723058 KECCAK256 0x3f MSTORE 0xb4 0x5e 0x2b CALLDATASIZE PUSH16 0x986D4DCD5FE6D02299C2925F94A582AD 0xe8 PUSH8 0x4A6682C2D1D4B000 0x29 ",
+                        "sourceMap": "26:75:0:-;;;60:38;;;;;;;;;95:1;87:10;;60:38;;;;;;;;;;;;;;;;;:::i;:::-;;26:75;8:9:-1;5:2;;;30:1;27;20:12;5:2;26:75:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;"
+                    },
+                    "deployedBytecode": {
+                        "linkReferences": {},
+                        "object": "608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063017a9105146044575b600080fd5b348015604f57600080fd5b50606c60048036038101908080359060200190929190505050608a565b60405180826000191660001916815260200191505060405180910390f35b600081815481101515609857fe5b9060005260206000200160009150905054815600a165627a7a723058203f52b45e2b366f986d4dcd5fe6d02299c2925f94a582ade8674a6682c2d1d4b00029",
+                        "opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x4 CALLDATASIZE LT PUSH1 0x3F JUMPI PUSH1 0x0 CALLDATALOAD PUSH29 0x100000000000000000000000000000000000000000000000000000000 SWAP1 DIV PUSH4 0xFFFFFFFF AND DUP1 PUSH4 0x17A9105 EQ PUSH1 0x44 JUMPI JUMPDEST PUSH1 0x0 DUP1 REVERT JUMPDEST CALLVALUE DUP1 ISZERO PUSH1 0x4F JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x6C PUSH1 0x4 DUP1 CALLDATASIZE SUB DUP2 ADD SWAP1 DUP1 DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 ADD SWAP1 SWAP3 SWAP2 SWAP1 POP POP POP PUSH1 0x8A JUMP JUMPDEST PUSH1 0x40 MLOAD DUP1 DUP3 PUSH1 0x0 NOT AND PUSH1 0x0 NOT AND DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 RETURN JUMPDEST PUSH1 0x0 DUP2 DUP2 SLOAD DUP2 LT ISZERO ISZERO PUSH1 0x98 JUMPI INVALID JUMPDEST SWAP1 PUSH1 0x0 MSTORE PUSH1 0x20 PUSH1 0x0 KECCAK256 ADD PUSH1 0x0 SWAP2 POP SWAP1 POP SLOAD DUP2 JUMP STOP LOG1 PUSH6 0x627A7A723058 KECCAK256 0x3f MSTORE 0xb4 0x5e 0x2b CALLDATASIZE PUSH16 0x986D4DCD5FE6D02299C2925F94A582AD 0xe8 PUSH8 0x4A6682C2D1D4B000 0x29 ",
+                        "sourceMap": "26:75:0:-;;;;;;;;;;;;;;;;;;;;;;;;60:38;;8:9:-1;5:2;;;30:1;27;20:12;5:2;60:38:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o"
+                    },
+                    "gasEstimates": {
+                        "creation": {
+                            "codeDepositCost": "43200",
+                            "executionCost": "infinite",
+                            "totalCost": "infinite"
+                        },
+                        "external": {
+                            "states(uint256)": "767"
+                        }
+                    },
+                    "legacyAssembly": {
+                        ".code": [
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "80"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "40"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "MSTORE"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH",
+                                "value": "20"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH",
+                                "value": "40"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "MLOAD"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "DUP2"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "ADD"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH",
+                                "value": "40"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "MSTORE"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "DUP1"
+                            },
+                            {
+                                "begin": 95,
+                                "end": 96,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 87,
+                                "end": 97,
+                                "name": "PUSH",
+                                "value": "1"
+                            },
+                            {
+                                "begin": 87,
+                                "end": 97,
+                                "name": "MUL"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "NOT"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "AND"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "NOT"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "AND"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "DUP2"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "MSTORE"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "POP"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH",
+                                "value": "1"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH [tag]",
+                                "value": "1"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "SWAP3"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "SWAP2"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "PUSH [tag]",
+                                "value": "2"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "JUMP",
+                                "value": "[in]"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "tag",
+                                "value": "1"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 60,
+                                "end": 98,
+                                "name": "POP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "CALLVALUE"
+                            },
+                            {
+                                "begin": 8,
+                                "end": 17,
+                                "name": "DUP1"
+                            },
+                            {
+                                "begin": 5,
+                                "end": 7,
+                                "name": "ISZERO"
+                            },
+                            {
+                                "begin": 5,
+                                "end": 7,
+                                "name": "PUSH [tag]",
+                                "value": "3"
+                            },
+                            {
+                                "begin": 5,
+                                "end": 7,
+                                "name": "JUMPI"
+                            },
+                            {
+                                "begin": 30,
+                                "end": 31,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 27,
+                                "end": 28,
+                                "name": "DUP1"
+                            },
+                            {
+                                "begin": 20,
+                                "end": 32,
+                                "name": "REVERT"
+                            },
+                            {
+                                "begin": 5,
+                                "end": 7,
+                                "name": "tag",
+                                "value": "3"
+                            },
+                            {
+                                "begin": 5,
+                                "end": 7,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "POP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "4"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SLOAD"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SSTORE"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "MSTORE"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "20"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "KECCAK256"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "ADD"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "ISZERO"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "5"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPI"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "20"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "MUL"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "ADD"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "6"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "GT"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "ISZERO"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "7"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPI"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "MLOAD"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "NOT"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "AND"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SSTORE"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "20"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "ADD"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "ADD"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "6"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "7"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "5"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "POP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "POP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "8"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "9"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMP",
+                                "value": "[in]"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "8"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "POP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMP",
+                                "value": "[out]"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "9"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "10"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "11"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP3"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "GT"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "ISZERO"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "12"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPI"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP2"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SSTORE"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "POP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "ADD"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [tag]",
+                                "value": "11"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "12"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "POP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMP"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "10"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "SWAP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMP",
+                                "value": "[out]"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "tag",
+                                "value": "4"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "JUMPDEST"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH #[$]",
+                                "value": "0000000000000000000000000000000000000000000000000000000000000000"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "DUP1"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH [$]",
+                                "value": "0000000000000000000000000000000000000000000000000000000000000000"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "CODECOPY"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "PUSH",
+                                "value": "0"
+                            },
+                            {
+                                "begin": 26,
+                                "end": 101,
+                                "name": "RETURN"
+                            }
+                        ],
+                        ".data": {
+                            "0": {
+                                ".auxdata": "a165627a7a723058203f52b45e2b366f986d4dcd5fe6d02299c2925f94a582ade8674a6682c2d1d4b00029",
+                                ".code": [
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH",
+                                        "value": "80"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH",
+                                        "value": "40"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "MSTORE"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH",
+                                        "value": "4"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "CALLDATASIZE"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "LT"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH [tag]",
+                                        "value": "1"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "JUMPI"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "CALLDATALOAD"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH",
+                                        "value": "100000000000000000000000000000000000000000000000000000000"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "SWAP1"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "DIV"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH",
+                                        "value": "FFFFFFFF"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "AND"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH",
+                                        "value": "17A9105"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "EQ"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH [tag]",
+                                        "value": "2"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "JUMPI"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "tag",
+                                        "value": "1"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "JUMPDEST"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 26,
+                                        "end": 101,
+                                        "name": "REVERT"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "tag",
+                                        "value": "2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "JUMPDEST"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "CALLVALUE"
+                                    },
+                                    {
+                                        "begin": 8,
+                                        "end": 17,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 5,
+                                        "end": 7,
+                                        "name": "ISZERO"
+                                    },
+                                    {
+                                        "begin": 5,
+                                        "end": 7,
+                                        "name": "PUSH [tag]",
+                                        "value": "3"
+                                    },
+                                    {
+                                        "begin": 5,
+                                        "end": 7,
+                                        "name": "JUMPI"
+                                    },
+                                    {
+                                        "begin": 30,
+                                        "end": 31,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 27,
+                                        "end": 28,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 20,
+                                        "end": 32,
+                                        "name": "REVERT"
+                                    },
+                                    {
+                                        "begin": 5,
+                                        "end": 7,
+                                        "name": "tag",
+                                        "value": "3"
+                                    },
+                                    {
+                                        "begin": 5,
+                                        "end": 7,
+                                        "name": "JUMPDEST"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "POP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH [tag]",
+                                        "value": "4"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "4"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "CALLDATASIZE"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SUB"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "ADD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "CALLDATALOAD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "20"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "ADD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP3"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "POP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "POP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "POP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH [tag]",
+                                        "value": "5"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "JUMP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "tag",
+                                        "value": "4"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "JUMPDEST"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "40"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "MLOAD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP3"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "NOT"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "AND"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "NOT"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "AND"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "MSTORE"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "20"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "ADD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "POP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "POP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "40"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "MLOAD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SUB"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "RETURN"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "tag",
+                                        "value": "5"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "JUMPDEST"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SLOAD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "LT"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "ISZERO"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "ISZERO"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH [tag]",
+                                        "value": "6"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "JUMPI"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "INVALID"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "tag",
+                                        "value": "6"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "JUMPDEST"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "MSTORE"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "20"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "KECCAK256"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "ADD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "PUSH",
+                                        "value": "0"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "POP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SWAP1"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "POP"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "SLOAD"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "DUP2"
+                                    },
+                                    {
+                                        "begin": 60,
+                                        "end": 98,
+                                        "name": "JUMP",
+                                        "value": "[out]"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "methodIdentifiers": {
+                        "states(uint256)": "017a9105"
+                    }
+                },
+                "metadata": "{\"compiler\":{\"version\":\"0.4.25+commit.59dbf8f1\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"states\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"test.sol\":\"PublicStorageArray\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"test.sol\":{\"keccak256\":\"0xb388410b4cfdfc42a97b4aa24057a71b7ad80e32c8253a06893f30561b3e4b3e\",\"urls\":[\"bzzr://a8b934f4749d682db35b6d915e703428c2e77fcd7ca4fb3144dcb5ab2928b3c8\"]}},\"version\":1}"
+            }
+        }
+    },
+    "sources": {
+        "test.sol": {
+            "id": 0,
+            "legacyAST": {
+                "attributes": {
+                    "absolutePath": "test.sol",
+                    "exportedSymbols": {
+                        "PublicStorageArray": [
+                            9
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "attributes": {
+                            "literals": [
+                                "solidity",
+                                "^",
+                                "0.4",
+                                ".22"
+                            ]
+                        },
+                        "id": 1,
+                        "name": "PragmaDirective",
+                        "src": "0:24:0"
+                    },
+                    {
+                        "attributes": {
+                            "baseContracts": [
+                                null
+                            ],
+                            "contractDependencies": [
+                                null
+                            ],
+                            "contractKind": "contract",
+                            "documentation": null,
+                            "fullyImplemented": true,
+                            "linearizedBaseContracts": [
+                                9
+                            ],
+                            "name": "PublicStorageArray",
+                            "scope": 10
+                        },
+                        "children": [
+                            {
+                                "attributes": {
+                                    "constant": false,
+                                    "name": "states",
+                                    "scope": 9,
+                                    "stateVariable": true,
+                                    "storageLocation": "default",
+                                    "type": "bytes32[]",
+                                    "visibility": "public"
+                                },
+                                "children": [
+                                    {
+                                        "attributes": {
+                                            "length": null,
+                                            "type": "bytes32[]"
+                                        },
+                                        "children": [
+                                            {
+                                                "attributes": {
+                                                    "name": "bytes32",
+                                                    "type": "bytes32"
+                                                },
+                                                "id": 2,
+                                                "name": "ElementaryTypeName",
+                                                "src": "60:7:0"
+                                            }
+                                        ],
+                                        "id": 3,
+                                        "name": "ArrayTypeName",
+                                        "src": "60:9:0"
+                                    },
+                                    {
+                                        "attributes": {
+                                            "argumentTypes": null,
+                                            "isConstant": false,
+                                            "isInlineArray": true,
+                                            "isLValue": false,
+                                            "isPure": true,
+                                            "lValueRequested": false,
+                                            "type": "bytes32[1] memory"
+                                        },
+                                        "children": [
+                                            {
+                                                "attributes": {
+                                                    "argumentTypes": null,
+                                                    "isConstant": false,
+                                                    "isLValue": false,
+                                                    "isPure": true,
+                                                    "isStructConstructorCall": false,
+                                                    "lValueRequested": false,
+                                                    "names": [
+                                                        null
+                                                    ],
+                                                    "type": "bytes32",
+                                                    "type_conversion": true
+                                                },
+                                                "children": [
+                                                    {
+                                                        "attributes": {
+                                                            "argumentTypes": [
+                                                                {
+                                                                    "typeIdentifier": "t_rational_0_by_1",
+                                                                    "typeString": "int_const 0"
+                                                                }
+                                                            ],
+                                                            "isConstant": false,
+                                                            "isLValue": false,
+                                                            "isPure": true,
+                                                            "lValueRequested": false,
+                                                            "type": "type(bytes32)",
+                                                            "value": "bytes32"
+                                                        },
+                                                        "id": 4,
+                                                        "name": "ElementaryTypeNameExpression",
+                                                        "src": "87:7:0"
+                                                    },
+                                                    {
+                                                        "attributes": {
+                                                            "argumentTypes": null,
+                                                            "hexvalue": "30",
+                                                            "isConstant": false,
+                                                            "isLValue": false,
+                                                            "isPure": true,
+                                                            "lValueRequested": false,
+                                                            "subdenomination": null,
+                                                            "token": "number",
+                                                            "type": "int_const 0",
+                                                            "value": "0"
+                                                        },
+                                                        "id": 5,
+                                                        "name": "Literal",
+                                                        "src": "95:1:0"
+                                                    }
+                                                ],
+                                                "id": 6,
+                                                "name": "FunctionCall",
+                                                "src": "87:10:0"
+                                            }
+                                        ],
+                                        "id": 7,
+                                        "name": "TupleExpression",
+                                        "src": "86:12:0"
+                                    }
+                                ],
+                                "id": 8,
+                                "name": "VariableDeclaration",
+                                "src": "60:38:0"
+                            }
+                        ],
+                        "id": 9,
+                        "name": "ContractDefinition",
+                        "src": "26:75:0"
+                    }
+                ],
+                "id": 10,
+                "name": "SourceUnit",
+                "src": "0:101:0"
+            }
+        }
+    }
+}

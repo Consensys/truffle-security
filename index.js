@@ -24,14 +24,14 @@ function getFormatter(style) {
 }
 
 const Analyze = {
-  run: function(options, callback) {
+  run: function(options, done) {
     var Config = require("truffle-config");
     var config = Config.detect(options);
-    const root_dir = config.working_directory;
+    const rootDir = config.working_directory;
     const buildDir = config.contracts_build_directory;
 
     // FIXME: use truffle library routine
-    const contractsDir = trufstuf.getContractsDir(root_dir);
+    const contractsDir = trufstuf.getContractsDir(rootDir);
     const buildJson = trufstuf.guessTruffleBuildJson(buildDir);
 
     // const expect = require("truffle-expect");
@@ -59,27 +59,33 @@ const Analyze = {
       buildJsonPath = path.join(buildDir, buildJson);
 
     } catch (err) {
-      callback(err);
+      done(err);
     }
 
     // console.log(`Reading ${buildJsonPath}`);
+
     let client = new armlet.Client(
       {
+        // NOTE: authentication is changing in the next API release
         apiKey: process.env.MYTHRIL_API_KEY,
         userEmail: process.env.MYTHRIL_API_KEY || 'bogus@example.com'
       });
 
     const buildObj = JSON.parse(fs.readFileSync(buildJsonPath, 'utf8'));
 
-    client.analyze({bytecode: buildObj.deployedBytecode})
+    // console.log(JSON.stringify(buildObj, null, 4));
+    options.data = mythril.truffle2MythrilJSON(buildObj);
+    options.data.analysisMode = options.analysisMode || 'full';
+
+    client.analyze(options)
       .then(issues => {
         const formatter = getFormatter(options.style);
         let esIssues = mythril.issues2Eslint(issues, buildObj, options);
         // console.log(esIssues); // debug
         esReporter.printReport(esIssues, solidityFile, formatter, console.log);
-        callback(null, [], []);
+        done(null, [], []);
       }).catch(err => {
-        callback(err);
+        done(err);
       });
   }
 }
