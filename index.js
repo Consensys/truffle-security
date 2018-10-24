@@ -33,6 +33,10 @@ const Analyze = {
     options.logger = options.logger || console;
 
 
+    // Run Mythril Platform analyze after we have
+    // ensured via compile that JSON data is there and
+    // up to date.
+    // Parameters "options", and "done" are implicitly passed in.
     function analyzeWithBuildDir() {
       // FIXME: use truffle library routine
       const contractsDir = trufstuf.getContractsDir(rootDir);
@@ -79,7 +83,12 @@ const Analyze = {
 
       // console.log(JSON.stringify(buildObj, null, 4));
       options.data = mythril.truffle2MythrilJSON(buildObj);
-      options.data.analysisMode = options.analysisMode || 'full';
+      options.data.analysisMode = options.mode || 'full';
+
+      // FIXME: The below "partners" will change when
+      // https://github.com/ConsenSys/mythril-api/issues/59
+      // is resolved.
+      options.partners = ['truffle'];
 
       client.analyze(options)
         .then(issues => {
