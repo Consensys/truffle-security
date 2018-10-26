@@ -26,8 +26,8 @@ function getFormatter(style) {
 const Analyze = {
   run: function(options, done) {
 
-    var Config = require("truffle-config");
-    var config = Config.detect(options);
+    const Config = require("truffle-config");
+    const config = Config.detect(options);
     const rootDir = config.working_directory;
     const buildDir = config.contracts_build_directory;
     options.logger = options.logger || console;
@@ -40,7 +40,6 @@ const Analyze = {
     function analyzeWithBuildDir() {
       // FIXME: use truffle library routine
       const contractsDir = trufstuf.getContractsDir(rootDir);
-      let buildJson = trufstuf.guessTruffleBuildJson(buildDir);
 
       // const expect = require("truffle-expect");
       // FIXME: expect things
@@ -48,13 +47,15 @@ const Analyze = {
       var solidityFileBase;
       let solidityFile;
       let buildJsonPath;
+      let buildJson;
 
       try {
         if (options._.length === 0) {
-          solidityFileBase = path.basename(buildJson, '.json');
+          buildJson = trufstuf.guessTruffleBuildJson(buildDir);
         } else {
-          solidityFileBase = options._[0];
+          buildJson = options._[0];
         }
+        solidityFileBase = path.basename(buildJson, '.json');
 
         if (! solidityFileBase.endsWith('.sol')) {
           solidityFileBase += '.sol';
@@ -64,7 +65,11 @@ const Analyze = {
         if (options.debug) {
           options.logger.log(`Solidity file used: ${solidityFile}`);
         }
+
         buildJsonPath = path.join(buildDir, buildJson);
+        if (! buildJsonPath.endsWith('.json')) {
+          buildJsonPath += '.json';
+        }
 
       } catch (err) {
         done(err);
@@ -109,7 +114,7 @@ const Analyze = {
                         if (arg !== null) {
                           options.logger.log(`compile returns ${arg}`);
                         }
-                    analyzeWithBuildDir()
+                        analyzeWithBuildDir();
                   });
   }
 }
