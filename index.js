@@ -53,7 +53,7 @@ const Analyze = {
         if (options._.length === 0) {
           buildJson = trufstuf.guessTruffleBuildJson(buildDir);
         } else {
-          buildJson = options._[0];
+          buildJson = path.basename(options._[0]);
         }
         solidityFileBase = path.basename(buildJson, '.json');
 
@@ -77,6 +77,12 @@ const Analyze = {
 
       // console.log(`Reading ${buildJsonPath}`);
 
+      if (process.env.MYTHRIL_API_KEY === undefined) {
+        options.logger.log('You need to set environment variable '
+                           + 'MYTHRIL_API_KEY to run analyze.');
+        return;
+      }
+
       let client = new armlet.Client(
         {
           // NOTE: authentication is changing in the next API release
@@ -84,7 +90,20 @@ const Analyze = {
           userEmail: process.env.MYTHRIL_API_KEY || 'bogus@example.com'
         });
 
-      const buildObj = JSON.parse(fs.readFileSync(buildJsonPath, 'utf8'));
+      if (!fs.existsSync(buildJsonPath)) {
+        options.logger.log("Can't read build/contract JSON file: " +
+                           `${buildJsonPath}`);
+        return;
+      }
+
+      let buildObj;
+      try {
+        buildObj = JSON.parse(fs.readFileSync(buildJsonPath, 'utf8'));
+      } catch (err) {
+        options.logger.log("Error parsing JSON file: " +
+                           `${buildJsonPath}`);
+        return;
+      }
 
       // console.log(JSON.stringify(buildObj, null, 4));
       options.data = mythril.truffle2MythrilJSON(buildObj);
