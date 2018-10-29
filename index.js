@@ -105,21 +105,32 @@ const Analyze = {
         return;
       }
 
-      // console.log(JSON.stringify(buildObj, null, 4));
-      options.data = mythril.truffle2MythrilJSON(buildObj);
-      options.data.analysisMode = options.mode || 'full';
+      let analyze_opts = {
+        _: options._,
+        debug: options.debug,
+        logger: options.logger,
+        mode: options.mode,
+        style: options.style,
 
-      // FIXME: The below "partners" will change when
-      // https://github.com/ConsenSys/mythril-api/issues/59
-      // is resolved.
-      options.partners = ['truffle'];
+        // FIXME: The below "partners" will change when
+        // https://github.com/ConsenSys/mythril-api/issues/59
+        // is resolved.
+        partners: ['truffle']
+      };
 
-      client.analyze(options)
+      // const util = require('util');
+      // console.log(`XXX2 buildObj ${util.inspect(buildObj)}`);
+	    analyze_opts.data = mythril.truffle2MythrilJSON(buildObj);
+      // console.log(`XXX3 JSON ${util.inspect(analyze_opts.data)}`);
+
+      analyze_opts.data.analysisMode = analyze_opts.mode || 'full';
+
+      client.analyze(analyze_opts)
         .then(issues => {
-          const formatter = getFormatter(options.style);
-          let esIssues = mythril.issues2Eslint(issues, buildObj, options);
+          const formatter = getFormatter(analyze_opts.style);
+          let esIssues = mythril.issues2Eslint(issues, buildObj, analyze_opts);
           // console.log(esIssues); // debug
-          esReporter.printReport(esIssues, solidityFile, formatter, options.logger.log);
+          esReporter.printReport(esIssues, solidityFile, formatter, analyze_opts.logger.log);
           done(null, [], []);
         }).catch(err => {
           done(err);
@@ -131,7 +142,7 @@ const Analyze = {
     Contracts.compile(config,
                       function(arg) {
                         if (arg !== null) {
-                          options.logger.log(`compile returns ${arg}`);
+                          analyze_opts.logger.log(`compile returns ${arg}`);
                         }
                         analyzeWithBuildDir();
                   });
