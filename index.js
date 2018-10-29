@@ -80,6 +80,7 @@ const Analyze = {
       if (process.env.MYTHRIL_API_KEY === undefined) {
         options.logger.log('You need to set environment variable '
                            + 'MYTHRIL_API_KEY to run analyze.');
+        done(null, [], []);
         return;
       }
 
@@ -93,6 +94,7 @@ const Analyze = {
       if (!fs.existsSync(buildJsonPath)) {
         options.logger.log("Can't read build/contract JSON file: " +
                            `${buildJsonPath}`);
+        done(null, [], []);
         return;
       }
 
@@ -102,6 +104,7 @@ const Analyze = {
       } catch (err) {
         options.logger.log("Error parsing JSON file: " +
                            `${buildJsonPath}`);
+        done(null, [], []);
         return;
       }
 
