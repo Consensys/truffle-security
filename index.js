@@ -114,6 +114,7 @@ const Analyze = {
         logger: options.logger,
         mode: options.mode,
         style: options.style,
+        timeout: (options.timeout || 30) * 1000,
 
         // FIXME: The below "partners" will change when
         // https://github.com/ConsenSys/mythril-api/issues/59
@@ -122,8 +123,9 @@ const Analyze = {
       };
 
       // const util = require('util');
+      // console.log(`XXX1 ${util.inspect(analyze_opts)}`);
       // console.log(`XXX2 buildObj ${util.inspect(buildObj)}`);
-	    analyze_opts.data = mythril.truffle2MythrilJSON(buildObj);
+      analyze_opts.data = mythril.truffle2MythrilJSON(buildObj);
       // console.log(`XXX3 JSON ${util.inspect(analyze_opts.data)}`);
 
       analyze_opts.data.analysisMode = analyze_opts.mode || 'full';
