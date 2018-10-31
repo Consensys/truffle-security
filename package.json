@@ -1,7 +1,7 @@
 {
   "name": "truffle-analyze",
   "namespace": "consensys",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Add vulnerability and weakness analysis via the Mythril Platform",
   "dependencies": {
     "armlet": ">=0.2.2",
