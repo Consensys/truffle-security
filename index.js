@@ -114,7 +114,7 @@ const Analyze = {
         logger: options.logger,
         mode: options.mode,
         style: options.style,
-        timeout: (options.timeout || 30) * 1000,
+        timeout: (options.timeout || 120) * 1000,
 
         // FIXME: The below "partners" will change when
         // https://github.com/ConsenSys/mythril-api/issues/59
