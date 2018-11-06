@@ -108,7 +108,7 @@ const Analyze = {
         return;
       }
 
-      let analyze_opts = {
+      let analyzeOpts = {
         _: options._,
         debug: options.debug,
         logger: options.logger,
@@ -123,19 +123,19 @@ const Analyze = {
       };
 
       // const util = require('util');
-      // console.log(`XXX1 ${util.inspect(analyze_opts)}`);
+      // console.log(`XXX1 ${util.inspect(analyzeOpts)}`);
       // console.log(`XXX2 buildObj ${util.inspect(buildObj)}`);
-      analyze_opts.data = mythril.truffle2MythrilJSON(buildObj);
-      // console.log(`XXX3 JSON ${util.inspect(analyze_opts.data)}`);
+      analyzeOpts.data = mythril.truffle2MythrilJSON(buildObj);
+      // console.log(`XXX3 JSON ${util.inspect(analyzeOpts.data)}`);
 
-      analyze_opts.data.analysisMode = analyze_opts.mode || 'full';
+      analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
-      client.analyze(analyze_opts)
+      client.analyze(analyzeOpts)
         .then(issues => {
-          const formatter = getFormatter(analyze_opts.style);
-          let esIssues = mythril.issues2Eslint(issues, buildObj, analyze_opts);
+          const formatter = getFormatter(analyzeOpts.style);
+          let esIssues = mythril.issues2Eslint(issues, buildObj, analyzeOpts);
           // console.log(esIssues); // debug
-          esReporter.printReport(esIssues, solidityFile, formatter, analyze_opts.logger.log);
+          esReporter.printReport(esIssues, solidityFile, formatter, analyzeOpts.logger.log);
           done(null, [], []);
         }).catch(err => {
           done(err);
@@ -147,9 +147,10 @@ const Analyze = {
     Contracts.compile(config,
                       function(arg) {
                         if (arg !== null) {
-                          analyze_opts.logger.log(`compile returns ${arg}`);
+                          options.logger.log(`compile returns ${arg}`);
+                        } else {
+                          analyzeWithBuildDir();
                         }
-                        analyzeWithBuildDir();
                   });
   }
 }
