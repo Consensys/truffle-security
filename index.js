@@ -77,19 +77,29 @@ const Analyze = {
 
       // console.log(`Reading ${buildJsonPath}`);
 
-      if (process.env.MYTHRIL_API_KEY === undefined) {
+      let armletOptions = {
+        // ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
+        password: process.env.MYTHRIL_PASSWORD,
+        platforms: ['truffle']  // client chargeback
+      }
+
+      if (process.env.MYTHRIL_PASSWORD === undefined) {
         options.logger.log('You need to set environment variable '
-                           + 'MYTHRIL_API_KEY to run analyze.');
+                           + 'MYTHRIL_PASSWORD to run analyze.');
         done(null, [], []);
         return;
       }
 
-      let client = new armlet.Client(
-        {
-          // NOTE: authentication is changing in the next API release
-          apiKey: process.env.MYTHRIL_API_KEY,
-          userEmail: process.env.MYTHRIL_API_KEY || 'bogus@example.com'
-        });
+      if (process.env.MYTHRIL_ETH_ADDRESS) {
+        armletOptions.ethAddress = process.env.MYTHRIL_ETH_ADDRESS
+      } else if (process.env.MYTHRIL_EMAIL) {
+        armletOptions.email = process.env.MYTHRIL_EMAIL
+      } else {
+        options.logger.log('You need to set either environment variable '
+                           + 'MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze.');
+      }
+
+      let client = new armlet.Client(armletOptions);
 
       if (!fs.existsSync(buildJsonPath)) {
         options.logger.log("Can't read build/contract JSON file: " +

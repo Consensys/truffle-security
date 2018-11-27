@@ -15,11 +15,28 @@ function getFormatter(style) {
     }
 }
 
-var client = new armlet.Client(
-    {
-        apiKey: process.env.MYTHRIL_API_KEY,
-        userEmail: process.env.MYTHRIL_API_KEY || 'bogus@example.com'
-    });
+let armletOptions = {
+    // ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
+    password: process.env.MYTHRIL_PASSWORD,
+    platforms: ['truffle']  // client chargeback
+};
+
+if (process.env.MYTHRIL_PASSWORD === undefined) {
+    console.log('You need to set environment variable '
+                       + 'MYTHRIL_PASSWORD to run analyze.');
+    return;
+}
+
+if (process.env.MYTHRIL_ETH_ADDRESS) {
+    armletOptions.ethAddress = process.env.MYTHRIL_ETH_ADDRESS;
+} else if (process.env.MYTHRIL_EMAIL) {
+    armletOptions.email = process.env.MYTHRIL_EMAIL;
+} else {
+    console.log('You need to set either environment variable '
+                       + 'MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze.');
+}
+
+var client = new armlet.Client(armletOptions);
 
 var buildObj = {
     'contractName': 'SimpleDAO',

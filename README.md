@@ -2,19 +2,22 @@
 
 The NPM package behind "truffle analyze".
 
-_This is alpha code. You won't be able to use this without a Mythrl API key,
+_This is alpha code. You won't be able to use this without a MythOS account,
 and will be more generally distributed in the December to January time period._
 
 This package is intended to be used as submodule inside
-`truffle/packages` and is not userful without further patches to
+`truffle/packages` and is not useful without further patches to
 the `truffle-core` package.
 
 A prelmiminary version was (based on truffle 4) was demo'd at
 [trufflecon2018](https://truffleframework.com/trufflecon2018).
 
-It will also been shown at [devcon4](https://devcon4.ethereum.org/)
-where it has been updated to use truffle `5.0-beta` along with
-a more advanced [Mythril Platform](mythril.ai).
+It also was shown at [devcon4](https://devcon4.ethereum.org/)
+where it was been updated to use truffle `5.0-beta` along with
+a more advanced [MythOS](mythril.ai).
+
+We expect to get this integrated into the new external plugin system
+that truffle expects to provide in in version 5.x.
 
 # Usage
 
