@@ -4,6 +4,58 @@
 */
 'use strict';
 
+
+/* This stuff is for testing only.... */
+const request = require('request')
+const util = require('util')
+
+function fakeAnalyzeWithBuildDir() {
+  const ethAddress = process.env.MYTHRIL_ETH_ADDRESS
+  const password =  process.env.MYTHRIL_PASSWORD
+  const email = null
+
+  let options = {form: {email, ethAddress, password}}
+  let url = `https://staging.api.mythril.ai/v1/auth/login`
+  debugger
+
+  request
+    .post(url, options, (err, res, body) => {
+      if (err) {
+        console.log(err)
+        return
+      }
+      if (res.statusCode !== 200) {
+        console.log(`Invalid status code ${res.statusCode}, ${body}`)
+      }
+
+      url = `https://staging.api.mythril.ai/v1/analyses`
+      const result = JSON.parse(body)
+      options = {
+        url: url,
+        json: true,
+        headers: {
+        'Authorization': `Bearer ${result.access}`,
+        'Content-type': 'application/json',
+        }
+      }
+      request(options, (error, res, body) => {
+        if (error) {
+          console.log(error)
+          return
+        }
+        if (res.statusCode !== 200) {
+          console.log('Invalid status code, expected 200')
+          return
+        }
+        if (options.json) {
+          console.log(`${JSON.stringify(body, null, 4)}`);
+        }
+      });
+    });
+}
+/* This stuff is for testing only.... */
+
+
 const path = require('path');
 const fs = require('fs');
 const armlet = require('armlet');
@@ -23,20 +75,17 @@ function getFormatter(style) {
     }
 }
 
-const Analyze = {
-  run: function(options, done) {
+module.exports = (config) => {
 
-    const Config = require("truffle-config");
-    const config = Config.detect(options);
     const rootDir = config.working_directory;
     const buildDir = config.contracts_build_directory;
-    options.logger = options.logger || console;
+    config.logger = config.logger || console;
 
 
     // Run Mythril Platform analyze after we have
     // ensured via compile that JSON data is there and
     // up to date.
-    // Parameters "options", and "done" are implicitly passed in.
+    // Parameters "config", and "done" are implicitly passed in.
     function analyzeWithBuildDir() {
       // FIXME: use truffle library routine
       const contractsDir = trufstuf.getContractsDir(rootDir);
@@ -50,10 +99,10 @@ const Analyze = {
       let buildJson;
 
       try {
-        if (options._.length === 0) {
+        if (config._.length === 0) {
           buildJson = trufstuf.guessTruffleBuildJson(buildDir);
         } else {
-          buildJson = path.basename(options._[0]);
+          buildJson = path.basename(config._[0]);
         }
         solidityFileBase = path.basename(buildJson, '.json');
 
@@ -62,8 +111,8 @@ const Analyze = {
         }
 
         solidityFile = path.join(contractsDir, solidityFileBase);
-        if (options.debug) {
-          options.logger.log(`Solidity file used: ${solidityFile}`);
+        if (config.debug) {
+          config.logger.log(`Solidity file used: ${solidityFile}`);
         }
 
         buildJsonPath = path.join(buildDir, buildJson);
@@ -84,7 +133,7 @@ const Analyze = {
       }
 
       if (process.env.MYTHRIL_PASSWORD === undefined) {
-        options.logger.log('You need to set environment variable '
+        config.logger.log('You need to set environment variable '
                            + 'MYTHRIL_PASSWORD to run analyze.');
         done(null, [], []);
         return;
@@ -95,14 +144,14 @@ const Analyze = {
       } else if (process.env.MYTHRIL_EMAIL) {
         armletOptions.email = process.env.MYTHRIL_EMAIL
       } else {
-        options.logger.log('You need to set either environment variable '
+        config.logger.log('You need to set either environment variable '
                            + 'MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze.');
       }
 
       let client = new armlet.Client(armletOptions);
 
       if (!fs.existsSync(buildJsonPath)) {
-        options.logger.log("Can't read build/contract JSON file: " +
+        config.logger.log("Can't read build/contract JSON file: " +
                            `${buildJsonPath}`);
         done(null, [], []);
         return;
@@ -112,19 +161,19 @@ const Analyze = {
       try {
         buildObj = JSON.parse(fs.readFileSync(buildJsonPath, 'utf8'));
       } catch (err) {
-        options.logger.log("Error parsing JSON file: " +
+        config.logger.log("Error parsing JSON file: " +
                            `${buildJsonPath}`);
         done(null, [], []);
         return;
       }
 
       let analyzeOpts = {
-        _: options._,
-        debug: options.debug,
-        logger: options.logger,
-        mode: options.mode,
-        style: options.style,
-        timeout: (options.timeout || 120) * 1000,
+        _: config._,
+        debug: config.debug,
+        logger: config.logger,
+        mode: config.mode,
+        style: config.style,
+        timeout: (config.timeout || 120) * 1000,
 
         // FIXME: The below "partners" will change when
         // https://github.com/ConsenSys/mythril-api/issues/59
@@ -154,15 +203,13 @@ const Analyze = {
 
     const Contracts = require("truffle-workflow-compile");
 
-    Contracts.compile(config,
-                      function(arg) {
-                        if (arg !== null) {
-                          options.logger.log(`compile returns ${arg}`);
-                        } else {
-                          analyzeWithBuildDir();
-                        }
-                  });
-  }
+    fakeAnalyzeWithBuildDir();
+    // Contracts.compile(config,
+    //                   function(arg) {
+    //                     if (arg !== null) {
+    //                       config.logger.log(`compile returns ${arg}`);
+    //                     } else {
+    //                       fakeAnalyzeWithBuildDir();
+    //                     }
+    //               });
 }
-
-module.exports = Analyze;

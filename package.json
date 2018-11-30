@@ -7,9 +7,7 @@
     "armlet": ">=0.3.0",
     "configstore": "^4.0.0",
     "mocha": "^5.2.0",
-    "node-dir": "0.1.17",
     "remix-lib": ">=0.3.13",
-    "truffle-config": "^1.1.0-beta.2",
     "truffle-workflow-compile": "2.0.0-beta.1"
   },
   "scripts": {

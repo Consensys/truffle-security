@@ -17,34 +17,14 @@ where it was been updated to use truffle `5.0-beta` along with
 a more advanced [MythOS](mythril.ai).
 
 We expect to get this integrated into the new external plugin system
-that truffle expects to provide in in version 5.x.
+that truffle expects to provide in in version 5.0.0.
 
 # Usage
 
-In the examples below this has been embedded in a fork of truffle called
-`truffle+analyze`.
+And here are the options for `run analyze`:
 
 ```console
-$ truffle+analyze help
-Truffle+Analyze v5.0.0-beta.1 - a development framework for Ethereum
-
-Usage: truffle+analyze <command> [options]
-
-Commands:
-  init      Initialize new and empty Ethereum project
-  compile   Compile contract source files
-  migrate   Run migrations to deploy contracts
-  deploy    (alias for migrate)
-  test      Run JavaScript and Solidity tests
-  analyze   Run Mythril Platform analyses on a contract
-  ^^^^^^^ this is added
-...
-```
-
-And here are the options for `analyze`:
-
-```console
-$ truffle+analyze help analyze
+$ truffle run analyze help
 
   Usage:        truffle+analyze analyze [--mode={full|quick}] [--debug] [--style *eslint-style-name*] [*contract-name*]
   Description:  Run Mythril Platform analyses on a contract
@@ -58,7 +38,7 @@ $ truffle+analyze help analyze
 ```
 
 Options are deliberately sparse since we want simple interaction. Most
-of the complexity is hidden behind the Mythril Platform.
+of the complexity is hidden behind the MythOS.
 
 If you leave off a _contract-name_, we'll find one inside the
 project. If you have more than one contract in the project you should
@@ -70,7 +50,7 @@ you are running inside a shell that contains command completion.
 Here is an example:
 
 ```console
-$ truffle+analyze analyze SimpleSuicide
+$ truffle run analyze SimpleSuicide
 Compiling ./contracts/Migrations.sol...
 Compiling ./contracts/SimpleDAO.sol...
 Compiling ./contracts/simple_suicide.sol...
