@@ -75,28 +75,28 @@ const Analyze = {
         done(err);
       }
 
-      // console.log(`Reading ${buildJsonPath}`);
-
-      let armletOptions = {
-        // ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
-        password: process.env.MYTHRIL_PASSWORD,
-        platforms: ['truffle']  // client chargeback
-      }
+      let mythril_api_key = null;
+      let mythril_password = null;
 
       if (process.env.MYTHRIL_PASSWORD === undefined) {
-        options.logger.log('You need to set environment variable '
-                           + 'MYTHRIL_PASSWORD to run analyze.');
-        done(null, [], []);
-        return;
+        if (process.env.MYTHRIL_API_KEY === undefined) {
+          options.logger.log('You need to set environment variable '
+                             + 'MYTHRIL_PASSWORD or MYTHRIL_API_KEY to run analyze.');
+          done(null, [], []);
+          return
+        } else if (process.env.MYTHRIL_ETH_ADDRESS === undefined) {
+          options.logger.log('You need to set environment variable '
+                             + 'MYTHRIL_ETH_KEY when MYTHRIL_PASSWORD is set to run analyze.');
+          done(null, [], []);
+        }
       }
 
-      if (process.env.MYTHRIL_ETH_ADDRESS) {
-        armletOptions.ethAddress = process.env.MYTHRIL_ETH_ADDRESS
-      } else if (process.env.MYTHRIL_EMAIL) {
-        armletOptions.email = process.env.MYTHRIL_EMAIL
-      } else {
-        options.logger.log('You need to set either environment variable '
-                           + 'MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze.');
+      let armletOptions = {
+        email: process.env.EMAIL,
+        ethAddress: process.env.MYTHRIL_API_KEY,
+        ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
+        password: process.env.MYTHRIL_PASSWORD,
+        platforms: ['truffle']  // client chargeback
       }
 
       let client = new armlet.Client(armletOptions);
