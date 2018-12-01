@@ -84,16 +84,16 @@ const Analyze = {
                              + 'MYTHRIL_PASSWORD or MYTHRIL_API_KEY to run analyze.');
           done(null, [], []);
           return
-        } else if (process.env.MYTHRIL_ETH_ADDRESS === undefined) {
-          options.logger.log('You need to set environment variable '
-                             + 'MYTHRIL_ETH_KEY when MYTHRIL_PASSWORD is set to run analyze.');
-          done(null, [], []);
         }
+      } else if (process.env.MYTHRIL_ETH_ADDRESS === undefined) {
+        options.logger.log('You need to set environment variable '
+                           + 'MYTHRIL_ETH_ADDRESS when MYTHRIL_PASSWORD is set to run analyze.');
+        done(null, [], []);
       }
 
       let armletOptions = {
-        email: process.env.EMAIL,
-        ethAddress: process.env.MYTHRIL_API_KEY,
+        email: process.env.MYTHRIL_EMAIL,
+        apiKey: process.env.MYTHRIL_API_KEY,
         ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
         password: process.env.MYTHRIL_PASSWORD,
         platforms: ['truffle']  // client chargeback
