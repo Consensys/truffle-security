@@ -150,6 +150,20 @@ module.exports = (config, done) => {
     const buildDir = config.contracts_build_directory;
     config.logger = config.logger || console;
 
+    if (config.help) {
+	console.log(`Usage: truffle run analyze [options]
+
+Options:
+  --debug Provide additional debug output
+  --style {stylish | unix | visualstudio | table | tap | ...},
+          Report format in given es-lint style style.
+          See https://eslint.org/docs/user-guide/formatters/ for a full list.
+  --timeout *seconds* ,
+          Limit MythOS analysis time to *s* seconds.
+          The default is 30 seconds.`);
+        done(null, [], []);
+	return;
+    }
 
     // Run Mythril Platform analyze after we have
     // ensured via compile that JSON data is there and
@@ -266,6 +280,7 @@ module.exports = (config, done) => {
     }
 
     const Contracts = require("truffle-workflow-compile");
+    // This can cause vyper to fail if you don't have vyper installed
     delete config.compilers.vyper;
 
     Contracts.compile(config,
