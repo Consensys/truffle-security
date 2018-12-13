@@ -1,6 +1,6 @@
 # Introduction
 
-The NPM package behind "truffle analyze".
+The NPM package behind "truffle run analyze".
 
 _This is alpha code. You won't be able to use this without a MythOS account,
 and will be more generally distributed in the December to January time period._

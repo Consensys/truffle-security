@@ -24,6 +24,10 @@ function getFormatter(style) {
     }
 }
 
+function versionJSON2String(jsonResponse) {
+    return Object.keys(jsonResponse).map((key) => `${key}: ${jsonResponse[key]}`).join(', ');
+}
+
 // Run Mythril Platform analyze after we have
 // ensured via compile that JSON data is there and
 // up to date.
@@ -159,9 +163,20 @@ Options:
           Report format in given es-lint style style.
           See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
-          Limit MythOS analysis time to *s* seconds.
-          The default is 30 seconds.`);
+          Limit MythX analysis time to *s* seconds.
+          The default is 30 seconds.
+  --version show package and MythX version information
+`);
         done(null, [], []);
+	return;
+    } else if (config.version) {
+	var pjson = require('./package.json');
+	console.log(`${pjson.name} ${pjson.version}`);
+	armlet.ApiVersion().then(
+	    result => {
+		console.log(versionJSON2String(result));
+		done(null, [], []);
+	    });
 	return;
     }
 
