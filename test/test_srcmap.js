@@ -1,7 +1,18 @@
 const assert = require('assert');
 const SrcMap = require('../lib/srcmap');
+const sinon = require('sinon');
+const solc = require('solc');
+
 
 describe('srcmap', function() {
+    it('should compile solidity file', () => {
+        const solcStub = sinon.stub(solc, 'compileStandardWrapper');
+        solcStub.returns('{"foo": "bar"}');
+        SrcMap.compileContract('');
+        assert.ok(solcStub.called);
+        solcStub.restore();
+    });
+
     it('should give back an AST we can use', () =>  {
         const soliditySource = 'pragma solidity ^0.4.22;\ncontract Simple { }\n';
 
