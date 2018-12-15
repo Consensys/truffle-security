@@ -105,10 +105,10 @@ Options:
       // console.log(`Reading ${buildJsonPath}`);
 
       let armletOptions = {
-        // email: process.env.MYTHRIL_EMAIL,
+        email: process.env.MYTHRIL_EMAIL,
         apiKey: process.env.MYTHRIL_API_KEY,
-        // ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
-        // password: process.env.MYTHRIL_PASSWORD,
+        ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
+        password: process.env.MYTHRIL_PASSWORD,
         platforms: ['truffle']  // client chargeback
       }
 
