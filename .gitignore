@@ -2,3 +2,4 @@
 /node_modules
 /tmp
 /.npmrc
+.nyc_output

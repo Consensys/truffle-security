@@ -1,7 +1,36 @@
 const assert = require('assert');
 const mythril = require('../lib/mythril');
+const rewire = require('rewire');
+
+const mythrilRewired = rewire('../lib/mythril');
 
 describe('mythril', function() {
+    describe('messageMessage', function() {
+        const massageMessage = mythrilRewired.__get__('massageMessage');
+
+        it('should display empty message', () => {
+            const mess = massageMessage('');
+            assert.equal(mess, '');
+        });
+
+        it('should display "no message"', () => {
+            const mess = massageMessage();
+            assert.equal(mess, 'no message');
+        });
+
+        it('should display first sentence', () => {
+            const testMessage = 'Test string. This will not be shown.';
+            const mess = massageMessage(testMessage);
+            assert.equal(mess, 'Test string.');
+        });
+
+        it('should remove illegal characters', () => {
+            const testMessage = '`Test`\n`string`.';
+            const mess = massageMessage(testMessage);
+            assert.equal(mess, '\'Test\' \'string\'.');
+        });
+    });
+
     it('should give convert truffle build/contract JSON to MP JSON', () =>  {
         const fs = require('fs');
         const buildPath = `${__dirname}/sample-truffle/build/` +

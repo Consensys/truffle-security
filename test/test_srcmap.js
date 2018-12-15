@@ -1,7 +1,20 @@
 const assert = require('assert');
 const SrcMap = require('../lib/srcmap');
+/**
+const sinon = require('sinon');
+const solc = require('solc');
+**/
 
 describe('srcmap', function() {
+    /****
+    it('should compile solidity file', () => {
+        const solcStub = sinon.stub(solc, 'compileStandardWrapper');
+        solcStub.returns('{"foo": "bar"}');
+        SrcMap.compileContract('');
+        assert.ok(solcStub.called);
+        solcStub.restore();
+    });
+
     it('should give back an AST we can use', () =>  {
         const soliditySource = 'pragma solidity ^0.4.22;\ncontract Simple { }\n';
 
@@ -16,7 +29,6 @@ describe('srcmap', function() {
         assert.ok('children' in ast);
     }).timeout(4000);
 
-    /****
        const fs = require('fs');
        it("should give find an AST we can use", () =>  {
        fs.readFile('./data/storage.json', 'utf8', function (err, data) {
