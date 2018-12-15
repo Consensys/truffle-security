@@ -2,7 +2,7 @@
 
 The NPM package behind "truffle run analyze".
 
-_This is alpha code. You won't be able to use this without a MythOS account,
+_This is alpha code. You won't be able to use this without a MythX account,
 and will be more generally distributed in the December to January time period._
 
 This package is intended to be used as submodule inside
@@ -14,7 +14,7 @@ A prelmiminary version was (based on truffle 4) was demo'd at
 
 It also was shown at [devcon4](https://devcon4.ethereum.org/)
 where it was been updated to use truffle `5.0-beta` along with
-a more advanced [MythOS](mythril.ai).
+a more advanced [MythX](mythril.ai).
 
 We expect to get this integrated into the new external plugin system
 that truffle expects to provide in in version 5.0.0.
@@ -38,7 +38,7 @@ $ truffle run analyze help
 ```
 
 Options are deliberately sparse since we want simple interaction. Most
-of the complexity is hidden behind the MythOS.
+of the complexity is hidden behind the MythX.
 
 If you leave off a _contract-name_, we'll find one inside the
 project. If you have more than one contract in the project you should
