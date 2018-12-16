@@ -10,8 +10,8 @@ test: check
 
 #: Look for nodejs lint violations
 lint:
-	npx eslint --rulesdir=tools/eslint-rules lib test
+	npx eslint --rulesdir=tools/eslint-rules lib
 
 #: Look and fix nodejs lint violations
 lint-fix:
-	npx eslint --fix --rulesdir=tools/eslint-rules lib test
+	npx eslint --fix --rulesdir=tools/eslint-rules lib

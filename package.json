@@ -11,7 +11,7 @@
     "truffle-workflow-compile": "2.0.0-beta.1"
   },
   "scripts": {
-    "pretest": "eslint --rulesdir=tools/eslint-rules lib test",
+    "pretest": "eslint --rulesdir=tools/eslint-rules lib",
     "test": "nyc mocha"
   },
   "repository": {
