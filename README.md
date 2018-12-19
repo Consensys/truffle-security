@@ -30,8 +30,8 @@ $ truffle run analyze help
                 --timeout *seconds* ,
                     Limit MythX analysis time to *s* seconds.
                     The default is 120 seconds (two minutes).
-				 --version
-				    Show package and MythX version information
+                 --version
+                    Show package and MythX version information
 ```
 
 Options are deliberately sparse since we want simple interaction. Most
