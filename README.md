@@ -18,20 +18,19 @@ And here are the options for `run analyze`:
 ```console
 $ truffle run analyze help
 
-  Usage:        truffle+analyze analyze [--mode={full|quick}] [--debug] [--style *eslint-style-name*] [*contract-name*]
-  Description:  Run Mythril Platform analyses on a contract
+  Usage:        truffle+analyze analyze [options] [*contract-name*]
+  Description:  Run MythX analyses on a contract
   Options:
-                --mode {
-                    Set analysis mode to be either quick (fast) or full (in depth)
-                --debug
-                    Provide additional debug output
-                --style {stylish | unix | visualstudio | table | tap | ...}
-                    Set output format in the given es-lint style format the migration file. See https://eslint.org/docs/user-guide/formatters/ for a full list.
-                --timeout *seconds* ,
-                    Limit MythX analysis time to *s* seconds.
-                    The default is 120 seconds (two minutes).
-                 --version
-                    Show package and MythX version information
+    --debug     Provide additional debug output
+    --mode { quick | full }
+                Perform quick or or in-depth (full) analysis     
+     --style {stylish | unix | visualstudio | table | tap | ...}
+                Output reort in the given es-lint style.
+                See https://eslint.org/docs/user-guide/formatters/ for a full list.
+     --timeout *seconds* ,
+                Limit MythX analysis time to *s* seconds. 
+                The default is 120 seconds (two minutes).
+     --version  Show package and MythX version information.
 ```
 
 Options are deliberately sparse since we want simple interaction. Most
