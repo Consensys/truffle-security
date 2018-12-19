@@ -3,7 +3,7 @@
 The NPM package behind "truffle run analyze".
 
 _This is alpha code. You won't be able to use this without a MythX account,
-and will be more generally distributed in the December to January time period._
+and will be more generally distributed in the January-February time period._
 
 Prelmiminary pre 5.0.0 versions were demo'd at
 [trufflecon2018](https://truffleframework.com/trufflecon2018) and
