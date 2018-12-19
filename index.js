@@ -45,7 +45,7 @@ Options:
           See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
           Limit MythX analysis time to *s* seconds.
-          The default is 30 seconds.
+          The default is 120 seconds (two minutes).
   --version show package and MythX version information
 `);
         done(null, [], []);

@@ -5,19 +5,11 @@ The NPM package behind "truffle run analyze".
 _This is alpha code. You won't be able to use this without a MythX account,
 and will be more generally distributed in the December to January time period._
 
-This package is intended to be used as submodule inside
-`truffle/packages` and is not useful without further patches to
-the `truffle-core` package.
+Prelmiminary pre 5.0.0 versions were demo'd at
+[trufflecon2018](https://truffleframework.com/trufflecon2018) and
+[devcon4](https://devcon4.ethereum.org/).
 
-A prelmiminary version was (based on truffle 4) was demo'd at
-[trufflecon2018](https://truffleframework.com/trufflecon2018).
-
-It also was shown at [devcon4](https://devcon4.ethereum.org/)
-where it was been updated to use truffle `5.0-beta` along with
-a more advanced [MythX](mythril.ai).
-
-We expect to get this integrated into the new external plugin system
-that truffle expects to provide in in version 5.0.0.
+This version now uses the truffle 5.0.0 [run plugin architecture](https://truffleframework.com/docs/truffle/getting-started/writing-external-scripts).
 
 # Usage
 
@@ -35,6 +27,9 @@ $ truffle run analyze help
                     Provide additional debug output
                 --style {stylish | unix | visualstudio | table | tap | ...}
                     Set output format in the given es-lint style format the migration file. See https://eslint.org/docs/user-guide/formatters/ for a full list.
+                --timeout *seconds* ,
+                    Limit MythX analysis time to *s* seconds.
+                    The default is 120 seconds (two minutes).
 				 --version
 				    Show package and MythX version information
 ```
