@@ -18,17 +18,17 @@ And here are the options for `run analyze`:
 ```console
 $ truffle run analyze help
 
-  Usage:        truffle+analyze analyze [options] [*contract-name*]
+  Usage:        truffle run analyze analyze [options] [*contract-name*]
   Description:  Run MythX analyses on a contract
   Options:
     --debug     Provide additional debug output
     --mode { quick | full }
-                Perform quick or or in-depth (full) analysis     
+                Perform quick or or in-depth (full) analysis
      --style {stylish | unix | visualstudio | table | tap | ...}
                 Output reort in the given es-lint style.
                 See https://eslint.org/docs/user-guide/formatters/ for a full list.
      --timeout *seconds* ,
-                Limit MythX analysis time to *s* seconds. 
+                Limit MythX analysis time to *s* seconds.
                 The default is 120 seconds (two minutes).
      --version  Show package and MythX version information.
 ```
