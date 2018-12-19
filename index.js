@@ -36,17 +36,19 @@ module.exports = (config, done) => {
     config.logger = config.logger || console;
 
     if (config.help) {
-	console.log(`Usage: truffle run analyze [options]
-
+	console.log(`Usage: truffle run analyze [options] [*contract-name*]
+Description: Run MythX platform analyses on a contract
 Options:
-  --debug Provide additional debug output
+  --debug    Provide additional debug output
+  --mode { quick | full }
+             Perform quick or in-depth (full) analysis.
   --style {stylish | unix | visualstudio | table | tap | ...},
-          Report format in given es-lint style style.
-          See https://eslint.org/docs/user-guide/formatters/ for a full list.
+             Output report in the given es-lint style style.
+             See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
-          Limit MythX analysis time to *s* seconds.
-          The default is 120 seconds (two minutes).
-  --version show package and MythX version information
+             Limit MythX analysis time to *s* seconds.
+             The default is 120 seconds (two minutes).
+  --version  Show package and MythX version information.
 `);
         done(null, [], []);
 	return;
