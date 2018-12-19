@@ -184,7 +184,6 @@ Options:
 
     // This can cause vyper to fail if you don't have vyper installed
     delete config.compilers.vyper;
-
     contracts.compile(config,
                       function(arg) {
                         if (arg !== null) {
