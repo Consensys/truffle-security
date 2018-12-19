@@ -11,6 +11,7 @@ const armlet = require('armlet');
 const mythril = require('./lib/mythril');
 const trufstuf = require('./lib/trufstuf');
 const esReporter = require('./lib/es-reporter');
+const contracts = require("truffle-workflow-compile");
 
 function getFormatter(style) {
     const formatterName = style || 'stylish';
@@ -71,7 +72,7 @@ Options:
       // const expect = require("truffle-expect");
       // FIXME: expect things
 
-      var solidityFileBase;
+      let solidityFileBase;
       let solidityFile;
       let buildJsonPath;
       let buildJson;
@@ -105,6 +106,10 @@ Options:
       // console.log(`Reading ${buildJsonPath}`);
 
       let armletOptions = {
+        email: process.env.MYTHRIL_EMAIL,
+        apiKey: process.env.MYTHRIL_API_KEY,
+        ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
+        password: process.env.MYTHRIL_PASSWORD,
         platforms: ['truffle']  // client chargeback
       }
 
@@ -149,21 +154,20 @@ Options:
         return;
       }
 
-      let analyzeOpts = {
-        _: config._,
-        debug: config.debug,
-        logger: config.logger,
-        mode: config.mode,
-        style: config.style,
-        timeout: (config.timeout || 120) * 1000,
+      const analyzeOpts = {
+          _: config._,
+          debug: config.debug,
+          data: mythril.truffle2MythrilJSON(buildObj),
+          logger: config.logger,
+          style: config.style,
+          timeout: (config.timeout || 120) * 1000,
 
-        // FIXME: The below "partners" will change when
-        // https://github.com/ConsenSys/mythril-api/issues/59
-        // is resolved.
-        partners: ['truffle']
+          // FIXME: The below "partners" will change when
+          // https://github.com/ConsenSys/mythril-api/issues/59
+          // is resolved.
+          partners: ['truffle']
       };
 
-      analyzeOpts.data = mythril.truffle2MythrilJSON(buildObj);
       analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
       client.analyze(analyzeOpts)
@@ -178,11 +182,10 @@ Options:
         });
     }
 
-    const Contracts = require("truffle-workflow-compile");
     // This can cause vyper to fail if you don't have vyper installed
     delete config.compilers.vyper;
 
-    Contracts.compile(config,
+    contracts.compile(config,
                       function(arg) {
                         if (arg !== null) {
                           config.logger.log(`compile returns ${arg}`);

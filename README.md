@@ -35,6 +35,8 @@ $ truffle run analyze help
                     Provide additional debug output
                 --style {stylish | unix | visualstudio | table | tap | ...}
                     Set output format in the given es-lint style format the migration file. See https://eslint.org/docs/user-guide/formatters/ for a full list.
+				 --version
+				    Show package and MythX version information
 ```
 
 Options are deliberately sparse since we want simple interaction. Most

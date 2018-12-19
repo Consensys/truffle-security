@@ -2,16 +2,16 @@
   "name": "truffle-analyze",
   "namespace": "consensys",
   "version": "1.0.0",
-  "description": "Add vulnerability and weakness analysis via the MythOS",
+  "description": "Add vulnerability and weakness analysis via the MythX",
   "dependencies": {
     "armlet": ">=0.3.0",
     "configstore": "^4.0.0",
     "mocha": "^5.2.0",
-    "remix-lib": ">=0.3.13",
+    "remix-lib": ">=0.4.1",
     "truffle-workflow-compile": "2.0.0-beta.1"
   },
   "scripts": {
-    "pretest": "eslint --rulesdir=tools/eslint-rules lib test",
+    "pretest": "eslint --rulesdir=tools/eslint-rules lib",
     "test": "nyc mocha"
   },
   "repository": {
