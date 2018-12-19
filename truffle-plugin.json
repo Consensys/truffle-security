@@ -1,0 +1,5 @@
+{
+  "commands": {
+    "analyze": "index.js"
+  }
+}
