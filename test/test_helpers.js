@@ -23,12 +23,12 @@ describe('helpers.js', function() {
       .returns('/tests/contracts/TestContract');
     sinon
       .stub(trufstuf, 'guessTruffleBuildJson')
-      .returns('contracts/TestContract.json');
+      .returns('TestContract.json');
 
     const details = await helpers.getSolidityDetails({
       _: ['/tests.json'],
       working_drectory: '/tests',
-      contracts_build_directory: '/tests/build',
+      contracts_build_directory: '/tests/build/contracts',
     });
     assert.equal(details.solidityFile, '/tests/contracts/TestContract/TestContract.sol')
     assert.equal(details.buildJsonPath, '/tests/build/contracts/TestContract.json')
