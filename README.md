@@ -18,7 +18,7 @@ And here are the options for `run analyze`:
 ```console
 $ truffle run analyze help
 
-  Usage:        truffle run analyze analyze [options] [*contract-name*]
+  Usage:        truffle run analyze [options] [*contract-name*]
   Description:  Run MythX analyses on a contract
   Options:
     --debug     Provide additional debug output
