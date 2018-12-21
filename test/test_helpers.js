@@ -20,17 +20,17 @@ describe('helpers.js', function() {
   it('should get contract json and sol locations', async () => {
     sinon
       .stub(trufstuf, 'getContractsDir')
-      .returns('/tests/contracts');
+      .returns('/tests/contracts/TestContract');
     sinon
       .stub(trufstuf, 'guessTruffleBuildJson')
-      .returns('/tests/build/contracts');
+      .returns('contracts/TestContract.json');
 
     const details = await helpers.getSolidityDetails({
       _: ['/tests.json'],
       working_drectory: '/tests',
       contracts_build_directory: '/tests/build',
     });
-    assert.equal(details.solidityFile, '/tests/contracts/Contract.sol')
-    assert.equal(details.buildJsonPath, '/tests/build/contracts/Contract.json')
+    assert.equal(details.solidityFile, '/tests/contracts/TestContract/TestContract.sol')
+    assert.equal(details.buildJsonPath, '/tests/build/contracts/TestContract.json')
   });
 });
