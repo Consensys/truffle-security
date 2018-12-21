@@ -104,14 +104,11 @@ function getSolidityDetails(config) {
 // up to date.
 async function analyze(config) {
   const { solidityFile, buildJsonPath } = getSolidityDetails(config);
-
   const buildJson = await readFile(buildJsonPath);
   const buildObj = JSON.parse(buildJson);
   const armletOptions = {
     platforms: ['truffle']  // client chargeback
   }
-
-  console.log('>>>', solidityFile, buildJsonPath)
 
   if (process.env.MYTHRIL_API_KEY) {
     armletOptions.apiKey = process.env.MYTHRIL_API_KEY;
