@@ -13,6 +13,14 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const contractsCompile = util.promisify(contracts.compile);
 
+
+/**
+ *
+ * Loads preferred ESLint formatter for warning reports.
+ * 
+ * @param {style} string
+ * @returns ESLint formatter module
+ */
 function getFormatter(style) {
     const formatterName = style || 'stylish';
     try {
@@ -25,6 +33,14 @@ function getFormatter(style) {
     }
 }
 
+
+/**
+ *
+ * Retrns JSON object from a version reponse. Each attribute/key is a tool name and the value is a version string of the tool.
+ * 
+ * @param {Object} jsonResponse
+ * @returns string  A comma-separated string of tool: version
+ */
 function versionJSON2String(jsonResponse) {
     return Object.keys(jsonResponse).map((key) => `${key}: ${jsonResponse[key]}`).join(', ');
 }
