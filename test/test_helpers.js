@@ -75,15 +75,31 @@ describe('helpers.js', function() {
     let helpers;
     let readFileStub;
     let getSolidityDetailsStub;
+    let initialEnVars;
     const buildJson = JSON.stringify({
-      contractName: 'TestConntract',
+      contractName: 'TestContract',
       ast: {
         absolutePath: '/test/contracts/Contract.json'
       },
+      deployedBytecode: '0x6080604052',
     })
 
     beforeEach(function () {
-      readFileStub = sinon.stub().callsFake((_, cb) => cb(null, '{'))
+      // Store initial environment variables
+      initialEnVars = {
+        MYTHRIL_PASSWORD: process.env.MYTHRIL_PASSWORD,
+        MYTHRIL_API_KEY: process.env.MYTHRIL_API_KEY,
+        MYTHRIL_EMAIL: process.env.MYTHRIL_EMAIL,
+        MYTHRIL_ETH_ADDRESS: process.env.MYTHRIL_ETH_ADDRESS,
+      }
+
+      // clear envronment variables for tests
+      delete process.env.MYTHRIL_PASSWORD;
+      delete process.env.MYTHRIL_API_KEY;
+      delete process.env.MYTHRIL_EMAIL;
+      delete process.env.MYTHRIL_ETH_ADDRESS;
+
+      readFileStub = sinon.stub().callsFake((_, cb) => cb(null, '{'));
      
       helpers = proxyquire('../helpers', {
         fs: {
@@ -94,6 +110,14 @@ describe('helpers.js', function() {
           guessTruffleBuildJson: sinon.stub().returns('TestContract.json'),
         }
       });
+    });
+
+    afterEach(function () {
+      process.env.MYTHRIL_PASSWORD = initialEnVars.MYTHRIL_PASSWORD;
+      process.env.MYTHRIL_API_KEY = initialEnVars.MYTHRIL_API_KEY;
+      process.env.MYTHRIL_EMAIL = initialEnVars.MYTHRIL_EMAIL;
+      process.env.MYTHRIL_ETH_ADDRESS = initialEnVars.MYTHRIL_ETH_ADDRESS;
+      initialEnVars = null;
     });
 
     it('should throw exception when no password or API key privided', async () => {
