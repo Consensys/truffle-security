@@ -1,5 +1,6 @@
 const assert = require('assert');
-var proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire');
+const fs = require('fs');
 const armlet = require('armlet');
 const sinon = require('sinon');
 const trufstuf = require('../lib/trufstuf');
@@ -42,47 +43,31 @@ describe('helpers.js', function() {
       assert.ok(stubLog.called);
       stubLog.restore();
     });
-
-    it('should get contract json and sol locations', async () => {
-      sinon
-        .stub(trufstuf, 'getContractsDir')
-        .returns('/tests/contracts/TestContract');
-      sinon
-        .stub(trufstuf, 'guessTruffleBuildJson')
-        .returns('TestContract.json');
-
-      const details = await helpers.getSolidityDetails({
-        _: ['TestContract.json'],
-        working_drectory: '/tests',
-        contracts_build_directory: '/tests/build/contracts',
-      });
-      assert.equal(details.solidityFile, '/tests/contracts/TestContract/TestContract.sol')
-      assert.equal(details.buildJsonPath, '/tests/build/contracts/TestContract.json')
-    });
-    
-    it('should get contract json and sol locations from first JSON file', async () => {
-      const details = await helpers.getSolidityDetails({
-        _: ['TestContract.json', 'OtherContract.json'],
-        working_drectory: '/tests',
-        contracts_build_directory: '/tests/build/contracts',
-      });
-      assert.equal(details.solidityFile, '/tests/contracts/TestContract/TestContract.sol')
-      assert.equal(details.buildJsonPath, '/tests/build/contracts/TestContract.json')
-    });
-  })
+  });
 
   describe('Armlet authentication analyze', () => {
     let helpers;
     let readFileStub;
-    let getSolidityDetailsStub;
+    let getTruffleBuildJsonFilesStub;
     let initialEnVars;
+  
     const buildJson = JSON.stringify({
       contractName: 'TestContract',
       ast: {
-        absolutePath: '/test/contracts/Contract.json'
+        absolutePath: '/test/build/contracts/TestContract.json'
       },
       deployedBytecode: '0x6080604052',
-    })
+      sourcePath: '/test/contracts/TestContract/TestContract.sol',
+    });
+    
+    const buildJson2 = JSON.stringify({
+      contractName: 'OtherContract',
+      ast: {
+        absolutePath: '/test/build/contracts/OtherContract.json'
+      },
+      deployedBytecode: '0x6080604052',
+      sourcePath: '/test/contracts/OtherContract/OtherContract.sol',
+    });
 
     beforeEach(function () {
       // Store initial environment variables
@@ -98,16 +83,21 @@ describe('helpers.js', function() {
       delete process.env.MYTHRIL_API_KEY;
       delete process.env.MYTHRIL_EMAIL;
       delete process.env.MYTHRIL_ETH_ADDRESS;
-
-      readFileStub = sinon.stub().callsFake((_, cb) => cb(null, '{'));
      
+      getTruffleBuildJsonFilesStub = sinon
+      .stub(trufstuf, 'getTruffleBuildJsonFiles')
+      .resolves(['/test/build/contracts/TestContract.json', '/test/build/contracts/OtherContract.json']);
+      
+      readFileStub = sinon.stub(fs, 'readFile');
+      readFileStub.onFirstCall().yields(null, buildJson);
+      readFileStub.onSecondCall().yields(null, buildJson2);
+
       helpers = proxyquire('../helpers', {
         fs: {
-          readFile: (err, cb) => cb(null, buildJson),
+          readFile: readFileStub,
         },
         trufstuf: {
-          getContractsDir: sinon.stub().returns('/tests/contracts/TestContract'),
-          guessTruffleBuildJson: sinon.stub().returns('TestContract.json'),
+          getTruffleBuildJsonFiles: getTruffleBuildJsonFilesStub,
         }
       });
     });
@@ -118,6 +108,8 @@ describe('helpers.js', function() {
       process.env.MYTHRIL_EMAIL = initialEnVars.MYTHRIL_EMAIL;
       process.env.MYTHRIL_ETH_ADDRESS = initialEnVars.MYTHRIL_ETH_ADDRESS;
       initialEnVars = null;
+      readFileStub.restore();
+      getTruffleBuildJsonFilesStub.restore();
     });
 
     it('should throw exception when no password or API key privided', async () => {
@@ -165,7 +157,7 @@ describe('helpers.js', function() {
       issues2EslintStub.restore();
       esReporterSpy.restore();
     });
-    
+ 
     it('should execute successfully with password and email', async () => {
       process.env.MYTHRIL_PASSWORD = 'password'
       process.env.MYTHRIL_EMAIL = 'test@test.com'
@@ -206,9 +198,9 @@ describe('helpers.js', function() {
       })
       delete process.env.MYTHRIL_API_KEY;
       delete process.env.MYTHRIL_ETH_ADDRESS;
-      assert.ok(armletAnalyzeStub.called);
-      assert.ok(issues2EslintStub.called);
-      assert.ok(esReporterSpy.called);
+      assert.ok(armletAnalyzeStub.calledTwice);
+      assert.ok(issues2EslintStub.calledTwice);
+      assert.ok(esReporterSpy.calledTwice);
       armletAnalyzeStub.restore();
       issues2EslintStub.restore();
       esReporterSpy.restore();

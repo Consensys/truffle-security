@@ -1,7 +1,6 @@
 'use strict';
 
 
-const path = require('path');
 const fs = require('fs');
 const armlet = require('armlet');
 const mythril = require('./lib/mythril');
@@ -77,51 +76,61 @@ async function printVersion() {
   return version;
 }
 
-function getSolidityDetails(config) {
-  const rootDir = config.working_directory;
-  const buildDir = config.contracts_build_directory;
-  // FIXME: use truffle library routine
-  const contractsDir = trufstuf.getContractsDir(rootDir);
 
-  // const expect = require("truffle-expect");
-  // FIXME: expect things
+/**
+ * Runs Mythril Platform analyze on smart contract build json files found
+ * in truffle build folder
+ * 
+ * @param {armlet.Client} client - instance of armlet.Client to send data to API.
+ * @param {Object} config - Truffle configuration object.
+ * @param {Array<String>} jsonFiles - List of smart contract build json files.
+ * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
+ */
+const doAnalysis = async (client, config, jsonFiles) => {
+  /**
+   * Multiple smart contracts need to be run concurrently
+   * to speed up analyze report output.
+   * Because simple forEach or map can't handle async operations -
+   * async map is used and Promise.all to be notified when all analyses
+   * are finished.
+   */
 
-  let solidityFileBase;
-  let solidityFile;
-  let buildJsonPath;
-  let buildJson;
+  return Promise.all(jsonFiles.map(async file => {
+    const buildJson = await readFile(file, 'utf8');
+    const buildObj = JSON.parse(buildJson);
+    const solidityFile = trufstuf.getSolidityFileFromJson(buildObj);
 
-  if (config._.length === 1) {
-    buildJson = trufstuf.guessTruffleBuildJson(buildDir);
-  } else {
-    buildJson = path.basename(config._[0]);
-  }
-  solidityFileBase = path.basename(buildJson, '.json');
+    const analyzeOpts = {
+      _: config._,
+      debug: config.debug,
+      data: mythril.truffle2MythrilJSON(buildObj),
+      logger: config.logger,
+      style: config.style,
+      timeout: (config.timeout || 120) * 1000,
+  
+      // FIXME: The below "partners" will change when
+      // https://github.com/ConsenSys/mythril-api/issues/59
+      // is resolved.
+      partners: ['truffle'],
+    };
+  
+    analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
+  
+    const issues = await client.analyze(analyzeOpts);
 
-  if (!solidityFileBase.endsWith('.sol')) {
-    solidityFileBase += '.sol';
-  }
-
-  solidityFile = path.join(contractsDir, solidityFileBase);
-  if (config.debug) {
-    config.logger.log(`Solidity file used: ${solidityFile}`);
-  }
-
-  buildJsonPath = path.join(buildDir, buildJson);
-  if (!buildJsonPath.endsWith('.json')) {
-    buildJsonPath += '.json';
-  }
-
-  return { solidityFile, buildJsonPath }; 
+    return {
+      buildObj,
+      solidityFile,
+      issues,
+    }
+  }));
 }
 
-// Run Mythril Platform analyze after we have
-// ensured via compile that JSON data is there and
-// up to date.
+/**
+ * 
+ * @param {Object} config - truffle configuration object.
+ */
 async function analyze(config) {
-  const { solidityFile, buildJsonPath } = getSolidityDetails(config);
-  const buildJson = await readFile(buildJsonPath);
-  const buildObj = JSON.parse(buildJson);
   const armletOptions = {
     platforms: ['truffle']  // client chargeback
   }
@@ -145,34 +154,25 @@ async function analyze(config) {
   }
 
   const client = new armlet.Client(armletOptions);
-  const analyzeOpts = {
-    _: config._,
-    debug: config.debug,
-    data: mythril.truffle2MythrilJSON(buildObj),
-    logger: config.logger,
-    style: config.style,
-    timeout: (config.timeout || 120) * 1000,
 
-    // FIXME: The below "partners" will change when
-    // https://github.com/ConsenSys/mythril-api/issues/59
-    // is resolved.
-    partners: ['truffle'],
-  };
+  // Get list of smart contract build json files from truffle build folder
+  const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
-  analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
+  const analysisResults = await doAnalysis(client, config, jsonFiles);
 
-  const issues = await client.analyze(analyzeOpts);
-  const formatter = getFormatter(analyzeOpts.style);
-  const esIssues = mythril.issues2Eslint(issues, buildObj, analyzeOpts);
-  esReporter.printReport(esIssues, solidityFile, formatter, analyzeOpts.logger.log);
+  const formatter = getFormatter(config.style);
+  
+  analysisResults.forEach(({issues, solidityFile, buildObj }) => {
+    const esIssues = mythril.issues2Eslint(issues, buildObj, config);
+    esReporter.printReport(esIssues, solidityFile, formatter, config.logger.log);
+  });
 
-  return issues;
+  return analysisResults;
 }
 
 
 module.exports = {
   analyze,
-  getSolidityDetails,
   printVersion,
   printHelpMessage,
   contractsCompile,
