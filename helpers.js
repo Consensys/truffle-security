@@ -17,7 +17,7 @@ const contractsCompile = util.promisify(contracts.compile);
 /**
  *
  * Loads preferred ESLint formatter for warning reports.
- * 
+ *
  * @param {style} string
  * @returns ESLint formatter module
  */
@@ -36,8 +36,9 @@ function getFormatter(style) {
 
 /**
  *
- * Retrns JSON object from a version reponse. Each attribute/key is a tool name and the value is a version string of the tool.
- * 
+ * Returns a JSON object from a version response. Each attribute/key
+ * is a tool name and the value is a version string of the tool.
+ *
  * @param {Object} jsonResponse
  * @returns string  A comma-separated string of tool: version
  */
@@ -45,9 +46,15 @@ function versionJSON2String(jsonResponse) {
     return Object.keys(jsonResponse).map((key) => `${key}: ${jsonResponse[key]}`).join(', ');
 }
 
-async function printHelpMessage() {
-  return new Promise(resolve => {
-    const helpMessage = `Usage: truffle run analyze [options]
+/**
+ *
+ * Handles: truffle run analyze --help
+ *
+ * @returns promise which resolves after help is shown
+ */
+function printHelpMessage() {
+    return new Promise(resolve => {
+        const helpMessage = `Usage: truffle run analyze [options]
 
 Options:
   --debug    Provide additional debug output
@@ -58,23 +65,33 @@ Options:
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
           Limit MythX analysis time to *s* seconds.
-          The default is 30 seconds.
+          The default is 120 seconds (two minutes).
   --version show package and MythX version information
 `;
-    console.log(helpMessage);
-    resolve(null);
-  });
+        // FIXME: decide if this is okay or whether we need
+        // to pass in `config` and use `config.logger.log`.
+        console.log(helpMessage);
+        resolve(null);
+    });
 }
 
-async function printVersion() {
-  const pjson = require('./package.json');
-  console.log(`${pjson.name} ${pjson.version}`);
-
-  const version = await armlet.ApiVersion();
-  
-  console.log(versionJSON2String(version))
-
-  return version;
+/**
+ *
+ * Handles: truffle run analyze --version
+ * Shows version information for this plugin and each of the MythX components.
+ *
+ * @returns promise which resolves after MythX version information is shown
+ */
+function printVersion() {
+  return new Promise(resolve => {
+      const pjson = require('./package.json');
+      // FIXME: decide if this is okay or whether we need
+      // to pass in `config` and use `config.logger.log`.
+      console.log(`${pjson.name} ${pjson.version}`);
+      const version = armlet.ApiVersion();
+      console.log(versionJSON2String(version))
+      resolve(null);
+  });
 }
 
 function getSolidityDetails(config) {
@@ -84,7 +101,7 @@ function getSolidityDetails(config) {
   const contractsDir = trufstuf.getContractsDir(rootDir);
 
   // const expect = require("truffle-expect");
-  // FIXME: expect things
+  // FIXME: "expect" whatever is proper
 
   let solidityFileBase;
   let solidityFile;
@@ -112,17 +129,24 @@ function getSolidityDetails(config) {
     buildJsonPath += '.json';
   }
 
-  return { solidityFile, buildJsonPath }; 
+  return { solidityFile, buildJsonPath };
 }
 
-// Run Mythril Platform analyze after we have
-// ensured via compile that JSON data is there and
-// up to date.
+/**
+  * Run Mythril Platform analyze after we have
+  * ensured via `compile` that truffle JSON artifacts in build/contracts data is there and
+  * up to date.
+  *
+  * @param {config} Object a `truffle-config` configuration object
+ */
 async function analyze(config) {
   const { solidityFile, buildJsonPath } = getSolidityDetails(config);
   const buildJson = await readFile(buildJsonPath);
   const buildObj = JSON.parse(buildJson);
   const armletOptions = {
+    // FIXME: The below "partners" will change when
+    // https://github.com/ConsenSys/mythril-api/issues/59
+    // is resolved.
     platforms: ['truffle']  // client chargeback
   }
 
@@ -132,7 +156,7 @@ async function analyze(config) {
     if (!process.env.MYTHRIL_PASSWORD) {
       throw new Error('You need to set environment variable MYTHRIL_PASSWORD to run analyze.');
     }
-  
+
     armletOptions.password = process.env.MYTHRIL_PASSWORD;
 
     if (process.env.MYTHRIL_ETH_ADDRESS) {
@@ -169,10 +193,9 @@ async function analyze(config) {
   return issues;
 }
 
-
 module.exports = {
   analyze,
-  getSolidityDetails,
+  getSolidityDetails, // Exported for testing
   printVersion,
   printHelpMessage,
   contractsCompile,

@@ -29,8 +29,7 @@ describe('helpers.js', function() {
     it('should call printVersion', async () => {
       const stubAPI = sinon.stub(armlet, 'ApiVersion').returns('1.0.0');
       const stubLog = sinon.stub(console, 'log');
-      const version = await helpers.printVersion();
-      assert.equal(version, '1.0.0')
+      await helpers.printVersion();
       assert.ok(stubAPI.called);
       assert.ok(stubLog.called);
       stubLog.restore();
@@ -59,7 +58,7 @@ describe('helpers.js', function() {
       assert.equal(details.solidityFile, '/tests/contracts/TestContract/TestContract.sol')
       assert.equal(details.buildJsonPath, '/tests/build/contracts/TestContract.json')
     });
-    
+
     it('should get contract json and sol locations from first JSON file', async () => {
       const details = await helpers.getSolidityDetails({
         _: ['TestContract.json', 'OtherContract.json'],
@@ -100,7 +99,7 @@ describe('helpers.js', function() {
       delete process.env.MYTHRIL_ETH_ADDRESS;
 
       readFileStub = sinon.stub().callsFake((_, cb) => cb(null, '{'));
-     
+
       helpers = proxyquire('../helpers', {
         fs: {
           readFile: (err, cb) => cb(null, buildJson),
@@ -130,7 +129,7 @@ describe('helpers.js', function() {
         })
       }, /You need to set environment variable MYTHRIL_PASSWORD to run analyze./);
     });
-    
+
     it('should throw exception when neither email or ethAddress are provided', async () => {
       process.env.MYTHRIL_PASSWORD = 'password'
       await assertThrowsAsync(
@@ -143,7 +142,7 @@ describe('helpers.js', function() {
       }, /You need to set either environment variable MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze./);
       delete process.env.MYTHRIL_PASSWORD;
     });
-  
+
     it('should execute successfully with api key', async () => {
       process.env.MYTHRIL_API_KEY = 'api-key'
       const armletAnalyzeStub = sinon.stub(armlet.Client.prototype, 'analyze').resolves([]);
@@ -165,7 +164,7 @@ describe('helpers.js', function() {
       issues2EslintStub.restore();
       esReporterSpy.restore();
     });
-    
+
     it('should execute successfully with password and email', async () => {
       process.env.MYTHRIL_PASSWORD = 'password'
       process.env.MYTHRIL_EMAIL = 'test@test.com'
