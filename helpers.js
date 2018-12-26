@@ -184,7 +184,7 @@ async function analyze(config) {
   
   analysisResults.forEach(({issues, solidityFile, buildObj }) => {
     const esIssues = mythril.issues2Eslint(issues, buildObj, config);
-    esReporter.printReport(esIssues, solidityFile, formatter, config.logger.log);
+    esReporter.printReport(esIssues, solidityFile, buildObj.contractName, formatter, config.logger.log);
   });
 
   return analysisResults;
