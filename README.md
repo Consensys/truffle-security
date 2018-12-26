@@ -1,6 +1,9 @@
+[![CircleCI](https://circleci.com/gh/ConsenSys/truffle-analyze.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-analyze)
+[![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-analyze/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-analyze?branch=master)
+
 # Introduction
 
-The NPM package behind "truffle run analyze".
+A [truffle "run" plugin](https://truffleframework.com/docs/truffle/getting-started/writing-external-scripts) that runs [MythX](mythx.io) Smart Contract analyses on truffle projects.
 
 _This is alpha code. You won't be able to use this without a MythX account,
 and will be more generally distributed in the January-February time period._
@@ -9,11 +12,38 @@ Prelmiminary pre 5.0.0 versions were demo'd at
 [trufflecon2018](https://truffleframework.com/trufflecon2018) and
 [devcon4](https://devcon4.ethereum.org/).
 
-This version now uses the truffle 5.0.0 [run plugin architecture](https://truffleframework.com/docs/truffle/getting-started/writing-external-scripts).
+# Installation
+
+1. Install plugin:
+
+```console
+$ npm install truffle-analyze
+```
+
+2. Configure each truffle project to use plugin.
+
+In your truffle project put in `truffle.js`:
+
+```
+module.exports = {
+    plugins: [ "truffle-analyze" ]
+};
+```
+
+For now `truffle.js` needs to be adjusted for each project. However, changes to truffle are planned
+so that in the future you can specifiy this globally.
+
+3. Set `MYTHX` environment variables.
+
+Get an ETH address from [MetaMask](https://metamask.io). Set the following enviromment variables,
+adjust for your ETH address and password:
+
+```
+export MYTHRIL_ETH_ADDRESS=0x1234567891235678900000000000000000000000
+export MYTHRIL_PASSWORD='Put your password in here!'
+```
 
 # Usage
-
-And here are the options for `run analyze`:
 
 ```console
 $ truffle run analyze help
@@ -24,13 +54,13 @@ $ truffle run analyze help
     --debug     Provide additional debug output
     --mode { quick | full }
                 Perform quick or or in-depth (full) analysis
-     --style {stylish | unix | visualstudio | table | tap | ...}
+    --style {stylish | unix | visualstudio | table | tap | ...}
                 Output reort in the given es-lint style.
                 See https://eslint.org/docs/user-guide/formatters/ for a full list.
-     --timeout *seconds* ,
+    --timeout *seconds* ,
                 Limit MythX analysis time to *s* seconds.
                 The default is 120 seconds (two minutes).
-     --version  Show package and MythX version information.
+    --version  Show package and MythX version information.
 ```
 
 Options are deliberately sparse since we want simple interaction. Most
