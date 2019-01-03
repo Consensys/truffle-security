@@ -11,6 +11,7 @@
     "remix-lib": ">=0.4.1",
     "truffle-workflow-compile": ">=2.0.0"
   },
+  "engines" : { "node" : ">=8.10.0" },
   "scripts": {
     "pretest": "eslint --rulesdir=tools/eslint-rules lib",
     "test": "nyc mocha"
