@@ -13,7 +13,8 @@
   },
   "scripts": {
     "pretest": "eslint --rulesdir=tools/eslint-rules lib",
-    "test": "nyc mocha"
+    "test": "nyc mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,7 @@
   "license": "MIT",
   "main": "index.js",
   "devDependencies": {
+    "coveralls": "^3.0.2",
     "eslint": ">=5.9.0",
     "ipfsd-ctl": "^0.21.0",
     "nyc": "^13.1.0",
