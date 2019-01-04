@@ -277,5 +277,36 @@ describe('helpers.js', function() {
       esReporterSpy.restore();
     });
 
+    it('should fail first smart contract and analyze second', async () => {
+      process.env.MYTHRIL_PASSWORD = 'password'
+      process.env.MYTHRIL_ETH_ADDRESS = '0x1234567890'
+      
+      const stdErrorStub = sinon.stub(console, 'error');
+      const armletAnalyzeStub = sinon.stub(armlet.Client.prototype, 'analyze');
+
+      armletAnalyzeStub.onFirstCall().rejects('Error');
+      armletAnalyzeStub.onSecondCall().resolves([]);
+  
+      const issues2EslintStub = sinon.stub(mythril, 'issues2Eslint').returns([]);
+      const esReporterSpy = sinon.spy(esReporter, 'printReport');
+      await helpers.analyze({
+        _: ['analyze', 'TestContract', 'OtherContract'],
+        debug: true,
+        working_drectory: '/tests',
+        contracts_build_directory: '/tests/build/contracts',
+        logger: console,
+        data: {},
+      })
+      delete process.env.MYTHRIL_API_KEY;
+      delete process.env.MYTHRIL_ETH_ADDRESS;
+      assert.ok(armletAnalyzeStub.calledTwice);
+      assert.ok(issues2EslintStub.calledOnce);
+      assert.ok(esReporterSpy.calledOnce);
+      assert.ok(stdErrorStub.called);
+      armletAnalyzeStub.restore();
+      issues2EslintStub.restore();
+      stdErrorStub.restore();
+      esReporterSpy.restore();
+    });
   });
 });

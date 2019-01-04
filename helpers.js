@@ -114,6 +114,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
    */
 
   return Promise.all(jsonFiles.map(async file => {
+    let issues, errors;
     const buildJson = await readFile(file, 'utf8');
     const buildObj = JSON.parse(buildJson);
 
@@ -141,13 +142,18 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
     };
   
     analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
-  
-    const issues = await client.analyze(analyzeOpts);
+
+    try {
+      issues = await client.analyze(analyzeOpts);
+    } catch (err) {
+      errors = err;
+    }
 
     return {
       buildObj,
       solidityFile,
       issues,
+      errors,
     }
   }));
 }
@@ -193,15 +199,24 @@ async function analyze(config) {
   let analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
   // Clean analysesResults from empty (skipped smart contracts) results
   analysisResults = analysisResults.filter(res => !!res);
+  
+  // Filter out passed and failed results
+  const passedAnalysis = analysisResults.filter(res => !res.errors)
+  const failedAnalysis = analysisResults.filter(res => !!res.errors)
 
   const formatter = getFormatter(config.style);
   
-  analysisResults.forEach(({issues, solidityFile, buildObj }) => {
+  passedAnalysis.forEach(({issues, solidityFile, buildObj }) => {
     const esIssues = mythril.issues2Eslint(issues, buildObj, config);
     esReporter.printReport(esIssues, solidityFile, formatter, config.logger.log);
   });
 
-  return analysisResults;
+  if (failedAnalysis) {
+   failedAnalysis.forEach(({ errors, buildObj}) => {
+     console.error(`Failed to analyze smart contract "${buildObj.contractName}":`);
+     console.error(errors, errors.stack);
+    });
+  }
 }
 
 module.exports = {
