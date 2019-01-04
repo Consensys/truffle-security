@@ -53,7 +53,7 @@ function versionJSON2String(jsonResponse) {
  */
 function printHelpMessage() {
     return new Promise(resolve => {
-        const helpMessage = `Usage: truffle run analyze [options]
+        const helpMessage = `Usage: truffle run analyze [options] [*contract-name*]
 
 Options:
   --debug    Provide additional debug output
@@ -101,9 +101,10 @@ function printVersion() {
  * @param {armlet.Client} client - instance of armlet.Client to send data to API.
  * @param {Object} config - Truffle configuration object.
  * @param {Array<String>} jsonFiles - List of smart contract build json files.
+ * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
-const doAnalysis = async (client, config, jsonFiles) => {
+const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
   /**
    * Multiple smart contracts need to be run concurrently
    * to speed up analyze report output.
@@ -115,6 +116,14 @@ const doAnalysis = async (client, config, jsonFiles) => {
   return Promise.all(jsonFiles.map(async file => {
     const buildJson = await readFile(file, 'utf8');
     const buildObj = JSON.parse(buildJson);
+
+    /**
+     * If contractNames have been passed then skip analyze for unwanted ones.
+     */
+    if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
+      return null;
+    }
+  
     const solidityFile = trufstuf.getSolidityFileFromJson(buildObj);
 
     const analyzeOpts = {
@@ -175,10 +184,15 @@ async function analyze(config) {
 
   const client = new armlet.Client(armletOptions);
 
+  // Extract list of contracts passed in cli to analyze
+  const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
+
   // Get list of smart contract build json files from truffle build folder
   const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
-  const analysisResults = await doAnalysis(client, config, jsonFiles);
+  let analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
+  // Clean analysesResults from empty (skipped smart contracts) results
+  analysisResults = analysisResults.filter(res => !!res);
 
   const formatter = getFormatter(config.style);
   

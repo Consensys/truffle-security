@@ -115,7 +115,7 @@ describe('helpers.js', function() {
       await assertThrowsAsync(
         async () => {
           await helpers.analyze({
-            _: ['TestContract.json'],
+            _: ['analyze'],
             working_drectory: '/tests',
             contracts_build_directory: '/tests/build/contracts',
         })
@@ -127,7 +127,7 @@ describe('helpers.js', function() {
       await assertThrowsAsync(
         async () => {
           await helpers.analyze({
-            _: ['TestContract.json'],
+            _: ['analyze'],
             working_drectory: '/tests',
             contracts_build_directory: '/tests/build/contracts',
         })
@@ -141,7 +141,7 @@ describe('helpers.js', function() {
       const issues2EslintStub = sinon.stub(mythril, 'issues2Eslint').returns([]);
       const esReporterSpy = sinon.spy(esReporter, 'printReport');
       await helpers.analyze({
-        _: ['TestContract.json'],
+        _: ['analyze'],
         debug: true,
         working_drectory: '/tests',
         contracts_build_directory: '/tests/build/contracts',
@@ -164,7 +164,7 @@ describe('helpers.js', function() {
       const issues2EslintStub = sinon.stub(mythril, 'issues2Eslint').returns([]);
       const esReporterSpy = sinon.spy(esReporter, 'printReport');
       await helpers.analyze({
-        _: ['TestContract.json'],
+        _: ['analyze'],
         debug: true,
         working_drectory: '/tests',
         contracts_build_directory: '/tests/build/contracts',
@@ -188,7 +188,7 @@ describe('helpers.js', function() {
       const issues2EslintStub = sinon.stub(mythril, 'issues2Eslint').returns([]);
       const esReporterSpy = sinon.spy(esReporter, 'printReport');
       await helpers.analyze({
-        _: ['TestContract.json'],
+        _: ['analyze'],
         debug: true,
         working_drectory: '/tests',
         contracts_build_directory: '/tests/build/contracts',
@@ -204,5 +204,78 @@ describe('helpers.js', function() {
       issues2EslintStub.restore();
       esReporterSpy.restore();
     });
+
+    it('should execute successfully for TestContract Only', async () => {
+      process.env.MYTHRIL_PASSWORD = 'password'
+      process.env.MYTHRIL_ETH_ADDRESS = '0x1234567890'
+      const armletAnalyzeStub = sinon.stub(armlet.Client.prototype, 'analyze').resolves([]);
+      const issues2EslintStub = sinon.stub(mythril, 'issues2Eslint').returns([]);
+      const esReporterSpy = sinon.spy(esReporter, 'printReport');
+      await helpers.analyze({
+        _: ['analyze', 'TestContract'],
+        debug: true,
+        working_drectory: '/tests',
+        contracts_build_directory: '/tests/build/contracts',
+        logger: console,
+        data: {},
+      })
+      delete process.env.MYTHRIL_API_KEY;
+      delete process.env.MYTHRIL_ETH_ADDRESS;
+      assert.ok(armletAnalyzeStub.calledOnce);
+      assert.ok(issues2EslintStub.calledOnce);
+      assert.ok(esReporterSpy.calledOnce);
+      armletAnalyzeStub.restore();
+      issues2EslintStub.restore();
+      esReporterSpy.restore();
+    });
+
+    it('should execute successfully for both contracts', async () => {
+      process.env.MYTHRIL_PASSWORD = 'password'
+      process.env.MYTHRIL_ETH_ADDRESS = '0x1234567890'
+      const armletAnalyzeStub = sinon.stub(armlet.Client.prototype, 'analyze').resolves([]);
+      const issues2EslintStub = sinon.stub(mythril, 'issues2Eslint').returns([]);
+      const esReporterSpy = sinon.spy(esReporter, 'printReport');
+      await helpers.analyze({
+        _: ['analyze', 'TestContract', 'OtherContract'],
+        debug: true,
+        working_drectory: '/tests',
+        contracts_build_directory: '/tests/build/contracts',
+        logger: console,
+        data: {},
+      })
+      delete process.env.MYTHRIL_API_KEY;
+      delete process.env.MYTHRIL_ETH_ADDRESS;
+      assert.ok(armletAnalyzeStub.calledTwice);
+      assert.ok(issues2EslintStub.calledTwice);
+      assert.ok(esReporterSpy.calledTwice);
+      armletAnalyzeStub.restore();
+      issues2EslintStub.restore();
+      esReporterSpy.restore();
+    });
+  
+    it('should not analyze if desired contracts not found', async () => {
+      process.env.MYTHRIL_PASSWORD = 'password'
+      process.env.MYTHRIL_ETH_ADDRESS = '0x1234567890'
+      const armletAnalyzeStub = sinon.stub(armlet.Client.prototype, 'analyze').resolves([]);
+      const issues2EslintStub = sinon.stub(mythril, 'issues2Eslint').returns([]);
+      const esReporterSpy = sinon.spy(esReporter, 'printReport');
+      await helpers.analyze({
+        _: ['analyze', 'TestContractDoesNotExist', 'OtherContractDoesNotExist'],
+        debug: true,
+        working_drectory: '/tests',
+        contracts_build_directory: '/tests/build/contracts',
+        logger: console,
+        data: {},
+      })
+      delete process.env.MYTHRIL_API_KEY;
+      delete process.env.MYTHRIL_ETH_ADDRESS;
+      assert.ok(armletAnalyzeStub.notCalled);
+      assert.ok(issues2EslintStub.notCalled);
+      assert.ok(esReporterSpy.notCalled);
+      armletAnalyzeStub.restore();
+      issues2EslintStub.restore();
+      esReporterSpy.restore();
+    });
+
   });
 });
