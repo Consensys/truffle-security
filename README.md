@@ -48,7 +48,7 @@ export MYTHRIL_PASSWORD='Put your password in here!'
 ```console
 $ truffle run analyze help
 
-  Usage:        truffle run analyze [options] [*contract-name*]
+  Usage:        truffle run analyze [options] [*contract-name1* [contract-name2*] ...]
   Description:  Run MythX analyses on a contract
   Options:
     --debug     Provide additional debug output
@@ -62,6 +62,9 @@ $ truffle run analyze help
                 The default is 120 seconds (two minutes).
     --version  Show package and MythX version information.
 ```
+
+Runs MythX analyses on given Solidity contracts. If no contracts are
+given, all are analyzed.
 
 Options are deliberately sparse since we want simple interaction. Most
 of the complexity is hidden behind the MythX.
