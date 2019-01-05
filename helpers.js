@@ -1,7 +1,6 @@
 'use strict';
 
 
-const path = require('path');
 const fs = require('fs');
 const armlet = require('armlet');
 const mythril = require('./lib/mythril');
@@ -13,12 +12,11 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const contractsCompile = util.promisify(contracts.compile);
 
-
 /**
  *
  * Loads preferred ESLint formatter for warning reports.
  *
- * @param {style} string
+ * @param {String} config
  * @returns ESLint formatter module
  */
 function getFormatter(style) {
@@ -54,7 +52,10 @@ function versionJSON2String(jsonResponse) {
  */
 function printHelpMessage() {
     return new Promise(resolve => {
-        const helpMessage = `Usage: truffle run analyze [options]
+        const helpMessage = `Usage: truffle run analyze [options] [*contract-name1* [*contract-name2*] ...]
+
+Runs MythX analyses on given Solidity contracts. If no contracts are
+given, all are analyzed.
 
 Options:
   --debug    Provide additional debug output
@@ -64,7 +65,7 @@ Options:
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
-          Limit MythX analysis time to *s* seconds.
+          Limit MythX analyses time to *s* seconds.
           The default is 120 seconds (two minutes).
   --version show package and MythX version information
 `;
@@ -94,55 +95,76 @@ function printVersion() {
   });
 }
 
-function getSolidityDetails(config) {
-  const rootDir = config.working_directory;
-  const buildDir = config.contracts_build_directory;
-  // FIXME: use truffle library routine
-  const contractsDir = trufstuf.getContractsDir(rootDir);
 
-  // const expect = require("truffle-expect");
-  // FIXME: "expect" whatever is proper
+/**
+ * Runs MythX security analyses on smart contract build json files found
+ * in truffle build folder
+ *
+ * @param {armlet.Client} client - instance of armlet.Client to send data to API.
+ * @param {Object} config - Truffle configuration object.
+ * @param {Array<String>} jsonFiles - List of smart contract build json files.
+ * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
+ * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
+ */
+const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
+  /**
+   * Multiple smart contracts need to be run concurrently
+   * to speed up analyze report output.
+   * Because simple forEach or map can't handle async operations -
+   * async map is used and Promise.all to be notified when all analyses
+   * are finished.
+   */
 
-  let solidityFileBase;
-  let solidityFile;
-  let buildJsonPath;
-  let buildJson;
+  return Promise.all(jsonFiles.map(async file => {
+    let issues, errors;
+    const buildJson = await readFile(file, 'utf8');
+    const buildObj = JSON.parse(buildJson);
 
-  if (config._.length === 1) {
-    buildJson = trufstuf.guessTruffleBuildJson(buildDir);
-  } else {
-    buildJson = path.basename(config._[0]);
-  }
-  solidityFileBase = path.basename(buildJson, '.json');
+    /**
+     * If contractNames have been passed then skip analyze for unwanted ones.
+     */
+    if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
+      return null;
+    }
 
-  if (!solidityFileBase.endsWith('.sol')) {
-    solidityFileBase += '.sol';
-  }
+    const solidityFile = trufstuf.getSolidityFileFromJson(buildObj);
 
-  solidityFile = path.join(contractsDir, solidityFileBase);
-  if (config.debug) {
-    config.logger.log(`Solidity file used: ${solidityFile}`);
-  }
+    const analyzeOpts = {
+      _: config._,
+      debug: config.debug,
+      data: mythril.truffle2MythrilJSON(buildObj),
+      logger: config.logger,
+      style: config.style,
+      timeout: (config.timeout || 120) * 1000,
 
-  buildJsonPath = path.join(buildDir, buildJson);
-  if (!buildJsonPath.endsWith('.json')) {
-    buildJsonPath += '.json';
-  }
+      // FIXME: The below "partners" will change when
+      // https://github.com/ConsenSys/mythril-api/issues/59
+      // is resolved.
+      partners: ['truffle'],
+    };
 
-  return { solidityFile, buildJsonPath };
+    analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
+
+    try {
+      issues = await client.analyze(analyzeOpts);
+    } catch (err) {
+      errors = err;
+    }
+
+    return {
+      buildObj,
+      solidityFile,
+      issues,
+      errors,
+    }
+  }));
 }
 
 /**
-  * Run Mythril Platform analyze after we have
-  * ensured via `compile` that truffle JSON artifacts in build/contracts data is there and
-  * up to date.
-  *
-  * @param {config} Object a `truffle-config` configuration object
+ *
+ * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
-  const { solidityFile, buildJsonPath } = getSolidityDetails(config);
-  const buildJson = await readFile(buildJsonPath);
-  const buildObj = JSON.parse(buildJson);
   const armletOptions = {
     // FIXME: The below "partners" will change when
     // https://github.com/ConsenSys/mythril-api/issues/59
@@ -169,34 +191,63 @@ async function analyze(config) {
   }
 
   const client = new armlet.Client(armletOptions);
-  const analyzeOpts = {
-    _: config._,
-    debug: config.debug,
-    data: mythril.truffle2MythrilJSON(buildObj),
-    logger: config.logger,
-    style: config.style,
-    timeout: (config.timeout || 120) * 1000,
 
-    // FIXME: The below "partners" will change when
-    // https://github.com/ConsenSys/mythril-api/issues/59
-    // is resolved.
-    partners: ['truffle'],
-  };
+  // Extract list of contracts passed in cli to analyze
+  const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
 
-  analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
+  // Get list of smart contract build json files from truffle build folder
+  const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
-  const issues = await client.analyze(analyzeOpts);
-  const formatter = getFormatter(analyzeOpts.style);
-  const esIssues = mythril.issues2Eslint(issues, buildObj, analyzeOpts);
-  esReporter.printReport(esIssues, solidityFile, formatter, analyzeOpts.logger.log);
+  let analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
+  // Clean analysesResults from empty (skipped smart contracts) results
+  analysisResults = analysisResults.filter(res => !!res);
 
-  return issues;
+  // Filter out passed and failed results
+  const passedAnalysis = analysisResults.filter(res => !res.errors)
+  const failedAnalysis = analysisResults.filter(res => !!res.errors)
+
+  const formatter = getFormatter(config.style);
+
+  passedAnalysis.forEach(({issues, solidityFile, buildObj }) => {
+    const esIssues = mythril.issues2Eslint(issues, buildObj, config);
+    esReporter.printReport(esIssues, solidityFile, formatter, config.logger.log);
+  });
+
+  if (failedAnalysis) {
+   failedAnalysis.forEach(({ errors, buildObj}) => {
+     console.error(`Failed to analyze smart contract "${buildObj.contractName}":`);
+     console.error(errors, errors.stack);
+    });
+  }
 }
+
+
+// FIXME: this stuff is cut and paste from truffle-workflow-compile writeContracts
+var mkdirp = require("mkdirp");
+var path = require("path");
+var { promisify } = require("util");
+var OS = require("os");
+
+async function  writeContracts(contracts, options) {
+    var logger = options.logger || console;
+
+    const result = await promisify(mkdirp)(options.contracts_build_directory);
+
+    if (options.quiet != true && options.quietWrite != true) {
+      logger.log("Writing artifacts to ." + path.sep + path.relative(options.working_directory, options.contracts_build_directory) + OS.EOL);
+    }
+
+    var extra_opts = {
+      network_id: options.network_id
+    };
+
+    await options.artifactor.saveAll(contracts, extra_opts);
+  }
 
 module.exports = {
   analyze,
-  getSolidityDetails, // Exported for testing
   printVersion,
   printHelpMessage,
   contractsCompile,
+  writeContracts,
 }
