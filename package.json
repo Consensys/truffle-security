@@ -9,7 +9,7 @@
     "mocha": "^5.2.0",
     "proxyquire": "^2.1.0",
     "remix-lib": ">=0.4.1",
-    "truffle-workflow-compile": ">=2.0.0"
+    "truffle-workflow-compile": ">=2.0.1"
   },
   "nyc": {
     "exclude": [
@@ -17,7 +17,9 @@
       "test/**/*.js"
     ]
   },
-  "engines" : { "node" : ">=8.10.0" },
+  "engines": {
+    "node": ">=8.10.0"
+  },
   "scripts": {
     "pretest": "eslint --rulesdir=tools/eslint-rules lib",
     "test": "nyc mocha",
@@ -41,6 +43,10 @@
     {
       "name": "Rocky Bernstein",
       "email": "rocky.bernstein@consensys.net"
+    },
+    {
+      "name": "Daniyar Chambylov",
+      "email": "dan.chambylov@gmail.com"
     }
   ],
   "license": "MIT",

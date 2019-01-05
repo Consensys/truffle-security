@@ -12,7 +12,6 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const contractsCompile = util.promisify(contracts.compile);
 
-
 /**
  *
  * Loads preferred ESLint formatter for warning reports.
@@ -53,7 +52,10 @@ function versionJSON2String(jsonResponse) {
  */
 function printHelpMessage() {
     return new Promise(resolve => {
-        const helpMessage = `Usage: truffle run analyze [options] [*contract-name*]
+        const helpMessage = `Usage: truffle run analyze [options] [*contract-name1* [*contract-name2*] ...]
+
+Runs MythX analyses on given Solidity contracts. If no contracts are
+given, all are analyzed.
 
 Options:
   --debug    Provide additional debug output
@@ -63,7 +65,7 @@ Options:
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
-          Limit MythX analysis time to *s* seconds.
+          Limit MythX analyses time to *s* seconds.
           The default is 120 seconds (two minutes).
   --version show package and MythX version information
 `;
@@ -95,9 +97,9 @@ function printVersion() {
 
 
 /**
- * Runs Mythril Platform analyze on smart contract build json files found
+ * Runs MythX security analyses on smart contract build json files found
  * in truffle build folder
- * 
+ *
  * @param {armlet.Client} client - instance of armlet.Client to send data to API.
  * @param {Object} config - Truffle configuration object.
  * @param {Array<String>} jsonFiles - List of smart contract build json files.
@@ -124,7 +126,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
     if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
       return null;
     }
-  
+
     const solidityFile = trufstuf.getSolidityFileFromJson(buildObj);
 
     const analyzeOpts = {
@@ -134,13 +136,13 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
       logger: config.logger,
       style: config.style,
       timeout: (config.timeout || 120) * 1000,
-  
+
       // FIXME: The below "partners" will change when
       // https://github.com/ConsenSys/mythril-api/issues/59
       // is resolved.
       partners: ['truffle'],
     };
-  
+
     analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
     try {
@@ -159,7 +161,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
 }
 
 /**
- * 
+ *
  * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
@@ -199,13 +201,13 @@ async function analyze(config) {
   let analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
   // Clean analysesResults from empty (skipped smart contracts) results
   analysisResults = analysisResults.filter(res => !!res);
-  
+
   // Filter out passed and failed results
   const passedAnalysis = analysisResults.filter(res => !res.errors)
   const failedAnalysis = analysisResults.filter(res => !!res.errors)
 
   const formatter = getFormatter(config.style);
-  
+
   passedAnalysis.forEach(({issues, solidityFile, buildObj }) => {
     const esIssues = mythril.issues2Eslint(issues, buildObj, config);
     esReporter.printReport(esIssues, solidityFile, formatter, config.logger.log);
@@ -219,9 +221,33 @@ async function analyze(config) {
   }
 }
 
+
+// FIXME: this stuff is cut and paste from truffle-workflow-compile writeContracts
+var mkdirp = require("mkdirp");
+var path = require("path");
+var { promisify } = require("util");
+var OS = require("os");
+
+async function  writeContracts(contracts, options) {
+    var logger = options.logger || console;
+
+    const result = await promisify(mkdirp)(options.contracts_build_directory);
+
+    if (options.quiet != true && options.quietWrite != true) {
+      logger.log("Writing artifacts to ." + path.sep + path.relative(options.working_directory, options.contracts_build_directory) + OS.EOL);
+    }
+
+    var extra_opts = {
+      network_id: options.network_id
+    };
+
+    await options.artifactor.saveAll(contracts, extra_opts);
+  }
+
 module.exports = {
   analyze,
   printVersion,
   printHelpMessage,
   contractsCompile,
+  writeContracts,
 }
