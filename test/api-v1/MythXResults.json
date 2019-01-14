@@ -1,4 +1,4 @@
-{
+[{
     "issues": [
         {
             "description": {
@@ -22,4 +22,4 @@
         "0xf230bec502569e8b7e7737616d0ad0f200c436624e3c223e5398c0615cd2d6b9"
     ],
     "sourceType": "raw-bytecode"
-}
+}]
