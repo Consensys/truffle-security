@@ -1,6 +1,8 @@
 const assert = require('assert');
+const sinon = require('sinon');
 const rewire = require('rewire');
 const fs = require('fs');
+const srcmap = require('../lib/srcmap');
 const rewired = rewire('../lib/issues2eslint');
 
 describe('issues2Eslint', function() {
@@ -94,6 +96,78 @@ describe('issues2Eslint', function() {
                 severity: "High",
                 },
             res);
+        });
+
+        it('should call isIgnorable correctly', () => {
+            const spyIsVariableDeclaration = sinon.spy(srcmap, 'isVariableDeclaration');
+            const spyIsDynamicArray = sinon.spy(srcmap, 'isDynamicArray');
+            const info = new InfoClass([], truffleJSON);
+            const issue = {
+                address: 444,
+                contract: 'TestContract',
+                description: 'Issue description',
+                function: '_function_0x00000000',
+                title: 'Issie',
+                type: 'Warning',
+                'swc-id': 'xxx',
+                tool: 'mythril'
+            }
+            const res = info.isIgnorable(issue, {});
+            assert.ok(spyIsVariableDeclaration.called);
+            assert.ok(spyIsDynamicArray.called);
+            assert.ok(spyIsDynamicArray.returned(false));
+            assert.equal(res, false);
+
+            spyIsVariableDeclaration.restore();
+            spyIsDynamicArray.restore();
+        });
+
+        it('should call isIgnorable correctly wheb issue is ignored', () => {
+            const spyIsVariableDeclaration = sinon.spy(srcmap, 'isVariableDeclaration');
+            const spyIsDynamicArray = sinon.stub(srcmap, 'isDynamicArray');
+            spyIsDynamicArray.returns(true);
+            const info = new InfoClass([], truffleJSON);
+            const issue = {
+                address: 444,
+                contract: 'TestContract',
+                description: 'Issue description',
+                function: '_function_0x00000000',
+                title: 'Issie',
+                type: 'Warning',
+                'swc-id': 'xxx',
+                tool: 'mythril'
+            }
+            const res = info.isIgnorable(issue, {});
+            assert.ok(spyIsVariableDeclaration.called);
+            assert.ok(spyIsDynamicArray.called);
+            assert.ok(res);
+            spyIsVariableDeclaration.restore();
+            spyIsDynamicArray.restore();
+        });
+    
+        it('should call isIgnorable correctly wheb issue is ignored in debug mode', () => {
+            const spyIsVariableDeclaration = sinon.spy(srcmap, 'isVariableDeclaration');
+            const spyIsDynamicArray = sinon.stub(srcmap, 'isDynamicArray');
+            const loggerStub = sinon.stub();
+            spyIsDynamicArray.returns(true);
+            const info = new InfoClass([], truffleJSON);
+            const issue = {
+                address: 444,
+                contract: 'TestContract',
+                description: 'Issue description',
+                function: '_function_0x00000000',
+                title: 'Issie',
+                type: 'Warning',
+                'swc-id': 'xxx',
+                tool: 'mythril'
+            }
+            const res = info.isIgnorable(issue, { debug: true, logger: { log: loggerStub } });
+            assert.ok(spyIsVariableDeclaration.called);
+            assert.ok(spyIsDynamicArray.called);
+            assert.ok(loggerStub.called);
+            assert.ok(res);
+            spyIsVariableDeclaration.restore();
+            spyIsDynamicArray.restore();
         });
     });
 });
