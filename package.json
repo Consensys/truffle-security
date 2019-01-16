@@ -21,7 +21,6 @@
     "node": ">=8.10.0"
   },
   "scripts": {
-    "pretest": "eslint --rulesdir=tools/eslint-rules lib",
     "test": "nyc mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },

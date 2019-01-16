@@ -26,10 +26,18 @@ describe('issues2Eslint', function() {
 
             done()
         });
+        
         it('should decode a bytecode offset correctly', (done) => {
             const info = new InfoClass([], truffleJSON);
             assert.deepEqual(info.byteOffset2lineColumn('100'),
 			     [ { 'line': 8, 'column': 0 }, { 'line': 25, 'column': 1 } ]);
+            done()
+        });
+
+        it('should decode a bytecode offset to empty result', (done) => {
+            const info = new InfoClass([], truffleJSON);
+            assert.deepEqual(info.byteOffset2lineColumn('50'),
+			     [ { 'line': -1, 'column': 0 }, { } ]);
             done()
         });
 
