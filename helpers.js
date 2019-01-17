@@ -172,21 +172,21 @@ async function analyze(config) {
     platforms: ['truffle']  // client chargeback
   }
 
-  if (process.env.MYTHRIL_API_KEY) {
-    armletOptions.apiKey = process.env.MYTHRIL_API_KEY;
+  if (process.env.MYTHX_API_KEY) {
+    armletOptions.apiKey = process.env.MYTHX_API_KEY;
   } else {
-    if (!process.env.MYTHRIL_PASSWORD) {
-      throw new Error('You need to set environment variable MYTHRIL_PASSWORD to run analyze.');
+    if (!process.env.MYTHX_PASSWORD) {
+      throw new Error('You need to set environment variable MYTHX_PASSWORD to run analyze.');
     }
 
-    armletOptions.password = process.env.MYTHRIL_PASSWORD;
+    armletOptions.password = process.env.MYTHX_PASSWORD;
 
-    if (process.env.MYTHRIL_ETH_ADDRESS) {
-      armletOptions.ethAddress = process.env.MYTHRIL_ETH_ADDRESS
-    } else if (process.env.MYTHRIL_EMAIL) {
-      armletOptions.email = process.env.MYTHRIL_EMAIL
+    if (process.env.MYTHX_ETH_ADDRESS) {
+      armletOptions.ethAddress = process.env.MYTHX_ETH_ADDRESS
+    } else if (process.env.MYTHX_EMAIL) {
+      armletOptions.email = process.env.MYTHX_EMAIL
     } else {
-      throw new Error('You need to set either environment variable MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze.');
+      throw new Error('You need to set either environment variable MYTHX_ETH_ADDRESS or MYTHX_EMAIL to run analyze.');
     }
   }
 

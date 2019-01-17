@@ -16,24 +16,24 @@ function getFormatter(style) {
 }
 
 let armletOptions = {
-    // ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
-    password: process.env.MYTHRIL_PASSWORD,
+    // ethAddress: process.env.MYTHX_ETH_ADDRESS,
+    password: process.env.MYTHX_PASSWORD,
     platforms: ['truffle']  // client chargeback
 };
 
-if (process.env.MYTHRIL_PASSWORD === undefined) {
+if (process.env.MYTHX_PASSWORD === undefined) {
     console.log('You need to set environment variable '
-                       + 'MYTHRIL_PASSWORD to run analyze.');
+                       + 'MYTHX_PASSWORD to run analyze.');
     return;
 }
 
-if (process.env.MYTHRIL_ETH_ADDRESS) {
-    armletOptions.ethAddress = process.env.MYTHRIL_ETH_ADDRESS;
-} else if (process.env.MYTHRIL_EMAIL) {
-    armletOptions.email = process.env.MYTHRIL_EMAIL;
+if (process.env.MYTHX_ETH_ADDRESS) {
+    armletOptions.ethAddress = process.env.MYTHX_ETH_ADDRESS;
+} else if (process.env.MYTHX_EMAIL) {
+    armletOptions.email = process.env.MYTHX_EMAIL;
 } else {
     console.log('You need to set either environment variable '
-                       + 'MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze.');
+                       + 'MYTHX_ETH_ADDRESS or MYTHX_EMAIL to run analyze.');
 }
 
 var client = new armlet.Client(armletOptions);
