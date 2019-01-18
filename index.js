@@ -15,15 +15,15 @@ const helpers = require('./helpers');
  * @param {config} Object a `truffle-config` configuration object
  */
 module.exports = async (config) => {
-  config.logger = config.logger || console;
+    config.logger = config.logger || console;
 
-  if (config.help) return helpers.printHelpMessage();
-  if (config.version) return helpers.printVersion();
+    if (config.help) return helpers.printHelpMessage();
+    if (config.version) return helpers.printVersion();
 
-  // FIXME: This is still not right. Figure out what's up and how to fix.
-  // This can cause vyper to fail if you don't have vyper installed
-  // This might be a bug in truffle?
-  delete config.compilers.vyper;
-  await helpers.contractsCompile(config);
-  return await helpers.analyze(config);
-}
+    // FIXME: This is still not right. Figure out what's up and how to fix.
+    // This can cause vyper to fail if you don't have vyper installed
+    // This might be a bug in truffle?
+    delete config.compilers.vyper;
+    await helpers.contractsCompile(config);
+    return await helpers.analyze(config);
+};
