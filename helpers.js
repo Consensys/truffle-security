@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const armlet = require('armlet');
-const mythril = require('./lib/mythril');
+const mythx = require('./lib/mythx');
 const trufstuf = require('./lib/trufstuf');
 const esReporter = require('./lib/es-reporter');
 const contracts = require("truffle-workflow-compile");
@@ -132,7 +132,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
     const analyzeOpts = {
       _: config._,
       debug: config.debug,
-      data: mythril.truffle2MythrilJSON(buildObj),
+      data: mythx.truffle2MythXJSON(buildObj),
       logger: config.logger,
       style: config.style,
       timeout: (config.timeout || 120) * 1000,
@@ -146,6 +146,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
     analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
     try {
+      debugger
       issues = await client.analyze(analyzeOpts);
     } catch (err) {
       errors = err;
