@@ -9,7 +9,7 @@ const rewired = rewire('../lib/issues2eslint');
 describe('issues2Eslint', function() {
     describe('Info class', () => {
         let truffleJSON;
-        let mythXJSON
+        let mythXJSON;
         const InfoClass = rewired.__get__('Info');
         const contractJSON = `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`;
         const sourceName = 'simple_dao.sol';
@@ -20,113 +20,113 @@ describe('issues2Eslint', function() {
                 truffleJSON = JSON.parse(data);
                 mythXJSON = mythx.truffle2MythXJSON(truffleJSON);
                 done();
-            })
+            });
         });
 
         it('should decode a source code location correctly', (done) => {
             const info = new InfoClass(mythXJSON);
             assert.deepEqual(info.textSrcEntry2lineColumn('30:2:0', info.lineBreakPositions[sourceName]),
-                             [ { 'line': 2, 'column': 27 }, { 'line': 2, 'column': 29 } ]);
+                [ { 'line': 2, 'column': 27 }, { 'line': 2, 'column': 29 } ]);
 
-            done()
+            done();
         });
         
         it('should decode a bytecode offset correctly', (done) => {
             const info = new InfoClass(mythXJSON);
             assert.deepEqual(info.byteOffset2lineColumn('100', info.lineBreakPositions[sourceName]),
 			     [ { 'line': 8, 'column': 0 }, { 'line': 25, 'column': 1 } ]);
-            done()
+            done();
         });
 
         it('should decode a bytecode offset to empty result', (done) => {
             const info = new InfoClass(mythXJSON);
             assert.deepEqual(info.byteOffset2lineColumn('50', info.lineBreakPositions[sourceName]),
 			     [ { 'line': -1, 'column': 0 }, { } ]);
-            done()
+            done();
         });
 
         it('should convert MythX issue to Eslint style with sourceFormat: evm-byzantium-bytecode', () => {
             const mythXOutput = {
-                "sourceFormat": "evm-byzantium-bytecode",
-                "sourceList": [
+                'sourceFormat': 'evm-byzantium-bytecode',
+                'sourceList': [
                     `/tmp/contracts/${sourceName}`
                 ],
-                "sourceType": "raw-bytecode",
-                "issues": [{
-                    "description": {
-                        "head": "Head message",
-                        "tail": "Tail message"
+                'sourceType': 'raw-bytecode',
+                'issues': [{
+                    'description': {
+                        'head': 'Head message',
+                        'tail': 'Tail message'
                     },
-                    "locations": [{
-                        "sourceMap": "444:1:0"
+                    'locations': [{
+                        'sourceMap': '444:1:0'
                     }],
-                    "severity": "High",
-                    "swcID": "SWC-000",
-                    "swcTitle": "Test Title"
+                    'severity': 'High',
+                    'swcID': 'SWC-000',
+                    'swcTitle': 'Test Title'
                 }],
-                "meta": {
-                    "selected_compiler": "0.5.0",
-                    "error": [],
-                    "warning": []
+                'meta': {
+                    'selected_compiler': '0.5.0',
+                    'error': [],
+                    'warning': []
                 }
-            }
+            };
 
             const remappedMythXOutput = mythx.remapMythXOutput(mythXOutput);
             const info = new InfoClass(mythXJSON);
             const res = info.issue2EsLintNew(remappedMythXOutput[0].issues[0], false, 'evm-byzantium-bytecode', sourceName);
     
             assert.deepEqual({
-                ruleId: "SWC-000",
+                ruleId: 'SWC-000',
                 column: 4,
                 line: 12,
                 endCol: 27,
                 endLine: 12,
                 fatal: false,
-                message: "Head message Tail message",
-                severity: "High",
-                },
+                message: 'Head message Tail message',
+                severity: 'High',
+            },
             res);
         });
 
         it('should convert MythX issue to Eslint style with sourceFormat: text', () => {
             const mythXOutput = {
-                "sourceType": "solidity-file",
-                "sourceFormat": "text",
-                "sourceList": [
+                'sourceType': 'solidity-file',
+                'sourceFormat': 'text',
+                'sourceList': [
                     `/tmp/contracts/${sourceName}`,
                 ],
-                "issues": [{
-                    "description": {
-                        "head": "Head message",
-                        "tail": "Tail message"
+                'issues': [{
+                    'description': {
+                        'head': 'Head message',
+                        'tail': 'Tail message'
                     },
-                    "locations": [{
-                        "sourceMap": "310:23:0"
+                    'locations': [{
+                        'sourceMap': '310:23:0'
                     }],
-                    "severity": "High",
-                    "swcID": "SWC-000",
-                    "swcTitle": "Test Title"
+                    'severity': 'High',
+                    'swcID': 'SWC-000',
+                    'swcTitle': 'Test Title'
                 }],
-                "meta": {
-                    "selected_compiler": "0.5.0",
-                    "error": [],
-                    "warning": []
+                'meta': {
+                    'selected_compiler': '0.5.0',
+                    'error': [],
+                    'warning': []
                 }
-            }
+            };
 
             const remappedMythXOutput = mythx.remapMythXOutput(mythXOutput);
             const info = new InfoClass(mythXJSON);
             const res = info.issue2EsLintNew(remappedMythXOutput[0].issues[0], false, 'text', sourceName);
     
             assert.deepEqual({
-                ruleId: "SWC-000",
+                ruleId: 'SWC-000',
                 column: 4,
                 line: 12,
                 endCol: 27,
                 endLine: 12,
                 fatal: false,
-                message: "Head message Tail message",
-                severity: "High",
+                message: 'Head message Tail message',
+                severity: 'High',
             }, res);
         });
 
@@ -174,27 +174,27 @@ describe('issues2Eslint', function() {
 
         it('should convert mythX report to Eslint issues', () => {
             const mythXOutput = {
-                "sourceType": "solidity-file",
-                "sourceFormat": "text",
-                "sourceList": [
+                'sourceType': 'solidity-file',
+                'sourceFormat': 'text',
+                'sourceList': [
                     `/tmp/contracts/${sourceName}`,
                 ],
-                "issues": [{
-                    "description": {
-                        "head": "Head message",
-                        "tail": "Tail message"
+                'issues': [{
+                    'description': {
+                        'head': 'Head message',
+                        'tail': 'Tail message'
                     },
-                    "locations": [{
-                        "sourceMap": "310:23:0"
+                    'locations': [{
+                        'sourceMap': '310:23:0'
                     }],
-                    "severity": "High",
-                    "swcID": "SWC-000",
-                    "swcTitle": "Test Title"
+                    'severity': 'High',
+                    'swcID': 'SWC-000',
+                    'swcTitle': 'Test Title'
                 }],
-                "meta": {
-                    "selected_compiler": "0.5.0",
-                    "error": [],
-                    "warning": []
+                'meta': {
+                    'selected_compiler': '0.5.0',
+                    'error': [],
+                    'warning': []
                 }
             };
 
@@ -214,9 +214,9 @@ describe('issues2Eslint', function() {
                     endLine: 12,
                     fatal: false,
                     line: 12,
-                    message: "Head message",
-                    ruleId: "SWC-000",
-                    severity: "High",
+                    message: 'Head message',
+                    ruleId: 'SWC-000',
+                    severity: 'High',
                 }],
             }]);
         });
