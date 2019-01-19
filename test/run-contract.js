@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const esReporter = require('../lib/es-reporter');
+// FIXME: Does not work
 const armlet = require('armlet');
 
 function getFormatter(style) {
@@ -65,7 +65,7 @@ client.analyze(options)
         const formatter = getFormatter('stylish');
         let esIssues = mythx.issues2Eslint(issues, buildObj, options);
         // console.log(esIssues); // debug
-        esReporter.printReport(esIssues, solidityFile, formatter, console.log);
+        // esReporter.printReport(esIssues, solidityFile, formatter, console.log);
     }).catch(err => {
         console.log(err);
     });

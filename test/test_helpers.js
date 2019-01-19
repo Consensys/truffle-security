@@ -4,7 +4,6 @@ const fs = require('fs');
 const armlet = require('armlet');
 const sinon = require('sinon');
 const trufstuf = require('../lib/trufstuf');
-const esReporter = require('../lib/es-reporter');
 
 
 async function assertThrowsAsync(fn, message) {
