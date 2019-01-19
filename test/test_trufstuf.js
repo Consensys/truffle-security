@@ -25,7 +25,7 @@ describe('trufstuf', function() {
         ]);
     });
 
-    it('should return paths to solidity file from smart contract json object json object', async () => {
+    it('should return paths to solidity file from smart contract json object', async () => {
         const obj = {
             'contractName': 'Contract',
             'abi': [],

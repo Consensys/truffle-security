@@ -3,7 +3,7 @@ const fs = require('fs');
 const mythx = require('../lib/mythx');
 
 describe('mythx.js', () => {
-    it('should turn truffe contract json to mythx compatible object', done => {
+    it('should turn truffle contract json to mythx compatible object', done => {
         fs.readFile( `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`, 'utf8', (err, data) => {
             if (err) return done(err);
             const truffleJSON = JSON.parse(data);
