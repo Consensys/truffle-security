@@ -5,7 +5,7 @@ const fs = require('fs');
 const armlet = require('armlet');
 const mythx = require('./lib/mythx');
 const trufstuf = require('./lib/trufstuf');
-const esReporter = require('./lib/es-reporter');
+const { Info } = require('./lib/issues2eslint');
 const contracts = require('truffle-workflow-compile');
 const util = require('util');
 
@@ -127,12 +127,14 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
             return null;
         }
 
-        const solidityFile = trufstuf.getSolidityFileFromJson(buildObj);
+        // Convert truffle json to mythX Input format object
+        // FIXME: initialize MythXReport class with truffle build Obj
+        const mythXInput = mythx.truffle2MythXJSON(buildObj);
 
         const analyzeOpts = {
             _: config._,
             debug: config.debug,
-            data: mythx.truffle2MythXJSON(buildObj),
+            data: mythXInput,
             logger: config.logger,
             style: config.style,
             timeout: (config.timeout || 120) * 1000,
@@ -141,20 +143,27 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
             // https://github.com/ConsenSys/mythril-api/issues/59
             // is resolved.
             partners: ['truffle'],
+            mode: 'quick',
         };
 
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
         try {
             debugger;
-            issues = await client.analyze(analyzeOpts);
+            const reports = await client.analyze(analyzeOpts);
+            // FIXME: hide this inside MythXReport class
+            // FIXME: call isIgnorable?
+            issues = reports
+                .map(mythx.remapMythXOutput)
+                .reduce((acc, curr) => acc.concat(curr), []);
+            ;
         } catch (err) {
             errors = err;
         }
-
+    
+        // FIXME: return MythXReport object
         return {
-            buildObj,
-            solidityFile,
+            buildObj: mythXInput,
             issues,
             errors,
         };
@@ -199,19 +208,20 @@ async function analyze(config) {
     // Get list of smart contract build json files from truffle build folder
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
-    let analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
-    // Clean analysesResults from empty (skipped smart contracts) results
-    analysisResults = analysisResults.filter(res => !!res);
+    const analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
 
-    // Filter out passed and failed results
+    // Filter out good and bad results
     const passedAnalysis = analysisResults.filter(res => !res.errors);
     const failedAnalysis = analysisResults.filter(res => !!res.errors);
 
     const formatter = getFormatter(config.style);
 
-    passedAnalysis.forEach(({issues, solidityFile, buildObj }) => {
-        const esIssues = mythril.issues2Eslint(issues, buildObj, config);
-        esReporter.printReport(esIssues, solidityFile, formatter, config.logger.log);
+    let eslintIssues = passedAnalysis.map(({issues, buildObj }) => {
+        // FIXME: move this somewhere else
+        const info = new Info(buildObj);
+        return issues.map(issue => {
+            return info.convertMythXReport2EsIssues(issue, true);
+        });
     });
 
     if (failedAnalysis) {
@@ -220,6 +230,10 @@ async function analyze(config) {
             console.error(errors, errors.stack);
         });
     }
+
+    eslintIssues = eslintIssues.reduce((acc, curr) => acc.concat(curr), []);
+
+    console.log(formatter(eslintIssues));
 }
 
 
