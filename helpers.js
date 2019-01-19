@@ -143,7 +143,6 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
             // https://github.com/ConsenSys/mythril-api/issues/59
             // is resolved.
             partners: ['truffle'],
-            mode: 'quick',
         };
 
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
