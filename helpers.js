@@ -148,18 +148,11 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
         try {
-            debugger;
-            const reports = await client.analyze(analyzeOpts);
-            // FIXME: hide this inside MythXReport class
-            // FIXME: call isIgnorable?
-            issues = reports
-                .map(mythx.remapMythXOutput)
-                .reduce((acc, curr) => acc.concat(curr), []);
-            ;
+            issues = await client.analyze(analyzeOpts);
         } catch (err) {
             errors = err;
         }
-    
+
         // FIXME: return MythXReport object
         return {
             buildObj: mythXInput,
@@ -209,6 +202,19 @@ async function analyze(config) {
 
     const analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
 
+    /*
+    const util = require('util');
+    for (const res of analysisResults) {
+	console.log(`${util.inspect(res)}`);
+	for (const issue of res.issues) {
+	    console.log(`${issue}`);
+	    for (const s of issue.sourceList) {
+		console.log(`${s}`);
+	    }
+	}
+    }
+    */
+
     // Filter out good and bad results
     const passedAnalysis = analysisResults.filter(res => !res.errors);
     const failedAnalysis = analysisResults.filter(res => !!res.errors);
@@ -223,7 +229,7 @@ async function analyze(config) {
         });
     });
 
-    if (failedAnalysis) {
+    if (failedAnalysis.length > 0) {
         failedAnalysis.forEach(({ errors, buildObj}) => {
             console.error(`Failed to analyze smart contract "${buildObj.contractName}":`);
             console.error(errors, errors.stack);
@@ -233,6 +239,7 @@ async function analyze(config) {
     eslintIssues = eslintIssues.reduce((acc, curr) => acc.concat(curr), []);
 
     console.log(formatter(eslintIssues));
+
 }
 
 
@@ -255,6 +262,11 @@ async function  writeContracts(contracts, options) {
         network_id: options.network_id
     };
 
+    const contractNames = Object.keys(contracts).sort();
+    const sources = contractNames.map(c => contracts[c].sourcePath);
+    for (let c of contractNames) {
+	contracts[c].sources = sources;
+    }
     await options.artifactor.saveAll(contracts, extra_opts);
 }
 
