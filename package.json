@@ -1,10 +1,10 @@
 {
   "name": "truffle-analyze",
   "namespace": "consensys",
-  "version": "5.0.0",
+  "version": "5.1.0-git",
   "description": "Add vulnerability and weakness analysis via the MythX",
   "dependencies": {
-    "armlet": ">=0.3.1",
+    "armlet": "git+https://git@github.com/consensys/armlet.git",
     "configstore": "^4.0.0",
     "mocha": "^5.2.0",
     "proxyquire": "^2.1.0",
@@ -21,7 +21,6 @@
     "node": ">=8.10.0"
   },
   "scripts": {
-    "pretest": "eslint --rulesdir=tools/eslint-rules lib",
     "test": "nyc mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
