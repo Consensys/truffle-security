@@ -3,30 +3,28 @@
 
 # Introduction
 
-"Truffle" is a world-class development environment, testing framework and asset pipeline for blockchains using the Ethereum Virtual Machine (EVM), aiming to make life as a developer easier. Read more about it on the [truffle suite website](https://truffleframework.com/docs/truffle/overview).
-
-Here we have a [truffle "run" plugin](https://truffleframework.com/docs/truffle/getting-started/writing-external-scripts) that runs [MythX](https://mythx.io) Smart Contract analyses on truffle projects.
+A [truffle "run" plugin](https://truffleframework.com/docs/truffle/getting-started/writing-external-scripts) that runs [MythX](mythx.io) Smart Contract analyses on truffle projects.
 
 _This is alpha code. You won't be able to use this without a MythX account,
 and will be more generally distributed in the January-February time period._
 
-Preliminary pre 5.0.0 versions were demo'd at
+Prelmiminary pre 5.0.0 versions were demo'd at
 [trufflecon2018](https://truffleframework.com/trufflecon2018) and
 [devcon4](https://devcon4.ethereum.org/).
 
 # Installation
 
-## Install plugin:
+1. Install plugin:
 
 ```console
 $ npm install truffle-analyze
 ```
 
-## Configure each truffle project to use the "analyze" plugin.
+2. Configure each truffle project to use plugin.
 
 In your truffle project put in `truffle.js`:
 
-```javascript
+```
 module.exports = {
     plugins: [ "truffle-analyze" ]
 };
@@ -35,26 +33,23 @@ module.exports = {
 For now `truffle.js` needs to be adjusted for each project. However, changes to truffle are planned
 so that in the future you can specifiy this globally.
 
-## Set `MYTHX` environment variables.
+3. Set `MYTHX` environment variables.
 
 Get an ETH address from [MetaMask](https://metamask.io). Set the following enviromment variables,
 adjust for your ETH address and password:
 
-```bash
+```
 export MYTHRIL_ETH_ADDRESS=0x1234567891235678900000000000000000000000
 export MYTHRIL_PASSWORD='Put your password in here!'
 ```
 
-# Example Session
+# Usage
 
 ```console
 $ truffle run analyze help
 
   Usage:        truffle run analyze [options] [*contract-name1* [contract-name2*] ...]
-
-Runs MythX analyses on given Solidity contracts. If no contracts are
-given, all are analyzed.
-
+  Description:  Run MythX analyses on a contract
   Options:
     --debug     Provide additional debug output
     --mode { quick | full }
@@ -67,6 +62,9 @@ given, all are analyzed.
                 The default is 120 seconds (two minutes).
     --version  Show package and MythX version information.
 ```
+
+Runs MythX analyses on given Solidity contracts. If no contracts are
+given, all are analyzed.
 
 Options are deliberately sparse since we want simple interaction. Most
 of the complexity is hidden behind the MythX.
@@ -88,8 +86,8 @@ Compiling ./contracts/simple_suicide.sol...
 Compiling ./contracts/suicide.sol...
 
 /tmp/github/vulnerable-truffle-project/contracts/SimpleSuicide.sol
-  4:4  error  The function '_function_0xa56a3b5a' executes the SUICIDE instruction                     SWC-106
-  0:0  error  Functions that do not have a function visibility type specified are 'public' by default  SWC-100
+  4:4  error  The function '_function_0xa56a3b5a' executes the SUICIDE instruction                     mythril/SWC-106
+  0:0  error  Functions that do not have a function visibility type specified are 'public' by default  maru/SWC-100
 
 ✖ 2 problems (2 errors, 0 warnings)
 
@@ -106,19 +104,19 @@ $ truffle+analyze analyze --style table
 
 /src/external-vcs/github/vulnerable-truffle-project/contracts/SimpleDAO.sol
 
-║ Line     │ Column   │ Type     │ Message                                                │ Rule ID      ║
-╟──────────┼──────────┼──────────┼────────────────────────────────────────────────────────┼──────────────╢
-║ 12       │ 4        │ error    │ A possible integer overflow exists in the function     │ SWC-101      ║
-║          │          │          │ '_function_0x00362a95'.                                │              ║
-║ 17       │ 14       │ error    │ This contract executes a message call to the           │ SWC-107      ║
-║          │          │          │ address of the transaction sender.                     │              ║
-║ 0        │ 0        │ error    │ Contracts should be deployed with the same             │ SWC-103      ║
-║          │          │          │ compiler version and flags that they have been         │              ║
-║          │          │          │ tested with thoroughly.                                │              ║
+║ Line     │ Column   │ Type     │ Message                                                │ Rule ID              ║
+╟──────────┼──────────┼──────────┼────────────────────────────────────────────────────────┼──────────────────────╢
+║ 12       │ 4        │ error    │ A possible integer overflow exists in the function     │ mythril/SWC-101      ║
+║          │          │          │ '_function_0x00362a95'.                                │                      ║
+║ 17       │ 14       │ error    │ This contract executes a message call to the           │ mythril/SWC-107      ║
+║          │          │          │ address of the transaction sender.                     │                      ║
+║ 0        │ 0        │ error    │ Contracts should be deployed with the same             │ maru/SWC-103         ║
+║          │          │          │ compiler version and flags that they have been         │                      ║
+║          │          │          │ tested with thoroughly.                                │                      ║
 
-╔════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-║ 3 Errors                                                                                               ║
-╟────────────────────────────────────────────────────────────────────────────────────────────────────────╢
-║ 0 Warnings                                                                                             ║
-╚════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ 3 Errors                                                                                                       ║
+╟────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+║ 0 Warnings                                                                                                     ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```

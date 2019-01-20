@@ -3,10 +3,10 @@
 
 const fs = require('fs');
 const armlet = require('armlet');
-const mythx = require('./lib/mythx');
+const mythril = require('./lib/mythril');
 const trufstuf = require('./lib/trufstuf');
-const { Info } = require('./lib/issues2eslint');
-const contracts = require('truffle-workflow-compile');
+const esReporter = require('./lib/es-reporter');
+const contracts = require("truffle-workflow-compile");
 const util = require('util');
 
 const readFile = util.promisify(fs.readFile);
@@ -84,15 +84,15 @@ Options:
  * @returns promise which resolves after MythX version information is shown
  */
 function printVersion() {
-    return new Promise(resolve => {
-        const pjson = require('./package.json');
-        // FIXME: decide if this is okay or whether we need
-        // to pass in `config` and use `config.logger.log`.
-        console.log(`${pjson.name} ${pjson.version}`);
-        const version = armlet.ApiVersion();
-        console.log(versionJSON2String(version));
-        resolve(null);
-    });
+  return new Promise(resolve => {
+      const pjson = require('./package.json');
+      // FIXME: decide if this is okay or whether we need
+      // to pass in `config` and use `config.logger.log`.
+      console.log(`${pjson.name} ${pjson.version}`);
+      const version = armlet.ApiVersion();
+      console.log(versionJSON2String(version))
+      resolve(null);
+  });
 }
 
 
@@ -107,7 +107,7 @@ function printVersion() {
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
 const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
-    /**
+  /**
    * Multiple smart contracts need to be run concurrently
    * to speed up analyze report output.
    * Because simple forEach or map can't handle async operations -
@@ -115,139 +115,118 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
    * are finished.
    */
 
-    return Promise.all(jsonFiles.map(async file => {
-        let issues, errors;
-        const buildJson = await readFile(file, 'utf8');
-        const buildObj = JSON.parse(buildJson);
+  return Promise.all(jsonFiles.map(async file => {
+    let issues, errors;
+    const buildJson = await readFile(file, 'utf8');
+    const buildObj = JSON.parse(buildJson);
 
-        /**
+    /**
      * If contractNames have been passed then skip analyze for unwanted ones.
      */
-        if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
-            return null;
-        }
+    if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
+      return null;
+    }
 
-        // Convert truffle json to mythX Input format object
-        // FIXME: initialize MythXReport class with truffle build Obj
-        const mythXInput = mythx.truffle2MythXJSON(buildObj);
+    const solidityFile = trufstuf.getSolidityFileFromJson(buildObj);
 
-        const analyzeOpts = {
-            _: config._,
-            debug: config.debug,
-            data: mythXInput,
-            logger: config.logger,
-            style: config.style,
-            timeout: (config.timeout || 120) * 1000,
+    const analyzeOpts = {
+      _: config._,
+      debug: config.debug,
+      data: mythril.truffle2MythrilJSON(buildObj),
+      logger: config.logger,
+      style: config.style,
+      timeout: (config.timeout || 120) * 1000,
 
-            // FIXME: The below "partners" will change when
-            // https://github.com/ConsenSys/mythril-api/issues/59
-            // is resolved.
-            partners: ['truffle'],
-        };
+      // FIXME: The below "partners" will change when
+      // https://github.com/ConsenSys/mythril-api/issues/59
+      // is resolved.
+      partners: ['truffle'],
+    };
 
-        analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
+    analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
-        try {
-            issues = await client.analyze(analyzeOpts);
-        } catch (err) {
-            errors = err;
-        }
+    try {
+      issues = await client.analyze(analyzeOpts);
+    } catch (err) {
+      errors = err;
+    }
 
-        // FIXME: return MythXReport object
-        return {
-            buildObj: mythXInput,
-            issues,
-            errors,
-        };
-    }));
-};
+    return {
+      buildObj,
+      solidityFile,
+      issues,
+      errors,
+    }
+  }));
+}
 
 /**
  *
  * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
-    const armletOptions = {
+  const armletOptions = {
     // FIXME: The below "partners" will change when
     // https://github.com/ConsenSys/mythril-api/issues/59
     // is resolved.
-        platforms: ['truffle']  // client chargeback
-    };
+    platforms: ['truffle']  // client chargeback
+  }
 
-    if (process.env.MYTHX_API_KEY) {
-        armletOptions.apiKey = process.env.MYTHX_API_KEY;
+  if (process.env.MYTHRIL_API_KEY) {
+    armletOptions.apiKey = process.env.MYTHRIL_API_KEY;
+  } else {
+    if (!process.env.MYTHRIL_PASSWORD) {
+      throw new Error('You need to set environment variable MYTHRIL_PASSWORD to run analyze.');
+    }
+
+    armletOptions.password = process.env.MYTHRIL_PASSWORD;
+
+    if (process.env.MYTHRIL_ETH_ADDRESS) {
+      armletOptions.ethAddress = process.env.MYTHRIL_ETH_ADDRESS
+    } else if (process.env.MYTHRIL_EMAIL) {
+      armletOptions.email = process.env.MYTHRIL_EMAIL
     } else {
-        if (!process.env.MYTHX_PASSWORD) {
-            throw new Error('You need to set environment variable MYTHX_PASSWORD to run analyze.');
-        }
-
-        armletOptions.password = process.env.MYTHX_PASSWORD;
-
-        if (process.env.MYTHX_ETH_ADDRESS) {
-            armletOptions.ethAddress = process.env.MYTHX_ETH_ADDRESS;
-        } else if (process.env.MYTHX_EMAIL) {
-            armletOptions.email = process.env.MYTHX_EMAIL;
-        } else {
-            throw new Error('You need to set either environment variable MYTHX_ETH_ADDRESS or MYTHX_EMAIL to run analyze.');
-        }
+      throw new Error('You need to set either environment variable MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze.');
     }
+  }
 
-    const client = new armlet.Client(armletOptions);
+  const client = new armlet.Client(armletOptions);
 
-    // Extract list of contracts passed in cli to analyze
-    const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
+  // Extract list of contracts passed in cli to analyze
+  const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
 
-    // Get list of smart contract build json files from truffle build folder
-    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
+  // Get list of smart contract build json files from truffle build folder
+  const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
-    const analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
+  let analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
+  // Clean analysesResults from empty (skipped smart contracts) results
+  analysisResults = analysisResults.filter(res => !!res);
 
-    /*
-    const util = require('util');
-    for (const res of analysisResults) {
-	console.log(`${util.inspect(res)}`);
-	for (const issue of res.issues) {
-	    console.log(`${issue}`);
-	    for (const s of issue.sourceList) {
-		console.log(`${s}`);
-	    }
-	}
-    }
-    */
+  // Filter out passed and failed results
+  const passedAnalysis = analysisResults.filter(res => !res.errors)
+  const failedAnalysis = analysisResults.filter(res => !!res.errors)
 
-    // Filter out good and bad results
-    const passedAnalysis = analysisResults.filter(res => !res.errors);
-    const failedAnalysis = analysisResults.filter(res => !!res.errors);
+  const formatter = getFormatter(config.style);
 
-    const formatter = getFormatter(config.style);
+  passedAnalysis.forEach(({issues, solidityFile, buildObj }) => {
+    const esIssues = mythril.issues2Eslint(issues, buildObj, config);
+    esReporter.printReport(esIssues, solidityFile, formatter, config.logger.log);
+  });
 
-    let eslintIssues = passedAnalysis.map(({issues, buildObj }) => {
-        // FIXME: move this somewhere else
-        const info = new Info(buildObj);
-        return issues.map(issue => {
-            return info.convertMythXReport2EsIssues(issue, true);
-        });
+  if (failedAnalysis) {
+   failedAnalysis.forEach(({ errors, buildObj}) => {
+     console.error(`Failed to analyze smart contract "${buildObj.contractName}":`);
+     console.error(errors, errors.stack);
     });
-
-    if (failedAnalysis.length > 0) {
-        failedAnalysis.forEach(({ errors, buildObj}) => {
-            console.error(`Failed to analyze smart contract "${buildObj.contractName}":`);
-            console.error(errors, errors.stack);
-        });
-    }
-
-    eslintIssues = eslintIssues.reduce((acc, curr) => acc.concat(curr), []);
-
-    console.log(formatter(eslintIssues));
-
+  }
 }
 
 
 // FIXME: this stuff is cut and paste from truffle-workflow-compile writeContracts
-var mkdirp = require('mkdirp');
-var path = require('path');
-var { promisify } = require('util');
-var OS = require('os');
+var mkdirp = require("mkdirp");
+var path = require("path");
+var { promisify } = require("util");
+var OS = require("os");
 
 async function  writeContracts(contracts, options) {
     var logger = options.logger || console;
@@ -255,25 +234,20 @@ async function  writeContracts(contracts, options) {
     const result = await promisify(mkdirp)(options.contracts_build_directory);
 
     if (options.quiet != true && options.quietWrite != true) {
-        logger.log('Writing artifacts to .' + path.sep + path.relative(options.working_directory, options.contracts_build_directory) + OS.EOL);
+      logger.log("Writing artifacts to ." + path.sep + path.relative(options.working_directory, options.contracts_build_directory) + OS.EOL);
     }
 
     var extra_opts = {
-        network_id: options.network_id
+      network_id: options.network_id
     };
 
-    const contractNames = Object.keys(contracts).sort();
-    const sources = contractNames.map(c => contracts[c].sourcePath);
-    for (let c of contractNames) {
-	contracts[c].sources = sources;
-    }
     await options.artifactor.saveAll(contracts, extra_opts);
-}
+  }
 
 module.exports = {
-    analyze,
-    printVersion,
-    printHelpMessage,
-    contractsCompile,
-    writeContracts,
-};
+  analyze,
+  printVersion,
+  printHelpMessage,
+  contractsCompile,
+  writeContracts,
+}

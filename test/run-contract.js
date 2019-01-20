@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// FIXME: Does not work
+const esReporter = require('../lib/es-reporter');
+const mythril = require('../lib/mythril');
 const armlet = require('armlet');
 
 function getFormatter(style) {
@@ -15,24 +16,24 @@ function getFormatter(style) {
 }
 
 let armletOptions = {
-    // ethAddress: process.env.MYTHX_ETH_ADDRESS,
-    password: process.env.MYTHX_PASSWORD,
+    // ethAddress: process.env.MYTHRIL_ETH_ADDRESS,
+    password: process.env.MYTHRIL_PASSWORD,
     platforms: ['truffle']  // client chargeback
 };
 
-if (process.env.MYTHX_PASSWORD === undefined) {
+if (process.env.MYTHRIL_PASSWORD === undefined) {
     console.log('You need to set environment variable '
-                       + 'MYTHX_PASSWORD to run analyze.');
+                       + 'MYTHRIL_PASSWORD to run analyze.');
     return;
 }
 
-if (process.env.MYTHX_ETH_ADDRESS) {
-    armletOptions.ethAddress = process.env.MYTHX_ETH_ADDRESS;
-} else if (process.env.MYTHX_EMAIL) {
-    armletOptions.email = process.env.MYTHX_EMAIL;
+if (process.env.MYTHRIL_ETH_ADDRESS) {
+    armletOptions.ethAddress = process.env.MYTHRIL_ETH_ADDRESS;
+} else if (process.env.MYTHRIL_EMAIL) {
+    armletOptions.email = process.env.MYTHRIL_EMAIL;
 } else {
     console.log('You need to set either environment variable '
-                       + 'MYTHX_ETH_ADDRESS or MYTHX_EMAIL to run analyze.');
+                       + 'MYTHRIL_ETH_ADDRESS or MYTHRIL_EMAIL to run analyze.');
 }
 
 var client = new armlet.Client(armletOptions);
@@ -63,9 +64,9 @@ const solidityFile = 'SimpleDAO.sol';
 client.analyze(options)
     .then(issues => {
         const formatter = getFormatter('stylish');
-        let esIssues = mythx.issues2Eslint(issues, buildObj, options);
+        let esIssues = mythril.issues2Eslint(issues, buildObj, options);
         // console.log(esIssues); // debug
-        // esReporter.printReport(esIssues, solidityFile, formatter, console.log);
+        esReporter.printReport(esIssues, solidityFile, formatter, console.log);
     }).catch(err => {
         console.log(err);
     });
