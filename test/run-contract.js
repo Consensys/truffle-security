@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-const esReporter = require('../lib/es-reporter');
-const mythril = require('../lib/mythril');
+// FIXME: Does not work
 const armlet = require('armlet');
 
 function getFormatter(style) {
@@ -64,9 +63,9 @@ const solidityFile = 'SimpleDAO.sol';
 client.analyze(options)
     .then(issues => {
         const formatter = getFormatter('stylish');
-        let esIssues = mythril.issues2Eslint(issues, buildObj, options);
+        let esIssues = mythx.issues2Eslint(issues, buildObj, options);
         // console.log(esIssues); // debug
-        esReporter.printReport(esIssues, solidityFile, formatter, console.log);
+        // esReporter.printReport(esIssues, solidityFile, formatter, console.log);
     }).catch(err => {
         console.log(err);
     });
