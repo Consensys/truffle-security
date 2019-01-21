@@ -29,8 +29,6 @@ describe('mythx.js', () => {
         });
     });
 
-    // FIXME Daniyar
-    /*
     it('should remap MythX Output object to array grouped by sourceLocation', () => {
         const mythXOutput = {
             'sourceType': 'solidity-file',
@@ -126,5 +124,5 @@ describe('mythx.js', () => {
         }]
         );
     });
-    */
+    
 });

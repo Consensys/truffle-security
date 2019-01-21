@@ -148,7 +148,12 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
         try {
-            issues = await client.analyze(analyzeOpts);
+            const reports = await client.analyze(analyzeOpts);	
+            // FIXME: hide this inside MythXReport class	
+            // FIXME: call isIgnorable?	
+            issues = reports	
+                .map(mythx.remapMythXOutput)	
+                .reduce((acc, curr) => acc.concat(curr), []);
         } catch (err) {
             errors = err;
         }
