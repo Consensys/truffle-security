@@ -246,7 +246,37 @@ var path = require('path');
 var { promisify } = require('util');
 var OS = require('os');
 
-async function  writeContracts(contracts, options) {
+/**
+ * A 2-level line-column comparison function.
+ * @returns {integer} -
+      zero:      line1/column1 == line2/column2
+      negative:  line1/column1 < line2/column2
+      positive:  line1/column1 > line2/column2
+*/
+function compareLineCol(line1, column1, line2, column2) {
+    return line1 === line2 ?
+        (column1 - column2) :
+        (line1 - line2);
+}
+
+/**
+ * A 2-level comparison function for eslint message structure ranges
+ * the fields off a message
+ * We use the start position in the first comparison and then the
+ * end position only when the start positions are the same.
+ *
+ * @returns {integer} -
+      zero:      range(mess1) == range(mess2)
+      negative:  range(mess1) <  range(mess2)
+      positive:  range(mess1) > range(mess)
+
+*/
+function compareMessLCRange(mess1, mess2) {
+    const c = compareLineCol(mess1.line, mess1.column, mess2.line, mess2.column)
+    return c != 0 ? c : compareLineCol(mess1.endLine, mess1.endCol, mess2.endLine, mess2.endCol);
+}
+
+async function writeContracts(contracts, options) {
     var logger = options.logger || console;
 
     const result = await promisify(mkdirp)(options.contracts_build_directory);
@@ -271,7 +301,7 @@ async function  writeContracts(contracts, options) {
 /**
  * Temporary function which turns eslint issues grouped by filepath
  * to eslint issues rouped by filename.
- *
+
  * @param {ESLintIssue[]}
  * @returns {ESListIssue[]}
  */
@@ -306,12 +336,20 @@ const groupEslintIssuesByBasename = issues => {
         return accum;
     }, {});
 
-    return Object.values(mappedIssues);
+    const issueGroups = Object.values(mappedIssues);
+    for (const group of issueGroups) {
+        group.messages = group.messages.sort(function(mess1, mess2) {
+            return compareMessLCRange(mess1, mess2);
+        });
+
+    };
+    return issueGroups;
 };
 
 
 module.exports = {
     analyze,
+    compareLineCol,
     printVersion,
     printHelpMessage,
     contractsCompile,
