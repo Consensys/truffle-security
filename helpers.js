@@ -148,7 +148,12 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
         try {
-            issues = await client.analyze(analyzeOpts);
+            const reports = await client.analyze(analyzeOpts);
+            // FIXME: hide this inside MythXReport class
+            // FIXME: call isIgnorable?
+            issues = reports
+                .map(mythx.remapMythXOutput)
+                .reduce((acc, curr) => acc.concat(curr), []);
         } catch (err) {
             errors = err;
         }
@@ -202,18 +207,10 @@ async function analyze(config) {
 
     const analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
 
-    /*
-    const util = require('util');
-    for (const res of analysisResults) {
-	console.log(`${util.inspect(res)}`);
-	for (const issue of res.issues) {
-	    console.log(`${issue}`);
-	    for (const s of issue.sourceList) {
-		console.log(`${s}`);
-	    }
-	}
-    }
-    */
+    // const util = require('util');
+    // for (const res of analysisResults) {
+    //  console.log(`${util.inspect(res, {depth: null})}`);
+    // }
 
     // Filter out good and bad results
     const passedAnalysis = analysisResults.filter(res => !res.errors);
@@ -224,9 +221,7 @@ async function analyze(config) {
     let eslintIssues = passedAnalysis.map(({issues, buildObj }) => {
         // FIXME: move this somewhere else
         const info = new Info(buildObj);
-        return issues.map(issue => {
-            return info.convertMythXReport2EsIssues(issue, true);
-        });
+        return issues.map(issue => info.convertMythXReport2EsIssues(issue, true));
     });
 
     if (failedAnalysis.length > 0) {
@@ -238,7 +233,9 @@ async function analyze(config) {
 
     eslintIssues = eslintIssues.reduce((acc, curr) => acc.concat(curr), []);
 
-    console.log(formatter(eslintIssues));
+    // FIXME: temporary solution until backend will return correct filepath and output.
+    const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
+    console.log(formatter(eslintIssuesBtBaseName));
 
 }
 
@@ -265,10 +262,53 @@ async function  writeContracts(contracts, options) {
     const contractNames = Object.keys(contracts).sort();
     const sources = contractNames.map(c => contracts[c].sourcePath);
     for (let c of contractNames) {
-	contracts[c].sources = sources;
+        contracts[c].sources = sources;
     }
     await options.artifactor.saveAll(contracts, extra_opts);
 }
+
+
+/**
+ * Temporary function which turns eslint issues grouped by filepath
+ * to eslint issues rouped by filename.
+ *
+ * @param {ESLintIssue[]}
+ * @returns {ESListIssue[]}
+ */
+const groupEslintIssuesByBasename = issues => {
+    const path = require('path');
+    const mappedIssues = issues.reduce((accum, issue) => {
+        const {
+            errorCount,
+            warningCount,
+            fixableErrorCount,
+            fixableWarningCount,
+            filePath,
+            messages,
+        } = issue;
+
+        const basename = path.basename(filePath);
+        if (!accum[basename]) {
+            accum[basename] = {
+                errorCount: 0,
+                warningCount: 0,
+                fixableErrorCount: 0,
+                fixableWarningCount: 0,
+                filePath: basename,
+                messages: [],
+            };
+        }
+        accum[basename].errorCount += errorCount;
+        accum[basename].warningCount += warningCount;
+        accum[basename].fixableErrorCount += fixableErrorCount;
+        accum[basename].fixableWarningCount += fixableWarningCount;
+        accum[basename].messages = accum[basename].messages.concat(messages);
+        return accum;
+    }, {});
+
+    return Object.values(mappedIssues);
+};
+
 
 module.exports = {
     analyze,

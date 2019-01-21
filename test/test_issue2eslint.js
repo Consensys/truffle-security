@@ -45,7 +45,6 @@ describe('issues2Eslint', function() {
             done();
         });
 
-        /* FIXME Daniyar
         it('should convert MythX issue to Eslint style with sourceFormat: evm-byzantium-bytecode', () => {
             const mythXOutput = {
                 'sourceFormat': 'evm-byzantium-bytecode',
@@ -84,7 +83,8 @@ describe('issues2Eslint', function() {
                 endLine: 12,
                 fatal: false,
                 message: 'Head message Tail message',
-                severity: 'High',
+                mythXseverity: 'High',
+                severity: 3,
             },
             res);
         });
@@ -127,10 +127,11 @@ describe('issues2Eslint', function() {
                 endLine: 12,
                 fatal: false,
                 message: 'Head message Tail message',
-                severity: 'High',
+                mythXseverity: 'High',
+                severity: 3,
             }, res);
         });
-        */
+
 
         it('should call isIgnorable correctly', () => {
             const spyIsVariableDeclaration = sinon.spy(srcmap, 'isVariableDeclaration');
@@ -174,7 +175,7 @@ describe('issues2Eslint', function() {
             spyIsDynamicArray.restore();
         });
 
-        /*
+        
         it('should convert mythX report to Eslint issues', () => {
             const mythXOutput = {
                 'sourceType': 'solidity-file',
@@ -219,10 +220,10 @@ describe('issues2Eslint', function() {
                     line: 12,
                     message: 'Head message',
                     ruleId: 'SWC-000',
-                    severity: 'High',
+                    mythXseverity: 'High',
+                    severity: 3,
                 }],
             }]);
         });
-        */
     });
 });
