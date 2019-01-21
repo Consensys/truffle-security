@@ -1,9 +1,11 @@
 const assert = require('assert');
 const proxyquire = require('proxyquire');
+const rewire = require('rewire');
 const fs = require('fs');
 const armlet = require('armlet');
 const sinon = require('sinon');
 const trufstuf = require('../lib/trufstuf');
+const rewiredHelpers = rewire('../helpers');
 
 
 async function assertThrowsAsync(fn, message) {
@@ -131,6 +133,61 @@ describe('helpers.js', function() {
                     });
                 }, /You need to set either environment variable MYTHX_ETH_ADDRESS or MYTHX_EMAIL to run analyze./);
             delete process.env.MYTHX_PASSWORD;
+        });
+
+        it('it should group eslint issues by filenames', () => {
+            const issues = [{
+                errorCount: 1,
+                warningCount: 1,
+                fixableErrorCount: 0,
+                fixableWarningCount: 0,
+                filePath: '/tmp/contracts/contract.sol',
+                messages: [
+                    'message 1',
+                    'message 2',
+                ]
+            }, {
+                errorCount: 0,
+                warningCount: 1,
+                fixableErrorCount: 0,
+                fixableWarningCount: 0,
+                filePath: '/tmp/test_dir/contract2.sol',
+                messages: [
+                    'message 3'
+                ]
+            }, {
+                errorCount: 0,
+                warningCount: 1,
+                fixableErrorCount: 0,
+                fixableWarningCount: 0,
+                filePath: '/tmp/test_dir/contract.sol',
+                messages: [
+                    'message 4'
+                ]
+            }];
+
+            const result = rewiredHelpers.__get__('groupEslintIssuesByBasename')(issues);
+            assert.deepEqual(result, [{
+                errorCount: 1,
+                warningCount: 2,
+                fixableErrorCount: 0,
+                fixableWarningCount: 0,
+                filePath: 'contract.sol',
+                messages: [
+                    'message 1',
+                    'message 2',
+                    'message 4',
+                ]
+            }, {
+                errorCount: 0,
+                warningCount: 1,
+                fixableErrorCount: 0,
+                fixableWarningCount: 0,
+                filePath: 'contract2.sol',
+                messages: [
+                    'message 3'
+                ]
+            }]);
         });
     });
 });
