@@ -148,11 +148,11 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
         try {
-            const reports = await client.analyze(analyzeOpts);	
-            // FIXME: hide this inside MythXReport class	
-            // FIXME: call isIgnorable?	
-            issues = reports	
-                .map(mythx.remapMythXOutput)	
+            const reports = await client.analyze(analyzeOpts);
+            // FIXME: hide this inside MythXReport class
+            // FIXME: call isIgnorable?
+            issues = reports
+                .map(mythx.remapMythXOutput)
                 .reduce((acc, curr) => acc.concat(curr), []);
         } catch (err) {
             errors = err;
@@ -207,18 +207,10 @@ async function analyze(config) {
 
     const analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
 
-    /*
-    const util = require('util');
-    for (const res of analysisResults) {
-	console.log(`${util.inspect(res)}`);
-	for (const issue of res.issues) {
-	    console.log(`${issue}`);
-	    for (const s of issue.sourceList) {
-		console.log(`${s}`);
-	    }
-	}
-    }
-    */
+    // const util = require('util');
+    // for (const res of analysisResults) {
+    //  console.log(`${util.inspect(res, {depth: null})}`);
+    // }
 
     // Filter out good and bad results
     const passedAnalysis = analysisResults.filter(res => !res.errors);
@@ -270,7 +262,7 @@ async function  writeContracts(contracts, options) {
     const contractNames = Object.keys(contracts).sort();
     const sources = contractNames.map(c => contracts[c].sourcePath);
     for (let c of contractNames) {
-	contracts[c].sources = sources;
+        contracts[c].sources = sources;
     }
     await options.artifactor.saveAll(contracts, extra_opts);
 }
@@ -279,14 +271,14 @@ async function  writeContracts(contracts, options) {
 /**
  * Temporary function which turns eslint issues grouped by filepath
  * to eslint issues rouped by filename.
- * 
- * @param {ESLintIssue[]} 
+ *
+ * @param {ESLintIssue[]}
  * @returns {ESListIssue[]}
  */
 const groupEslintIssuesByBasename = issues => {
     const path = require('path');
     const mappedIssues = issues.reduce((accum, issue) => {
-        const { 
+        const {
             errorCount,
             warningCount,
             fixableErrorCount,
@@ -294,7 +286,7 @@ const groupEslintIssuesByBasename = issues => {
             filePath,
             messages,
         } = issue;
-    
+
         const basename = path.basename(filePath);
         if (!accum[basename]) {
             accum[basename] = {
