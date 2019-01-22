@@ -5,7 +5,9 @@ const fs = require('fs');
 const armlet = require('armlet');
 const sinon = require('sinon');
 const trufstuf = require('../lib/trufstuf');
+const mythx = require('../lib/mythx');
 const rewiredHelpers = rewire('../helpers');
+const util = require('util');
 
 
 async function assertThrowsAsync(fn, message) {
@@ -188,6 +190,175 @@ describe('helpers.js', function() {
                     'message 3'
                 ]
             }]);
+        });
+    });
+
+    describe('doAnalysis', () => {
+        let armletClient, stubAnalyze;
+        
+        beforeEach(() => {
+            armletClient = new armlet.Client({ apiKey: 'test' });
+            stubAnalyze = sinon.stub(armletClient, 'analyze');
+        });
+
+        afterEach(() => {
+            stubAnalyze.restore();
+            stubAnalyze = null;
+        });
+
+        it('should return 1 mythXIssues object and no errors', async () => {
+            const doAnalysis = rewiredHelpers.__get__('doAnalysis');
+            const config = {
+                _: [],
+                debug: true,
+                logger: {},
+                style: 'test-style',
+            }
+            const jsonFiles = [
+                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
+            ];
+
+            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFiles[0], 'utf8');
+            const mythXInput = mythx.truffle2MythXJSON(JSON.parse(simpleDaoJSON));
+            stubAnalyze.resolves([{
+                'sourceFormat': 'evm-byzantium-bytecode',
+                'sourceList': [
+                    `${__dirname}/sample-truffle/simple_dao/contracts/SimpleDAO.sol`
+                ],
+                'sourceType': 'raw-bytecode',
+                'issues': [{
+                    'description': {
+                        'head': 'Head message',
+                        'tail': 'Tail message'
+                    },
+                    'locations': [{
+                        'sourceMap': '444:1:0'
+                    }],
+                    'severity': 'High',
+                    'swcID': 'SWC-000',
+                    'swcTitle': 'Test Title'
+                }],
+                'meta': {
+                    'selected_compiler': '0.5.0',
+                    'error': [],
+                    'warning': []
+                }
+            }]);
+            const results = await doAnalysis(armletClient, config, jsonFiles);
+            mythXInput.analysisMode = 'full';
+            assert.ok(stubAnalyze.calledWith({
+                _: [],
+                debug: true,
+                data: mythXInput,
+                logger: {},
+                style: 'test-style',
+                timeout: 120000,
+                partners: ['truffle'],
+            }));
+            assert.equal(results.errors.length, 0);
+            assert.equal(results.objects.length, 1);
+        });
+
+        it('should return 0 mythXIssues objects and 1 error', async () => {
+            const doAnalysis = rewiredHelpers.__get__('doAnalysis');
+            const config = {
+                _: [],
+                debug: true,
+                logger: {},
+                style: 'test-style',
+            }
+            const jsonFiles = [
+                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
+            ];
+            stubAnalyze.throws();
+            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFiles[0], 'utf8');
+            const mythXInput = mythx.truffle2MythXJSON(JSON.parse(simpleDaoJSON));
+            const results = await doAnalysis(armletClient, config, jsonFiles);
+            mythXInput.analysisMode = 'full';
+            assert.ok(stubAnalyze.calledWith({
+                _: [],
+                debug: true,
+                data: mythXInput,
+                logger: {},
+                style: 'test-style',
+                timeout: 120000,
+                partners: ['truffle'],
+            }));
+            assert.equal(results.errors.length, 1);
+            assert.equal(results.objects.length, 0);
+        });
+    
+        it('should return 1 mythXIssues object and 1 error', async () => {
+            const doAnalysis = rewiredHelpers.__get__('doAnalysis');
+            const config = {
+                _: [],
+                debug: true,
+                logger: {},
+                style: 'test-style',
+            }
+            const jsonFiles = [
+                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
+                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
+            ];
+
+            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFiles[0], 'utf8');
+            const mythXInput = mythx.truffle2MythXJSON(JSON.parse(simpleDaoJSON));
+            stubAnalyze.onFirstCall().throws();
+            stubAnalyze.onSecondCall().resolves([{
+                'sourceFormat': 'evm-byzantium-bytecode',
+                'sourceList': [
+                    `${__dirname}/sample-truffle/simple_dao/contracts/SimpleDAO.sol`
+                ],
+                'sourceType': 'raw-bytecode',
+                'issues': [{
+                    'description': {
+                        'head': 'Head message',
+                        'tail': 'Tail message'
+                    },
+                    'locations': [{
+                        'sourceMap': '444:1:0'
+                    }],
+                    'severity': 'High',
+                    'swcID': 'SWC-000',
+                    'swcTitle': 'Test Title'
+                }],
+                'meta': {
+                    'selected_compiler': '0.5.0',
+                    'error': [],
+                    'warning': []
+                }
+            }]);
+            const results = await doAnalysis(armletClient, config, jsonFiles);
+            mythXInput.analysisMode = 'full';
+            assert.ok(stubAnalyze.calledWith({
+                _: [],
+                debug: true,
+                data: mythXInput,
+                logger: {},
+                style: 'test-style',
+                timeout: 120000,
+                partners: ['truffle'],
+            }));
+            assert.equal(results.errors.length, 1);
+            assert.equal(results.objects.length, 1);
+        });
+        
+        it('should skip unwanted smart contract', async () => {
+            const doAnalysis = rewiredHelpers.__get__('doAnalysis');
+            const config = {
+                _: [],
+                debug: true,
+                logger: {},
+                style: 'test-style',
+            }
+            const jsonFiles = [
+                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
+            ];
+
+            const results = await doAnalysis(armletClient, config, jsonFiles, ['UnkonwnContract']);
+            assert.ok(!stubAnalyze.called);
+            assert.equal(results.errors.length, 0);
+            assert.equal(results.objects.length, 0);
         });
     });
 });
