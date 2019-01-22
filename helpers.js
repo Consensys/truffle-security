@@ -5,7 +5,7 @@ const fs = require('fs');
 const armlet = require('armlet');
 const mythx = require('./lib/mythx');
 const trufstuf = require('./lib/trufstuf');
-const { Info } = require('./lib/issues2eslint');
+const { MythXIssues } = require('./lib/issues2eslint');
 const contracts = require('truffle-workflow-compile');
 const util = require('util');
 
@@ -115,8 +115,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
    * are finished.
    */
 
-    return Promise.all(jsonFiles.map(async file => {
-        let issues, errors;
+    const results = await Promise.all(jsonFiles.map(async file => {
         const buildJson = await readFile(file, 'utf8');
         const buildObj = JSON.parse(buildJson);
 
@@ -124,17 +123,15 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
      * If contractNames have been passed then skip analyze for unwanted ones.
      */
         if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
-            return null;
+            return [null, null];
         }
 
-        // Convert truffle json to mythX Input format object
-        // FIXME: initialize MythXReport class with truffle build Obj
-        const mythXInput = mythx.truffle2MythXJSON(buildObj);
+        const obj = new MythXIssues(buildObj);
 
         const analyzeOpts = {
             _: config._,
             debug: config.debug,
-            data: mythXInput,
+            data: obj.buildObj,
             logger: config.logger,
             style: config.style,
             timeout: (config.timeout || 120) * 1000,
@@ -149,22 +146,22 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
 
         try {
             const reports = await client.analyze(analyzeOpts);
-            // FIXME: hide this inside MythXReport class
-            // FIXME: call isIgnorable?
-            issues = reports
-                .map(mythx.remapMythXOutput)
-                .reduce((acc, curr) => acc.concat(curr), []);
+            obj.setIssues(reports);
+            return [null, obj];
         } catch (err) {
-            errors = err;
+            return [err, null];
         }
-
-        // FIXME: return MythXReport object
-        return {
-            buildObj: mythXInput,
-            issues,
-            errors,
-        };
     }));
+
+    return results.reduce((accum, curr) => {
+        const [ err, obj ] = curr;
+        if (err) {
+            accum.errors.push(err);
+        } else if (obj) {
+            accum.objects.push(obj);
+        }
+        return accum;
+    }, { errors: [], objects: [] });
 };
 
 /**
@@ -205,38 +202,19 @@ async function analyze(config) {
     // Get list of smart contract build json files from truffle build folder
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
-    const analysisResults = await doAnalysis(client, config, jsonFiles, contractNames);
+    const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames);
 
-    // const util = require('util');
-    // for (const res of analysisResults) {
-    //  console.log(`${util.inspect(res, {depth: null})}`);
-    // }
+    const eslintIssues = objects
+        .map(obj => obj.getEslintIssues(true))
+        .reduce((acc, curr) => acc.concat(curr), []);;
 
-    // Filter out good and bad results
-    const passedAnalysis = analysisResults.filter(res => !res.errors);
-    const failedAnalysis = analysisResults.filter(res => !!res.errors);
-
-    const formatter = getFormatter(config.style);
-
-    let eslintIssues = passedAnalysis.map(({issues, buildObj }) => {
-        // FIXME: move this somewhere else
-        const info = new Info(buildObj);
-        return issues.map(issue => info.convertMythXReport2EsIssues(issue, true));
-    });
-
-    if (failedAnalysis.length > 0) {
-        failedAnalysis.forEach(({ errors, buildObj}) => {
-            console.error(`Failed to analyze smart contract "${buildObj.contractName}":`);
-            console.error(errors, errors.stack);
-        });
-    }
-
-    eslintIssues = eslintIssues.reduce((acc, curr) => acc.concat(curr), []);
+    errors.forEach(err => console.error(err, err.stack));
 
     // FIXME: temporary solution until backend will return correct filepath and output.
     const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
-    console.log(formatter(eslintIssuesBtBaseName));
 
+    const formatter = getFormatter(config.style);
+    console.log(formatter(eslintIssuesBtBaseName));
 }
 
 
