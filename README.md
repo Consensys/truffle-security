@@ -14,7 +14,7 @@ Preliminary pre 5.0.0 versions were demo'd at
 [trufflecon2018](https://truffleframework.com/trufflecon2018) and
 [devcon4](https://devcon4.ethereum.org/).
 
-# Installation
+# Setup
 
 ## Install plugin:
 
@@ -22,7 +22,7 @@ Preliminary pre 5.0.0 versions were demo'd at
 $ npm install truffle-analyze
 ```
 
-## Configure each truffle project to use the "analyze" plugin.
+## Enable the plugin
 
 In your truffle project put in `truffle.js`:
 
@@ -45,7 +45,7 @@ export MYTHRIL_ETH_ADDRESS=0x1234567891235678900000000000000000000000
 export MYTHRIL_PASSWORD='Put your password in here!'
 ```
 
-# Example Session
+# Using Truffle Analyze
 
 ```console
 $ truffle run analyze help
@@ -67,6 +67,8 @@ given, all are analyzed.
                 The default is 120 seconds (two minutes).
     --version  Show package and MythX version information.
 ```
+
+uns MythX analyses on given Solidity contracts. If no contracts are given, all are analyzed.
 
 Options are deliberately sparse since we want simple interaction. Most
 of the complexity is hidden behind the MythX.

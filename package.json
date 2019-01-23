@@ -1,15 +1,15 @@
 {
   "name": "truffle-analyze",
   "namespace": "consensys",
-  "version": "5.1.0-git",
+  "version": "5.1.0",
   "description": "Add vulnerability and weakness analysis via the MythX",
   "dependencies": {
-    "armlet": "git+https://git@github.com/consensys/armlet.git",
+    "armlet": "1.0.0",
     "configstore": "^4.0.0",
     "mocha": "^5.2.0",
     "proxyquire": "^2.1.0",
     "remix-lib": ">=0.4.1",
-    "truffle-workflow-compile": ">=2.0.1"
+    "truffle-workflow-compile": ">=2.0.2"
   },
   "nyc": {
     "exclude": [
