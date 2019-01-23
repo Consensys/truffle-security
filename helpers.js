@@ -146,6 +146,9 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
 
         try {
             const reports = await client.analyze(analyzeOpts);
+	    // For debugging:
+	    // const util = require('util');
+	    // console.log(`${util.inspect(reports, {depth: null})}`);
             obj.setIssues(reports);
             return [null, obj];
         } catch (err) {
