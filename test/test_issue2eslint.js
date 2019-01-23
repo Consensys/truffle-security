@@ -71,7 +71,7 @@ describe('issues2Eslint', function() {
 
             const remappedMythXOutput = mythx.remapMythXOutput(mythXOutput);
             const issuesObject = new MythXIssues(truffleJSON);
-            const res = issuesObject.issue2EsLintNew(remappedMythXOutput[0].issues[0], false, 'evm-byzantium-bytecode', sourceName);
+            const res = issuesObject.issue2EsLint(remappedMythXOutput[0].issues[0], false, 'evm-byzantium-bytecode', sourceName);
 
             assert.deepEqual({
                 ruleId: 'SWC-000',
@@ -115,7 +115,7 @@ describe('issues2Eslint', function() {
 
             const remappedMythXOutput = mythx.remapMythXOutput(mythXOutput);
             const issuesObject = new MythXIssues(truffleJSON);
-            const res = issuesObject.issue2EsLintNew(remappedMythXOutput[0].issues[0], false, 'text', sourceName);
+            const res = issuesObject.issue2EsLint(remappedMythXOutput[0].issues[0], false, 'text', sourceName);
 
             assert.deepEqual({
                 ruleId: 'SWC-000',
@@ -173,7 +173,7 @@ describe('issues2Eslint', function() {
             spyIsDynamicArray.restore();
         });
 
-        
+
         it('should convert mythX report to Eslint issues', () => {
             const mythXOutput = {
                 'sourceType': 'solidity-file',
