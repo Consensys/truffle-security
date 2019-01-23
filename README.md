@@ -41,8 +41,8 @@ Get an ETH address from [MetaMask](https://metamask.io). Set the following envir
 adjust for your ETH address and password:
 
 ```bash
-export MYTHRIL_ETH_ADDRESS=0x1234567891235678900000000000000000000000
-export MYTHRIL_PASSWORD='Put your password in here!'
+export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
+export MYTHX_PASSWORD='Put your password in here!'
 ```
 
 # Using Truffle Analyze
