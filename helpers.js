@@ -207,8 +207,9 @@ async function analyze(config) {
 
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames);
 
+    const spaceLimited = ['tap', 'markdown'].indexOf(config.style) !== -1;
     const eslintIssues = objects
-        .map(obj => obj.getEslintIssues(true))
+        .map(obj => obj.getEslintIssues(spaceLimited))
         .reduce((acc, curr) => acc.concat(curr), []);;
 
     errors.forEach(err => console.error(err, err.stack));
@@ -305,7 +306,7 @@ const groupEslintIssuesByBasename = issues => {
                 warningCount: 0,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
-                filePath: basename,
+                filePath: filePath,
                 messages: [],
             };
         }
