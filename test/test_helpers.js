@@ -169,7 +169,7 @@ describe('helpers.js', function() {
                 warningCount: 1,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
-                filePath: '/tmp/contracts/contract.sol',
+                filePath: 'contract.sol',
                 messages: [
                     'message 1',
                     'message 2',
@@ -211,7 +211,7 @@ describe('helpers.js', function() {
                 warningCount: 1,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
-                filePath: 'contract2.sol',
+                filePath: '/tmp/test_dir/contract2.sol',
                 messages: [
                     'message 3'
                 ]
@@ -221,7 +221,7 @@ describe('helpers.js', function() {
 
     describe('doAnalysis', () => {
         let armletClient, stubAnalyze;
-        
+
         beforeEach(() => {
             armletClient = new armlet.Client({ apiKey: 'test' });
             stubAnalyze = sinon.stub(armletClient, 'analyze');
@@ -313,7 +313,7 @@ describe('helpers.js', function() {
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 0);
         });
-    
+
         it('should return 1 mythXIssues object and 1 error', async () => {
             const doAnalysis = rewiredHelpers.__get__('doAnalysis');
             const config = {
@@ -368,7 +368,7 @@ describe('helpers.js', function() {
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 1);
         });
-        
+
         it('should skip unwanted smart contract', async () => {
             const doAnalysis = rewiredHelpers.__get__('doAnalysis');
             const config = {
