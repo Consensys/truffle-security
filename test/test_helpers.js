@@ -25,16 +25,16 @@ describe('helpers.js', function() {
     let helpers;
 
     function compareTest(line1, col1, line2, col2, expect) {
-	const res = helpers.compareLineCol(line1, col1, line2, col2);
-	if (expect === '=') {
-	    assert.ok(res === 0);
-	} else if (expect === '<') {
-	    assert.ok(res < 0);
-	} else if (expect === '>') {
-	    assert.ok(res > 0);
-	} else {
+        const res = helpers.compareLineCol(line1, col1, line2, col2);
+        if (expect === '=') {
+            assert.ok(res === 0);
+        } else if (expect === '<') {
+            assert.ok(res < 0);
+        } else if (expect === '>') {
+            assert.ok(res > 0);
+        } else {
             assert.throws(`invalid test expect symbol ${expect}; '=', '<', or '>' expected`);
-	}
+        }
     }
 
     describe('test helper functions', () => {
@@ -59,15 +59,15 @@ describe('helpers.js', function() {
         });
 
         it('should compare two line/column pairs properly', () => {
-	    const expected = [
-		[1, 5, 1, 5, '='],
-		[1, 4, 1, 5, '<'],
-		[2, 4, 1, 5, '>'],
-		[1, 6, 1, 5, '>'],
-		[1, 6, 2, 4, '<']];
-	    for (const t of expected) {
-		compareTest(t[0], t[1], t[2], t[3], t[4]);
-	    }
+            const expected = [
+                [1, 5, 1, 5, '='],
+                [1, 4, 1, 5, '<'],
+                [2, 4, 1, 5, '>'],
+                [1, 6, 1, 5, '>'],
+                [1, 6, 2, 4, '<']];
+            for (const t of expected) {
+                compareTest(t[0], t[1], t[2], t[3], t[4]);
+            }
         });
 
     });
@@ -273,13 +273,9 @@ describe('helpers.js', function() {
             const results = await doAnalysis(armletClient, config, jsonFiles);
             mythXInput.analysisMode = 'full';
             assert.ok(stubAnalyze.calledWith({
-                _: [],
-                debug: true,
                 data: mythXInput,
-                logger: {},
-                style: 'test-style',
                 timeout: 120000,
-                partners: ['truffle'],
+                clientToolName: 'truffle',
             }));
             assert.equal(results.errors.length, 0);
             assert.equal(results.objects.length, 1);
@@ -302,13 +298,9 @@ describe('helpers.js', function() {
             const results = await doAnalysis(armletClient, config, jsonFiles);
             mythXInput.analysisMode = 'full';
             assert.ok(stubAnalyze.calledWith({
-                _: [],
-                debug: true,
                 data: mythXInput,
-                logger: {},
-                style: 'test-style',
                 timeout: 120000,
-                partners: ['truffle'],
+                clientToolName: 'truffle',
             }));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 0);
@@ -357,13 +349,9 @@ describe('helpers.js', function() {
             const results = await doAnalysis(armletClient, config, jsonFiles);
             mythXInput.analysisMode = 'full';
             assert.ok(stubAnalyze.calledWith({
-                _: [],
-                debug: true,
                 data: mythXInput,
-                logger: {},
-                style: 'test-style',
                 timeout: 120000,
-                partners: ['truffle'],
+                clientToolName: 'truffle',
             }));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 1);
