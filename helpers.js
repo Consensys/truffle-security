@@ -131,10 +131,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         let analyzeOpts = {
             data: obj.buildObj,
             timeout: (config.timeout || 120) * 1000,
-            // FIXME: The below "partners" will change when
-            // https://github.com/ConsenSys/mythril-api/issues/59
-            // is resolved.
-            // partners: ['truffle'],
+            clientToolName: 'truffle',
         };
 
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
@@ -142,8 +139,8 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         try {
             const reports = await client.analyze(analyzeOpts);
 	    // For debugging:
-	    const util = require('util');
-	    console.log(`${util.inspect(reports, {depth: null})}`);
+	    // const util = require('util');
+	    // console.log(`${util.inspect(reports, {depth: null})}`);
             obj.setIssues(reports);
             return [null, obj];
         } catch (err) {
@@ -168,10 +165,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
  */
 async function analyze(config) {
     const armletOptions = {
-    // FIXME: The below "partners" will change when
-    // https://github.com/ConsenSys/mythril-api/issues/59
-    // is resolved.
-    // platforms: ['truffle']  // client chargeback
+	clientToolName: 'truffle'  // client chargeback
     };
 
     if (process.env.MYTHX_API_KEY) {
