@@ -128,18 +128,13 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
 
         const obj = new MythXIssues(buildObj);
 
-        const analyzeOpts = {
-            _: config._,
-            debug: config.debug,
+        let analyzeOpts = {
             data: obj.buildObj,
-            logger: config.logger,
-            style: config.style,
             timeout: (config.timeout || 120) * 1000,
-
             // FIXME: The below "partners" will change when
             // https://github.com/ConsenSys/mythril-api/issues/59
             // is resolved.
-            partners: ['truffle'],
+            // partners: ['truffle'],
         };
 
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
@@ -147,8 +142,8 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         try {
             const reports = await client.analyze(analyzeOpts);
 	    // For debugging:
-	    // const util = require('util');
-	    // console.log(`${util.inspect(reports, {depth: null})}`);
+	    const util = require('util');
+	    console.log(`${util.inspect(reports, {depth: null})}`);
             obj.setIssues(reports);
             return [null, obj];
         } catch (err) {
@@ -176,7 +171,7 @@ async function analyze(config) {
     // FIXME: The below "partners" will change when
     // https://github.com/ConsenSys/mythril-api/issues/59
     // is resolved.
-        platforms: ['truffle']  // client chargeback
+    // platforms: ['truffle']  // client chargeback
     };
 
     if (process.env.MYTHX_API_KEY) {
@@ -204,6 +199,10 @@ async function analyze(config) {
 
     // Get list of smart contract build json files from truffle build folder
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
+
+    if (!config.style) {
+	config.style = 'stylish'
+    }
 
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames);
 

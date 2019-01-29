@@ -1,10 +1,10 @@
 {
   "name": "truffle-analyze",
   "namespace": "consensys",
-  "version": "5.1.1",
-  "description": "Add vulnerability and weakness analysis via the MythX",
+  "version": "5.2.0",
+  "description": "Truffle run plugin to perform security analyses via MythX",
   "dependencies": {
-    "armlet": "1.0.0",
+    "armlet": "~1.0.0",
     "configstore": "^4.0.0",
     "mocha": "^5.2.0",
     "proxyquire": "^2.1.0",
@@ -31,7 +31,8 @@
   "keywords": [
     "ethereum",
     "truffle",
-    "mythril"
+    "mythril",
+    "mythX"
   ],
   "homepage": "https://github.com/consensys/truffle-analyze",
   "bugs": {
