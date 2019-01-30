@@ -4,7 +4,7 @@
   "version": "5.2.0",
   "description": "Truffle run plugin to perform security analyses via MythX",
   "dependencies": {
-    "armlet": "~1.0.0",
+    "armlet": "https://github.com/ConsenSys/armlet.git#b74a8c6762d1f23556a86f9c29c2fd62c741b51b",
     "configstore": "^4.0.0",
     "mocha": "^5.2.0",
     "proxyquire": "^2.1.0",

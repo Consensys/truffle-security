@@ -164,27 +164,18 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
  * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
+    const apiKey = process.env.MYTHX_API_KEY;
+    const password = process.env.MYTHX_PASSWORD;
+    const ethAddress = process.env.MYTHX_ETH_ADDRESS;
+    const email = process.env.MYTHX_EMAIL;
+
     const armletOptions = {
-	clientToolName: 'truffle'  // client chargeback
+        clientToolName: 'truffle',  // client chargeback
+        apiKey,
+        password,
+        ethAddress,
+        email,
     };
-
-    if (process.env.MYTHX_API_KEY) {
-        armletOptions.apiKey = process.env.MYTHX_API_KEY;
-    } else {
-        if (!process.env.MYTHX_PASSWORD) {
-            throw new Error('You need to set environment variable MYTHX_PASSWORD to run analyze.');
-        }
-
-        armletOptions.password = process.env.MYTHX_PASSWORD;
-
-        if (process.env.MYTHX_ETH_ADDRESS) {
-            armletOptions.ethAddress = process.env.MYTHX_ETH_ADDRESS;
-        } else if (process.env.MYTHX_EMAIL) {
-            armletOptions.email = process.env.MYTHX_EMAIL;
-        } else {
-            throw new Error('You need to set either environment variable MYTHX_ETH_ADDRESS or MYTHX_EMAIL to run analyze.');
-        }
-    }
 
     const client = new armlet.Client(armletOptions);
 
