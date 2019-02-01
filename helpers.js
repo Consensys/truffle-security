@@ -120,8 +120,8 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         const buildObj = JSON.parse(buildJson);
 
         /**
-     * If contractNames have been passed then skip analyze for unwanted ones.
-     */
+         * If contractNames have been passed then skip analyze for unwanted ones.
+         */
         if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
             return [null, null];
         }
@@ -137,11 +137,16 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
 
         try {
-            const reports = await client.analyze(analyzeOpts);
-	    // For debugging:
-	    // const util = require('util');
-	    // console.log(`${util.inspect(reports, {depth: null})}`);
-            obj.setIssues(reports);
+            const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
+            // For debugging:
+            // const util = require('util');
+            // console.log(`${util.inspect(issues, {depth: null})}`);
+            // console.log(`${util.inspect(status, {depth: null})}`);
+            if (status.status === 'Error') {
+                return [status, null];
+            } else {
+                obj.setIssues(issues);
+            }
             return [null, obj];
         } catch (err) {
             return [err, null];
@@ -165,7 +170,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
  */
 async function analyze(config) {
     const armletOptions = {
-	clientToolName: 'truffle'  // client chargeback
+        clientToolName: 'truffle'  // client chargeback
     };
 
     if (process.env.MYTHX_API_KEY) {
@@ -195,23 +200,33 @@ async function analyze(config) {
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
     if (!config.style) {
-	config.style = 'stylish'
+        config.style = 'stylish'
     }
 
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames);
 
-    const spaceLimited = ['tap', 'markdown'].indexOf(config.style) !== -1;
+    const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
     const eslintIssues = objects
         .map(obj => obj.getEslintIssues(spaceLimited))
         .reduce((acc, curr) => acc.concat(curr), []);;
-
-    errors.forEach(err => console.error(err, err.stack));
 
     // FIXME: temporary solution until backend will return correct filepath and output.
     const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
 
     const formatter = getFormatter(config.style);
-    console.log(formatter(eslintIssuesBtBaseName));
+    config.logger.log(formatter(eslintIssuesBtBaseName));
+
+    if (errors.length > 0) {
+        config.logger.error("Internal MythX errors encountered:");
+        errors.forEach(err => {
+            config.logger.error(err);
+            if (err.stack) {
+                config.logger.log(err.stack);
+            };
+        });
+    }
+
+
 }
 
 
