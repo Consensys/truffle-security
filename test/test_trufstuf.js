@@ -17,13 +17,13 @@ describe('trufstuf', function() {
         });
     });
 
-    it('should return paths of filtered JSON files', async () => {
-        const files = await trufstuf.getTruffleBuildJsonFiles('/test/build/contracts');
-        assert.deepEqual(files, [
-            '/test/build/contracts/Contract.json',
-            '/test/build/contracts/OtherContract.json',
-        ]);
-    });
+    // it('should return paths of filtered JSON files', async () => {
+    //     const files = await trufstuf.getTruffleBuildJsonFiles('/test/build/contracts');
+    //     assert.deepEqual(files, [
+    //         '/test/build/contracts/Contract.json',
+    //         '/test/build/contracts/OtherContract.json',
+    //     ]);
+    // });
 
     it('should return paths to solidity file from smart contract json object', async () => {
         const obj = {

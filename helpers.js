@@ -59,6 +59,9 @@ given, all are analyzed.
 
 Options:
   --debug    Provide additional debug output
+  --uuid *UUID*
+             Print JSON results from a prior run having *UUID*
+             Note: this is still a bit raw and will be improved
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
   --style {stylish | unix | visualstudio | table | tap | ...},
@@ -116,8 +119,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
    */
 
     const results = await Promise.all(jsonFiles.map(async file => {
-        const buildJson = await readFile(file, 'utf8');
-        const buildObj = JSON.parse(buildJson);
+        const buildObj = trufstuf.parseBuildJson(file);
 
         /**
          * If contractNames have been passed then skip analyze for unwanted ones.
@@ -164,6 +166,30 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
     }, { errors: [], objects: [] });
 };
 
+function doReport(config, objects, errors) {
+    const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
+    const eslintIssues = objects
+        .map(obj => obj.getEslintIssues(spaceLimited))
+        .reduce((acc, curr) => acc.concat(curr), []);;
+
+    // FIXME: temporary solution until backend will return correct filepath and output.
+    const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
+
+    const formatter = getFormatter(config.style);
+    config.logger.log(formatter(eslintIssuesBtBaseName));
+
+    if (errors.length > 0) {
+        config.logger.error("Internal MythX errors encountered:");
+        errors.forEach(err => {
+            config.logger.error(err);
+            if (err.stack) {
+                config.logger.log(err.stack);
+            };
+        });
+    }
+}
+
+
 /**
  *
  * @param {Object} config - truffle configuration object.
@@ -193,6 +219,23 @@ async function analyze(config) {
 
     const client = new armlet.Client(armletOptions);
 
+    if (config.uuid) {
+        await client.getIssues(config.uuid)
+            .then(issues => {
+                if (issues.length > 0) {
+                    config.logger.log(`${util.inspect(issues, {depth: null})}`);
+                } else {
+                    config.logger.log("No issues found");
+                }
+            }).catch(err => {
+                console.log(err)
+            });
+        return
+    }
+
+    await contractsCompile(config);
+
+
     // Extract list of contracts passed in cli to analyze
     const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
 
@@ -204,29 +247,7 @@ async function analyze(config) {
     }
 
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames);
-
-    const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
-    const eslintIssues = objects
-        .map(obj => obj.getEslintIssues(spaceLimited))
-        .reduce((acc, curr) => acc.concat(curr), []);;
-
-    // FIXME: temporary solution until backend will return correct filepath and output.
-    const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
-
-    const formatter = getFormatter(config.style);
-    config.logger.log(formatter(eslintIssuesBtBaseName));
-
-    if (errors.length > 0) {
-        config.logger.error("Internal MythX errors encountered:");
-        errors.forEach(err => {
-            config.logger.error(err);
-            if (err.stack) {
-                config.logger.log(err.stack);
-            };
-        });
-    }
-
-
+    doReport(config, objects, errors);
 }
 
 
