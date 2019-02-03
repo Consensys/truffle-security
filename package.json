@@ -1,10 +1,10 @@
 {
-  "name": "truffle-analyze",
+  "name": "truffle-security",
   "namespace": "consensys",
-  "version": "5.2.0",
+  "version": "1.0.0",
   "description": "Truffle run plugin to perform security analyses via MythX",
   "dependencies": {
-    "armlet": "~1.1.0",
+    "armlet": "^1.2.0",
     "configstore": "^4.0.0",
     "mocha": "^5.2.0",
     "proxyquire": "^2.1.0",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/consensys/truffle-analyze.git"
+    "url": "https://github.com/consensys/truffle-security.git"
   },
   "keywords": [
     "ethereum",
@@ -34,9 +34,9 @@
     "mythril",
     "mythX"
   ],
-  "homepage": "https://github.com/consensys/truffle-analyze",
+  "homepage": "https://github.com/consensys/truffle-security",
   "bugs": {
-    "url": "https://github.com/ConsenSys/truffle-analyzes/issues"
+    "url": "https://github.com/ConsenSys/truffle-security/issues"
   },
   "author": "consensys.net",
   "authors": [

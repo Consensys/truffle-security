@@ -1,5 +1,5 @@
-[![CircleCI](https://circleci.com/gh/ConsenSys/truffle-analyze.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-analyze)
-[![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-analyze/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-analyze?branch=master)
+[![CircleCI](https://circleci.com/gh/ConsenSys/truffle-security.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-security)
+[![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-security/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-security?branch=master)
 
 # Truffle Security Analysis - MythX Plugin
 
@@ -10,7 +10,7 @@ This plugin adds automated smart contract security analysis to the [Truffle fram
 ## Install the plugin:
 
 ```console
-$ npm install truffle-analyze
+$ npm install truffle-security
 ```
 
 ## Enable the plugin
@@ -19,7 +19,7 @@ In your truffle project put in `truffle.js`:
 
 ```javascript
 module.exports = {
-    plugins: [ "truffle-analyze" ]
+    plugins: [ "truffle-security" ]
 };
 ```
 
@@ -37,12 +37,12 @@ export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
 export MYTHX_PASSWORD='Put your password in here!'
 ```
 
-# Using Truffle Analyze
+# Using Truffle Security
 
 ```console
-$ truffle run analyze help
+$ truffle run verify help
 
-  Usage:        truffle run analyze [options] [*contract-name1* [contract-name2*] ...]
+  Usage:        truffle run verify [options] [*contract-name1* [contract-name2*] ...]
 
 Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
@@ -78,7 +78,7 @@ you are running inside a shell that contains command completion.
 Here is an example:
 
 ```console
-$ truffle run analyze SimpleSuicide
+$ truffle run verify SimpleSuicide
 Compiling ./contracts/Migrations.sol...
 Compiling ./contracts/SimpleDAO.sol...
 Compiling ./contracts/simple_suicide.sol...
@@ -99,7 +99,7 @@ Here is an example of using the  `table` format:
 
 
 ```
-$ truffle+analyze analyze --style table
+$ truffle run verify --style table
 
 /src/external-vcs/github/vulnerable-truffle-project/contracts/SimpleDAO.sol
 
