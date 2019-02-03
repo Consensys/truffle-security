@@ -8,6 +8,7 @@ const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
 const contracts = require('truffle-workflow-compile');
 const util = require('util');
+const yaml = require('js-yaml');
 
 const readFile = util.promisify(fs.readFile);
 const contractsCompile = util.promisify(contracts.compile);
@@ -189,6 +190,20 @@ function doReport(config, objects, errors) {
     }
 }
 
+// A stripped-down listing for issues.
+// We will need this until we can beef up information in UUID retrieval
+function ghettoReport(logger, results) {
+    if (results.length === 0) {
+        logger("No issues found");
+        return
+    }
+    for (const group of results) {
+        logger(group.sourceList.join(', '))
+        for (const issue of group.issues) {
+            logger(yaml.safeDump(issue));
+        }
+    }
+}
 
 /**
  *
@@ -202,33 +217,23 @@ async function analyze(config) {
     if (process.env.MYTHX_API_KEY) {
         armletOptions.apiKey = process.env.MYTHX_API_KEY;
     } else {
-        if (!process.env.MYTHX_PASSWORD) {
-            throw new Error('You need to set environment variable MYTHX_PASSWORD to run analyze.');
-        }
-
         armletOptions.password = process.env.MYTHX_PASSWORD;
 
         if (process.env.MYTHX_ETH_ADDRESS) {
             armletOptions.ethAddress = process.env.MYTHX_ETH_ADDRESS;
         } else if (process.env.MYTHX_EMAIL) {
             armletOptions.email = process.env.MYTHX_EMAIL;
-        } else {
-            throw new Error('You need to set either environment variable MYTHX_ETH_ADDRESS or MYTHX_EMAIL to run analyze.');
-        }
+	}
     }
 
     const client = new armlet.Client(armletOptions);
 
     if (config.uuid) {
         await client.getIssues(config.uuid)
-            .then(issues => {
-                if (issues.length > 0) {
-                    config.logger.log(`${util.inspect(issues, {depth: null})}`);
-                } else {
-                    config.logger.log("No issues found");
-                }
+            .then(results => {
+		ghettoReport(config.logger.log, results);
             }).catch(err => {
-                console.log(err)
+                config.logger.log(err)
             });
         return
     }
