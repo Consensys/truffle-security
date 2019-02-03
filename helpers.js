@@ -141,10 +141,13 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
 
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
-            // For debugging:
-            // const util = require('util');
-            // console.log(`${util.inspect(issues, {depth: null})}`);
-            // console.log(`${util.inspect(status, {depth: null})}`);
+	    if (config.debug) {
+		config.logger.debug(`UUID for this job is ${status.uuid}`);
+		if (config.debug > 1) {
+		    config.logger.debug(`${util.inspect(issues, {depth: null})}`)
+		    config.logger.debug(`${util.inspect(status, {depth: null})}`);
+		}
+	    }
             if (status.status === 'Error') {
                 return [status, null];
             } else {
