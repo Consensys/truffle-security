@@ -57,6 +57,9 @@ given, all are analyzed.
 
   Options:
     --debug     Provide additional debug output
+    --uuid *UUID*
+                Print JSON results from a prior run having *UUID*
+                Note: this is still a bit raw and will be improved
     --mode { quick | full }
                 Perform quick or or in-depth (full) analysis
     --style {stylish | unix | visualstudio | table | tap | ...}
