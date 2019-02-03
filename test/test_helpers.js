@@ -139,30 +139,6 @@ describe('helpers.js', function() {
             getTruffleBuildJsonFilesStub.restore();
         });
 
-        it('should throw exception when no password or API key privided', async () => {
-            await assertThrowsAsync(
-                async () => {
-                    await helpers.analyze({
-                        _: ['analyze'],
-                        working_drectory: '/tests',
-                        contracts_build_directory: '/tests/build/contracts',
-                    });
-                }, /You need to set environment variable MYTHX_PASSWORD to run analyze./);
-        });
-
-        it('should throw exception when neither email or ethAddress are provided', async () => {
-            process.env.MYTHX_PASSWORD = 'password';
-            await assertThrowsAsync(
-                async () => {
-                    await helpers.analyze({
-                        _: ['analyze'],
-                        working_drectory: '/tests',
-                        contracts_build_directory: '/tests/build/contracts',
-                    });
-                }, /You need to set either environment variable MYTHX_ETH_ADDRESS or MYTHX_EMAIL to run analyze./);
-            delete process.env.MYTHX_PASSWORD;
-        });
-
         it('it should group eslint issues by filenames', () => {
             const issues = [{
                 errorCount: 1,

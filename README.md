@@ -1,5 +1,7 @@
-[![CircleCI](https://circleci.com/gh/ConsenSys/truffle-security.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-security)
+<!-- until coveralls is fixed for the repo change -->
+<!-- [![CircleCI](https://circleci.com/gh/ConsenSys/truffle-security.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-security)
 [![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-security/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-security?branch=master)
+-->
 
 # Truffle Security Analysis - MythX Plugin
 
@@ -24,13 +26,20 @@ module.exports = {
 ```
 
 For now `truffle.js` needs to be adjusted for each project. However, changes to truffle are planned
-so that in the future you can specifiy this globally.
+so that in the future you can specifiy this globally. See [truffle issue #1695](https://github.com/trufflesuite/truffle/issues/1695)
 
 ## Set `MYTHX` environment variables.
 
-A user account is required top use the MythX API. To get your free account, you have to visit the the [MythX website](https://mythx.io) with a web3-enabled browser. Check out the [MythX getting started guide](https://docs.mythx.io/en/latest/main/getting-started.html) for detailed instructions.
+Out of the box you get access which is somewhat limited in the number
+of analsyes you can run and the kinds of capabilities available.  To
+get a higher level of access, a user account is required top use the
+MythX API. To get your free account, you have to visit the the [MythX
+website](https://mythx.io) with a web3-enabled browser. Check out the
+[MythX getting started
+guide](https://docs.mythx.io/en/latest/main/getting-started.html) for
+detailed instructions.
 
-Once you have set up an account set the following enviromment variables to your ETH address and password:
+After setting up an accoun,t set the following enviromment variables to your ETH address and password:
 
 ```bash
 export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
