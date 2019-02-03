@@ -24,6 +24,5 @@ module.exports = async (config) => {
     // This can cause vyper to fail if you don't have vyper installed
     // This might be a bug in truffle?
     delete config.compilers.vyper;
-    await helpers.contractsCompile(config);
     return await helpers.analyze(config);
 };
