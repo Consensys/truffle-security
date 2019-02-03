@@ -1,22 +1,13 @@
 [![CircleCI](https://circleci.com/gh/ConsenSys/truffle-analyze.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-analyze)
 [![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-analyze/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-analyze?branch=master)
 
-# Introduction
+# Truffle Security Analysis - MythX Plugin
 
-"Truffle" is a world-class development environment, testing framework and asset pipeline for blockchains using the Ethereum Virtual Machine (EVM), aiming to make life as a developer easier. Read more about it on the [truffle suite website](https://truffleframework.com/docs/truffle/overview).
-
-Here we have a [truffle "run" plugin](https://truffleframework.com/docs/truffle/getting-started/writing-external-scripts) that runs [MythX](https://mythx.io) Smart Contract analyses on truffle projects.
-
-_This is alpha code. You won't be able to use this without a MythX account,
-and will be more generally distributed in the January-February time period._
-
-Preliminary pre 5.0.0 versions were demo'd at
-[trufflecon2018](https://truffleframework.com/trufflecon2018) and
-[devcon4](https://devcon4.ethereum.org/).
+This plugin adds automated smart contract security analysis to the [Truffle framework]((https://truffleframework.com/docs/truffle/overview). It is based on [MythX](https://mythx.io), the security analysis API for Ethereum smart contracts.
 
 # Setup
 
-## Install plugin:
+## Install the plugin:
 
 ```console
 $ npm install truffle-analyze
@@ -37,8 +28,9 @@ so that in the future you can specifiy this globally.
 
 ## Set `MYTHX` environment variables.
 
-Get an ETH address from [MetaMask](https://metamask.io). Set the following enviromment variables,
-adjust for your ETH address and password:
+A user account is required top use the MythX API. To get your free account, you have to visit the the [MythX website](https://mythx.io) with a web3-enabled browser. Check out the [MythX getting started guide](https://docs.mythx.io/en/latest/main/getting-started.html) for detailed instructions.
+
+Once you have set up an account set the following enviromment variables to your ETH address and password:
 
 ```bash
 export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
@@ -71,7 +63,7 @@ given, all are analyzed.
     --version  Show package and MythX version information.
 ```
 
-uns MythX analyses on given Solidity contracts. If no contracts are given, all are analyzed.
+Runs MythX analyses on given Solidity contracts. If no contracts are given, all are analyzed.
 
 Options are deliberately sparse since we want simple interaction. Most
 of the complexity is hidden behind the MythX.
