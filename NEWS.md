@@ -13,4 +13,5 @@ v1.0.0 - 2019-02-04
 - `--debug` will show the UUID in play. `--debug=1` (or greater) will
   show the JSON MythX responses
 - remove extraneous fields in analysis request
+- default analysis mode is "quick"
 - Update docs
