@@ -130,7 +130,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
    */
 
     const results = await Promise.all(jsonFiles.map(async file => {
-        const buildObj = trufstuf.parseBuildJson(file);
+        const buildObj = await trufstuf.parseBuildJson(file);
 
         /**
          * If contractNames have been passed then skip analyze for unwanted ones.
@@ -242,13 +242,13 @@ async function analyze(config) {
     const client = new armlet.Client(armletOptions);
 
     if (config.uuid) {
-        await client.getIssues(config.uuid)
-            .then(results => {
-                ghettoReport(config.logger.log, results);
-            }).catch(err => {
-                config.logger.log(err)
-            });
-        return
+        try {
+            const results = await client.getIssues(config.uuid);
+            ghettoReport(config.logger.log, results);
+        } catch (err) {
+            config.logger.log(err);
+        }
+        return ;
     }
 
     await contractsCompile(config);

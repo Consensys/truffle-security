@@ -1,29 +1,27 @@
 const assert = require('assert');
-const proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire').noCallThru();
+const sinon = require('sinon');
 
 
-describe('trufstuf', function() {
+describe('trufstuf', () => {
     let trufstuf;
+    const statStub = sinon.stub();
+    const readdirStub = sinon.stub();
 
-    beforeEach(function () {
+    beforeEach(() => {
         trufstuf = proxyquire('../lib/trufstuf', {
             fs: {
-                readdir: (directory, cb) => cb(null, [
-                    'Contract.json',
-                    'Migrations.json',
-                    'OtherContract.json',
-                ]),
+                readdir: readdirStub,
+                readFile: (filePath, encoding, cb) => cb(null, '{"content": "content"}'),
+                stat: statStub,
             }
         });
     });
 
-    // it('should return paths of filtered JSON files', async () => {
-    //     const files = await trufstuf.getTruffleBuildJsonFiles('/test/build/contracts');
-    //     assert.deepEqual(files, [
-    //         '/test/build/contracts/Contract.json',
-    //         '/test/build/contracts/OtherContract.json',
-    //     ]);
-    // });
+    afterEach(() => {
+        statStub.reset();
+        readdirStub.reset();
+    })
 
     it('should return paths to solidity file from smart contract json object', async () => {
         const obj = {
@@ -41,4 +39,71 @@ describe('trufstuf', function() {
         assert.equal(solFile, 'test/truffle-analyze/contracts/Contract.sol');
     });
 
+    it('should read and parse JSON File', async () => {
+        const result = await trufstuf.parseBuildJson('filePath');
+        assert.deepEqual(result, { content: 'content' });
+    });
+    
+    it('should identify json as non-stale when mtime of json and source file are the same', async () => {
+        const parseBuildJson = sinon.stub(trufstuf, 'parseBuildJson');
+
+        statStub.yields(null, { mtime: 1000000 })
+        parseBuildJson.resolves({ sourcePath: 'test/contract.sol' });
+
+        const result = await trufstuf.staleBuildContract('test/build/contracts', 'Contract.json');
+        assert.deepEqual(result, false);
+    });
+
+    it('should identify json as stale when source file does not exist', async () => {
+        const parseBuildJson = sinon.stub(trufstuf, 'parseBuildJson');
+
+        statStub
+            .onFirstCall().yields(null, { mtime: 1000000 });
+        statStub
+            .onSecondCall().yields('error');
+        
+        parseBuildJson.resolves({ sourcePath: 'test/contract.sol' });
+
+        const result = await trufstuf.staleBuildContract('test/build/contracts', 'Contract.json');
+        assert.ok(result);
+    });
+
+    it('should identify json as stale when json file is older than source', async () => {
+        const parseBuildJson = sinon.stub(trufstuf, 'parseBuildJson');
+        statStub
+            .onFirstCall().yields(null, { mtime: 1000000 });
+        statStub
+            .onSecondCall().yields(null, { mtime: 1000001 });
+        
+        parseBuildJson.resolves({ sourcePath: 'test/contract.sol' });
+
+        const result = await trufstuf.staleBuildContract('test/build/contracts', 'Contract.json');
+        assert.ok(result);
+    });
+
+    /*
+    FIXME: mock staleBuildContract
+    it('should return paths of filtered JSON files', async () => {
+        const staleBuildContractStub = sinon.stub(trufstuf, 'staleBuildContract');
+        staleBuildContractStub.onFirstCall().resolves(true);
+        staleBuildContractStub.onSecondCall().resolves(false);
+
+        statStub
+            .onFirstCall().yields(null, { mtime: 1000000 });
+        statStub
+            .onSecondCall().yields('error');
+        
+
+        readdirStub.yields(null, [
+            'Contract.json',
+            'Migrations.json',
+            'OtherContract.json',
+        ]);
+
+        const files = await trufstuf.getTruffleBuildJsonFiles('/test/build/contracts');
+        assert.deepEqual(files, [
+            '/test/build/contracts/OtherContract.json',
+        ]);
+    });
+    */
 });
