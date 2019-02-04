@@ -39,7 +39,7 @@ website](https://mythx.io) with a web3-enabled browser. Check out the
 guide](https://docs.mythx.io/en/latest/main/getting-started.html) for
 detailed instructions.
 
-After setting up an accoun,t set the following enviromment variables to your ETH address and password:
+After setting up an account, set the following enviromment variables to your ETH address and password:
 
 ```bash
 export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
