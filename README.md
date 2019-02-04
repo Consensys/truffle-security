@@ -36,7 +36,7 @@ To get full access, visit the [MythX website](https://mythx.io) with a
 web3-enabled browser and create a free user account. Check out the
 [MythX getting started guide](https://docs.mythx.io/en/latest/main/getting-started.html)
 for detailed instructions.
-=
+
 After setting up an account, set the following enviromment variables to your ETH address and password:
 
 ```bash
