@@ -1,17 +1,27 @@
 'use strict';
 
 
-const fs = require('fs');
 const armlet = require('armlet');
-const mythx = require('./lib/mythx');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
 const contracts = require('truffle-workflow-compile');
 const util = require('util');
 const yaml = require('js-yaml');
 
-const readFile = util.promisify(fs.readFile);
-const contractsCompile = util.promisify(contracts.compile);
+
+// FIXME: util.promisify breaks compile internal call to writeContracts
+// const contractsCompile = util.promisify(contracts.compile);
+const contractsCompile = config => {
+    return new Promise((resolve, reject) => {
+        contracts.compile(config, (err, result) => {
+            if (err) {
+                reject(err);
+                return ;
+            }
+            resolve(result);
+        });
+    });
+}
 
 /**
  *
