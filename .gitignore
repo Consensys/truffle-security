@@ -1,5 +1,6 @@
 *~
+.nyc_output
+/.npmrc
+/ChangeLog
 /node_modules
 /tmp
-/.npmrc
-.nyc_output
