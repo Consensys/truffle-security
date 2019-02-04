@@ -32,7 +32,7 @@ so that in the future you can specifiy this globally. See [truffle issue #1695](
 
 By default, the plugin is configured with a MythX trial account that
 allows a limited number of requests and may lack some analysis features.
-To get full access, visit the [MythX website](https://mythx.io) with a 
+To get full access, visit the [MythX website](https://mythx.io) with a
 web3-enabled browser and create a free user account. Check out the
 [MythX getting started guide](https://docs.mythx.io/en/latest/main/getting-started.html)
 for detailed instructions.
@@ -82,20 +82,24 @@ solidity file, you can also give either a relative or absolute path
 the a JSON file the `build/contracts` directory. This is useful if
 you are running inside a shell that contains command completion.
 
-Here is an example:
+Here is an example from the [MythX Devcon4 Workshop](https://github.com/ConsenSys/mythx-playground/tree/master/exercise3):
 
 ```console
 $ truffle run verify SimpleSuicide
+Compiling ./contracts/Etherbank.sol...
 Compiling ./contracts/Migrations.sol...
-Compiling ./contracts/SimpleDAO.sol...
-Compiling ./contracts/simple_suicide.sol...
-Compiling ./contracts/suicide.sol...
+Compilation warnings encountered:
 
-/tmp/github/vulnerable-truffle-project/contracts/SimpleSuicide.sol
-  4:4  error  The function '_function_0xa56a3b5a' executes the SUICIDE instruction                     SWC-106
-  0:0  error  Functions that do not have a function visibility type specified are 'public' by default  SWC-100
+/src/external-vcs/github/consensys/devcon4-playground/exercise3/contracts/Etherbank.sol:17:22: Warning: Unused local variable.
+      (bool success, bytes memory data) = msg.sender.call.value(amount)("");
+                     ^---------------^
 
-✖ 2 problems (2 errors, 0 warnings)
+/tmp/devcon4-playground/exercise3/contracts/Etherbank.sol
+   1:0   warning  A floating pragma is set                       SWC-103
+  10:22  warning  The binary addition can overflow               SWC-101
+  37:34  error    A call to a user-supplied address is executed  SWC-107
+
+✖ 3 problems (1 error, 2 warnings)
 
 ```
 
@@ -108,19 +112,17 @@ Here is an example of using the  `table` format:
 ```
 $ truffle run verify --style table
 
-/src/external-vcs/github/vulnerable-truffle-project/contracts/SimpleDAO.sol
+/tmp/devcon4-playground/exercise3/contracts/Etherbank.sol
 
-║ Line     │ Column   │ Type     │ Message                                                │ Rule ID      ║
-╟──────────┼──────────┼──────────┼────────────────────────────────────────────────────────┼──────────────╢
-║ 12       │ 4        │ error    │ The binary subtraction can underflow.                  │ SWC-101      ║
-║ 17       │ 14       │ error    │ State variable visibility is not set explictly.        │ SWC-108      ║
-║ 0        │ 0        │ error    │ Contracts should be deployed with the same             │ SWC-103      ║
-║          │          │          │ compiler version and flags that they have been         │              ║
-║          │          │          │ tested with thoroughly.                                │              ║
+║ Line     │ Column   │ Type     │ Message                                                │ Rule ID              ║
+╟──────────┼──────────┼──────────┼────────────────────────────────────────────────────────┼──────────────────────╢
+║ 1        │ 0        │ warning  │ A floating pragma is set.                              │ SWC-103              ║
+║ 10       │ 22       │ warning  │ The binary addition can overflow.                      │ SWC-108              ║
+║ 37       │ 34       │ error    │ A call to a user-supplied address is executed.         │ SWC-103              ║
 
-╔════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-║ 3 Errors                                                                                               ║
-╟────────────────────────────────────────────────────────────────────────────────────────────────────────╢
-║ 0 Warnings                                                                                             ║
-╚════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ 1 Error                                                                                                        ║
+╟────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+║ 2 Warnings                                                                                                     ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```

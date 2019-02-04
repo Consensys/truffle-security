@@ -137,17 +137,17 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
             clientToolName: 'truffle',
         };
 
-        analyzeOpts.data.analysisMode = analyzeOpts.mode || 'full';
+        analyzeOpts.data.analysisMode = analyzeOpts.mode || 'quick';
 
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
-	    if (config.debug) {
-		config.logger.debug(`UUID for this job is ${status.uuid}`);
-		if (config.debug > 1) {
-		    config.logger.debug(`${util.inspect(issues, {depth: null})}`)
-		    config.logger.debug(`${util.inspect(status, {depth: null})}`);
-		}
-	    }
+            if (config.debug) {
+                config.logger.debug(`UUID for this job is ${status.uuid}`);
+                if (config.debug > 1) {
+                    config.logger.debug(`${util.inspect(issues, {depth: null})}`)
+                    config.logger.debug(`${util.inspect(status, {depth: null})}`);
+                }
+            }
             if (status.status === 'Error') {
                 return [status, null];
             } else {
@@ -226,7 +226,7 @@ async function analyze(config) {
             armletOptions.ethAddress = process.env.MYTHX_ETH_ADDRESS;
         } else if (process.env.MYTHX_EMAIL) {
             armletOptions.email = process.env.MYTHX_EMAIL;
-	}
+        }
     }
 
     const client = new armlet.Client(armletOptions);
@@ -234,7 +234,7 @@ async function analyze(config) {
     if (config.uuid) {
         await client.getIssues(config.uuid)
             .then(results => {
-		ghettoReport(config.logger.log, results);
+                ghettoReport(config.logger.log, results);
             }).catch(err => {
                 config.logger.log(err)
             });
