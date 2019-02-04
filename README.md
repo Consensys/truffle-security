@@ -30,14 +30,12 @@ so that in the future you can specifiy this globally. See [truffle issue #1695](
 
 ## Set `MYTHX` environment variables.
 
-Out of the box you get access which is somewhat limited in the number
-of analsyes you can run and the kinds of capabilities available.  To
-get a higher level of access, a user account is required top use the
-MythX API. To get your free account, you have to visit the the [MythX
-website](https://mythx.io) with a web3-enabled browser. Check out the
-[MythX getting started
-guide](https://docs.mythx.io/en/latest/main/getting-started.html) for
-detailed instructions.
+By default, the plugin is configured with a MythX trial account that
+allows a limited number of requests and may lack some analysis features.
+To get full access, visit the [MythX website](https://mythx.io) with a 
+web3-enabled browser and create a free user account. Check out the
+[MythX getting started guide](https://docs.mythx.io/en/latest/main/getting-started.html)
+for detailed instructions.
 
 After setting up an account, set the following enviromment variables to your ETH address and password:
 
@@ -101,7 +99,7 @@ Compiling ./contracts/suicide.sol...
 
 ```
 
-Note that in above that `analyze` may invoke `compile` when sources are not up to date.
+Note that in above that `verify` may invoke `compile` when sources are not up to date.
 
 The default report style is `stylish` however you may want to experiment with other styles.
 Here is an example of using the  `table` format:
@@ -114,10 +112,8 @@ $ truffle run verify --style table
 
 ║ Line     │ Column   │ Type     │ Message                                                │ Rule ID      ║
 ╟──────────┼──────────┼──────────┼────────────────────────────────────────────────────────┼──────────────╢
-║ 12       │ 4        │ error    │ A possible integer overflow exists in the function     │ SWC-101      ║
-║          │          │          │ '_function_0x00362a95'.                                │              ║
-║ 17       │ 14       │ error    │ This contract executes a message call to the           │ SWC-107      ║
-║          │          │          │ address of the transaction sender.                     │              ║
+║ 12       │ 4        │ error    │ The binary subtraction can underflow.                  │ SWC-101      ║
+║ 17       │ 14       │ error    │ State variable visibility is not set explictly.        │ SWC-108      ║
 ║ 0        │ 0        │ error    │ Contracts should be deployed with the same             │ SWC-103      ║
 ║          │          │          │ compiler version and flags that they have been         │              ║
 ║          │          │          │ tested with thoroughly.                                │              ║
