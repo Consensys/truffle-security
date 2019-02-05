@@ -81,17 +81,9 @@ describe('trufstuf', () => {
         assert.ok(result);
     });
 
-    /*
-    FIXME: mock staleBuildContract
     it('should return paths of filtered JSON files', async () => {
-        const staleBuildContractStub = sinon.stub(trufstuf, 'staleBuildContract');
-        staleBuildContractStub.onFirstCall().resolves(true);
-        staleBuildContractStub.onSecondCall().resolves(false);
-
-        statStub
-            .onFirstCall().yields(null, { mtime: 1000000 });
-        statStub
-            .onSecondCall().yields('error');
+        statStub.yields(null, { mtime: 1000000 });
+        statStub.onCall(2).yields('error');
         
 
         readdirStub.yields(null, [
@@ -105,5 +97,4 @@ describe('trufstuf', () => {
             '/test/build/contracts/OtherContract.json',
         ]);
     });
-    */
 });
