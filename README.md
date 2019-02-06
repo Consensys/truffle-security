@@ -58,7 +58,7 @@ Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
 
   Options:
-    --debug     Provide additional debug output. Use debug=2 for more
+    --debug     Provide additional debug output. Use --debug=2 for more
                 verbose output
     --uuid *UUID*
                 Print JSON results from a prior run having *UUID*
