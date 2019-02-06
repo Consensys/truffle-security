@@ -2,7 +2,7 @@
 
 
 #: Run lint and then tests
-check: lint
+check: lint-fix
 	npx mocha test/test*.js
 
 #: same thing as "make check"

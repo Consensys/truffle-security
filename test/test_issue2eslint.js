@@ -82,7 +82,7 @@ describe('issues2Eslint', function() {
                 fatal: false,
                 message: 'Head message Tail message',
                 mythXseverity: 'High',
-                severity: 3,
+                severity: 2,
             },
             res);
         });
@@ -126,7 +126,7 @@ describe('issues2Eslint', function() {
                 fatal: false,
                 message: 'Head message Tail message',
                 mythXseverity: 'High',
-                severity: 3,
+                severity: 2,
             }, res);
         });
 
@@ -205,8 +205,8 @@ describe('issues2Eslint', function() {
             const result = remappedMythXOutput.map(output => issuesObject.convertMythXReport2EsIssue(output, true));
 
             assert.deepEqual(result, [{
-                errorCount: 0,
-                warningCount: 1,
+                errorCount: 1,
+                warningCount: 0,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
                 filePath: '/tmp/contracts/simple_dao.sol',
@@ -219,7 +219,7 @@ describe('issues2Eslint', function() {
                     message: 'Head message',
                     ruleId: 'SWC-000',
                     mythXseverity: 'High',
-                    severity: 3,
+                    severity: 2,
                 }],
             }]);
         });
@@ -299,8 +299,8 @@ describe('issues2Eslint', function() {
             issuesObject.setIssues(mythXOutput);
             const result = issuesObject.getEslintIssues(true);
             assert.deepEqual(result, [{
-                errorCount: 0,
-                warningCount: 1,
+                errorCount: 1,
+                warningCount: 0,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
                 filePath: '/tmp/contracts/simple_dao.sol',
@@ -312,7 +312,7 @@ describe('issues2Eslint', function() {
                     endLine: 12,
                     message: 'Head message',
                     mythXseverity: 'High',
-                    severity: 3,
+                    severity: 2,
                     fatal: false,
                 }],
             }])
