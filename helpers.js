@@ -70,7 +70,7 @@ given, all are analyzed.
 
 Options:
   --debug    Provide additional debug output. Use debug=2 for more
-             verboser output
+             verbose output
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
              Note: this is still a bit raw and will be improved

@@ -58,7 +58,8 @@ Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
 
   Options:
-    --debug     Provide additional debug output
+    --debug     Provide additional debug output. Use debug=2 for more
+                verbose output
     --uuid *UUID*
                 Print JSON results from a prior run having *UUID*
                 Note: this is still a bit raw and will be improved
@@ -93,7 +94,7 @@ Compiling ./contracts/Etherbank.sol...
 Compiling ./contracts/Migrations.sol...
 Compilation warnings encountered:
 
-/src/external-vcs/github/consensys/devcon4-playground/exercise3/contracts/Etherbank.sol:17:22: Warning: Unused local variable.
+/tmp/devcon4-playground/exercise3/contracts/Etherbank.sol:17:22: Warning: Unused local variable.
       (bool success, bytes memory data) = msg.sender.call.value(amount)("");
                      ^---------------^
 
