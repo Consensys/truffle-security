@@ -10,7 +10,7 @@ const helpers = require('./helpers');
 
 /**
  *
- * Main "truffle run analyze" entry point.
+ * Main "truffle run verify" entry point.
  *
  * @param {config} Object a `truffle-config` configuration object
  */
