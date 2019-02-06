@@ -57,13 +57,13 @@ function versionJSON2String(jsonResponse) {
 
 /**
  *
- * Handles: truffle run analyze --help
+ * Handles: truffle run verify --help
  *
  * @returns promise which resolves after help is shown
  */
 function printHelpMessage() {
     return new Promise(resolve => {
-        const helpMessage = `Usage: truffle run analyze [options] [*contract-name1* [*contract-name2*] ...]
+        const helpMessage = `Usage: truffle run verify [options] [*contract-name1* [*contract-name2*] ...]
 
 Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
@@ -92,7 +92,7 @@ Options:
 
 /**
  *
- * Handles: truffle run analyze --version
+ * Handles: truffle run verify --version
  * Shows version information for this plugin and each of the MythX components.
  *
  * @returns promise which resolves after MythX version information is shown
@@ -254,7 +254,7 @@ async function analyze(config) {
     await contractsCompile(config);
 
 
-    // Extract list of contracts passed in cli to analyze
+    // Extract list of contracts passed in cli to verify
     const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
 
     // Get list of smart contract build json files from truffle build folder
