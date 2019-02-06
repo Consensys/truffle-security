@@ -2,5 +2,6 @@
 .nyc_output
 /.npmrc
 /ChangeLog
+/README.html
 /node_modules
 /tmp

@@ -6,6 +6,10 @@
 
 This plugin adds automated smart contract security analysis to the [Truffle framework](https://truffleframework.com/docs/truffle/overview). It is based on [MythX](https://mythx.io), the security analysis API for Ethereum smart contracts.
 
+This is a [truffle run
+plugin](https://github.com/trufflesuite/truffle/releases/tag/v5.0.0#user-content-what-s-new-in-truffle-v5-new-truffle-run),
+so truffle version 5.0.0 or greater is required.
+
 # Setup
 
 ## Install the plugin:

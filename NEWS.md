@@ -1,5 +1,5 @@
 v1.0.0 - 2019-02-04
--------------------
+-----------------------
 
 - Name change: change the package name and git repo from `truffle-analyze` to
   `truffle-security` and the invocation changes from `truffle run analyze` to

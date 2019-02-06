@@ -69,9 +69,10 @@ Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
 
 Options:
-  --debug    Provide additional debug output
+  --debug    Provide additional debug output. Use debug=2 for more
+             verboser output
   --uuid *UUID*
-             Print JSON results from a prior run having *UUID*
+             Print in YAML results from a prior run having *UUID*
              Note: this is still a bit raw and will be improved
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
@@ -148,6 +149,9 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         };
 
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'quick';
+        if (config.debug > 1) {
+            config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`)
+        }
 
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
@@ -195,8 +199,8 @@ function doReport(config, objects, errors) {
     if (errors.length > 0) {
         config.logger.error("Internal MythX errors encountered:");
         errors.forEach(err => {
-            config.logger.error(err);
-            if (err.stack) {
+            config.logger.error(err.error || err);
+            if (config.debug > 1 && err.stack) {
                 config.logger.log(err.stack);
             };
         });
