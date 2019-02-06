@@ -1,3 +1,13 @@
+v1.0.1 - 2019-02-06
+-----------------------
+
+- doc fixes
+  * note we work on truffle 5.0.0 or greater
+  * note --debug=2 option
+  * truffle-analyze -> truffle-security
+- fix recent versions of truffle mangling bytecode
+- fix bux introduced in 1.0.0 to filter migrations
+
 v1.0.0 - 2019-02-04
 -----------------------
 
