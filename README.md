@@ -33,7 +33,7 @@ export MYTHX_PASSWORD='Put your password in here!'
 
 ## Running Security Analyses
 
-Once the plugin is installed you'll have an additional command available. Running `truffle run verify` analyzes your project for security vulnerabilies. You can either analyze a specific contract by specifying a contract name (e.g. `truffle run verify MyContract` or the entire project by not providing a name/
+Once the plugin is installed the `truffle run verify` becomes available. You can either analyze a specific contract by running `truffle run verify <contract-name>` or the entire project leaving out the contract name.
 
 **Your project must compile successfully for the security analysis to work.** Note that the `verify` command invokes `truffle compile` automatically if the build files are not up to date.
 
