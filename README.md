@@ -2,13 +2,11 @@
 [![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-security/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-security?branch=master)
 
 
-# Truffle Security Analysis - MythX Plugin
+# MythX Security Analysis Plugin for Truffle Framework
 
 This plugin adds automated smart contract security analysis to the [Truffle framework](https://truffleframework.com/docs/truffle/overview). It is based on [MythX](https://mythx.io), the security analysis API for Ethereum smart contracts.
 
-This is a [truffle run
-plugin](https://github.com/trufflesuite/truffle/releases/tag/v5.0.0#user-content-what-s-new-in-truffle-v5-new-truffle-run),
-so truffle version 5.0.0 or greater is required.
+The MythX plugin is compatible with Truffle 5.0 or higher.
 
 # Setup
 
@@ -20,7 +18,7 @@ $ npm install truffle-security
 
 ## Enable the plugin
 
-In your truffle project put in `truffle.js`:
+Currently, the plugin must be activated on a per-project basis. Add the following to `truffle.js` in the root directory of your Truffle project:
 
 ```javascript
 module.exports = {
@@ -28,29 +26,64 @@ module.exports = {
 };
 ```
 
-For now `truffle.js` needs to be adjusted for each project. However, changes to truffle are planned
-so that in the future you can specifiy this globally. See [truffle issue #1695](https://github.com/trufflesuite/truffle/issues/1695)
+By default, the plugin is configured with a MythX trial account that allows a limited number of requests. You can set up a free account on the [MythX website](https://mythx.io) to get full access.
 
-## Set `MYTHX` environment variables.
-
-By default, the plugin is configured with a MythX trial account that
-allows a limited number of requests and may lack some analysis features.
-To get full access, visit the [MythX website](https://mythx.io) with a
-web3-enabled browser and create a free user account. Check out the
-[MythX getting started guide](https://docs.mythx.io/en/latest/main/getting-started.html)
-for detailed instructions.
-
-After setting up an account, set the following enviromment variables to your ETH address and password:
+After setting up an account, set the following enviromment variables to your ETH address and password (add this to your `.bashrc` or `.bash_profile` for added convenience):
 
 ```bash
 export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
 export MYTHX_PASSWORD='Put your password in here!'
 ```
 
-# Using Truffle Security
+# Running Security Analysis on your Truffle Project
+
+Once the plugin is installed you'll have an additional command available. Running `truffle run verify` analyzes your project for security vulnerabilies. You can either analyze a specific contract by specifying a contract name (e.g. `truffle run verify MyContract` or the entire project by not providing a name/
+
+**Your project must compile successfully for the security analysis to work.** Note that the `verify` command invokes `truffle compile` automatically if the build files are not up to date.
+
+Here is the output of `truffle verify` for an [example](https://github.com/ConsenSys/mythx-playground/tree/master/exercise2) from the [DevCon4 MythX Workshop](https://github.com/ConsenSys/mythx-workshop):
 
 ```console
-$ truffle run verify help
+$ truffle run verify
+
+/Projects/mythx-playground/exercise2/contracts/Migrations.sol
+  1:0  warning  A floating pragma is set  SWC-103
+
+/Users/bernhardmueller/Projects/mythx-playground/exercise2/contracts/Tokensale.sol
+   1:0   warning  A floating pragma is set                SWC-103
+  16:29  warning  The binary multiplication can overflow  SWC-101
+  18:8   warning  The binary addition can overflow        SWC-101
+
+✖ 4 problems (0 errors, 4 warnings)
+```
+
+Here is an example of analyzing a single contract and using the `table` report style:
+
+```
+$ truffle run verify --style table
+
+/Projects/mythx-playground/exercise2/contracts/Tokensale.sol
+
+║ Line     │ Column   │ Type     │ Message                                                │ Rule ID              ║
+╟──────────┼──────────┼──────────┼────────────────────────────────────────────────────────┼──────────────────────╢
+║ 1        │ 0        │ warning  │ A floating pragma is set.                              │ SWC-103              ║
+║ 16       │ 29       │ warning  │ The binary multiplication can overflow.                │ SWC-101              ║
+║ 18       │ 8        │ warning  │ The binary addition can overflow.                      │ SWC-101              ║
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ 0 Errors                                                                                                       ║
+╟────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+║ 4 Warnings                                                                                                     ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+```
+
+# Advanced Configuration
+
+Run `truffle run verify --help` to show advanced configuration options.
+
+```console
+$ truffle run verify --help
 
   Usage:        truffle run verify [options] [*contract-name1* [contract-name2*] ...]
 
@@ -72,61 +105,4 @@ given, all are analyzed.
                 Limit MythX analysis time to *s* seconds.
                 The default is 120 seconds (two minutes).
     --version  Show package and MythX version information.
-```
-
-Runs MythX analyses on given Solidity contracts. If no contracts are given, all are analyzed.
-
-Options are deliberately sparse since we want simple interaction. Most
-of the complexity is hidden behind the MythX.
-
-If you leave off a _contract-name_, we'll find one inside the
-project. If you have more than one contract in the project you should
-specify which one you want to use. Instead of a contract name inside a
-solidity file, you can also give either a relative or absolute path
-the a JSON file the `build/contracts` directory. This is useful if
-you are running inside a shell that contains command completion.
-
-Here is an example from the [MythX Devcon4 Workshop](https://github.com/ConsenSys/mythx-playground/tree/master/exercise3):
-
-```console
-$ truffle run verify SimpleSuicide
-Compiling ./contracts/Etherbank.sol...
-Compiling ./contracts/Migrations.sol...
-Compilation warnings encountered:
-
-/tmp/devcon4-playground/exercise3/contracts/Etherbank.sol:17:22: Warning: Unused local variable.
-      (bool success, bytes memory data) = msg.sender.call.value(amount)("");
-                     ^---------------^
-
-/tmp/devcon4-playground/exercise3/contracts/Etherbank.sol
-   1:0   warning  A floating pragma is set                       SWC-103
-  10:22  warning  The binary addition can overflow               SWC-101
-  37:34  error    A call to a user-supplied address is executed  SWC-107
-
-✖ 3 problems (1 error, 2 warnings)
-
-```
-
-Note that in above that `verify` may invoke `compile` when sources are not up to date.
-
-The default report style is `stylish` however you may want to experiment with other styles.
-Here is an example of using the  `table` format:
-
-
-```
-$ truffle run verify --style table
-
-/tmp/devcon4-playground/exercise3/contracts/Etherbank.sol
-
-║ Line     │ Column   │ Type     │ Message                                                │ Rule ID              ║
-╟──────────┼──────────┼──────────┼────────────────────────────────────────────────────────┼──────────────────────╢
-║ 1        │ 0        │ warning  │ A floating pragma is set.                              │ SWC-103              ║
-║ 10       │ 22       │ warning  │ The binary addition can overflow.                      │ SWC-108              ║
-║ 37       │ 34       │ error    │ A call to a user-supplied address is executed.         │ SWC-103              ║
-
-╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-║ 1 Error                                                                                                        ║
-╟────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
-║ 2 Warnings                                                                                                     ║
-╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
