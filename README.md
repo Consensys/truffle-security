@@ -8,8 +8,16 @@ This plugin adds automated smart contract security analysis to the [Truffle fram
 
 ## Installing the Plugin
 
+To install the latest stable version from NPM:
+
 ```console
-$ npm install truffle-security
+$ npm install -g truffle-security
+```
+
+If you're feeling adventurous, you can also install the from the master branch:
+
+```
+$ npm install -g git+https://git@github.com/ConsenSys/truffle-security.git
 ```
 
 ## Configuration
