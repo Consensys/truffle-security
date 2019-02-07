@@ -7,8 +7,10 @@ const { MythXIssues } = require('./lib/issues2eslint');
 const contracts = require('truffle-workflow-compile');
 const util = require('util');
 const yaml = require('js-yaml');
+const asyncPool = require('tiny-async-pool');
 
 
+const defaultAnalyzeRateLimit = 4;
 // FIXME: util.promisify breaks compile internal call to writeContracts
 // const contractsCompile = util.promisify(contracts.compile);
 const contractsCompile = config => {
@@ -21,7 +23,7 @@ const contractsCompile = config => {
             resolve(result);
         });
     });
-}
+};
 
 /**
  *
@@ -82,6 +84,8 @@ Options:
   --timeout *seconds* ,
           Limit MythX analyses time to *s* seconds.
           The default is 120 seconds (two minutes).
+  --rateLimit *N*
+             Analyze maxmum N contracts at the moment.
   --version show package and MythX version information
 `;
         // FIXME: decide if this is okay or whether we need
@@ -121,7 +125,7 @@ function printVersion() {
  * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
-const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
+const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateLimit = defaultAnalyzeRateLimit) => {
     /**
    * Multiple smart contracts need to be run concurrently
    * to speed up analyze report output.
@@ -130,12 +134,12 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
    * are finished.
    */
 
-    const results = await Promise.all(jsonFiles.map(async file => {
+    const results = await asyncPool(rateLimit, jsonFiles, async file => {
         const buildObj = await trufstuf.parseBuildJson(file);
 
         /**
-         * If contractNames have been passed then skip analyze for unwanted ones.
-         */
+     * If contractNames have been passed then skip analyze for unwanted ones.
+     */
         if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
             return [null, null];
         }
@@ -150,7 +154,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
 
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'quick';
         if (config.debug > 1) {
-            config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`)
+            config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`);
         }
 
         try {
@@ -158,7 +162,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
             if (config.debug) {
                 config.logger.debug(`UUID for this job is ${status.uuid}`);
                 if (config.debug > 1) {
-                    config.logger.debug(`${util.inspect(issues, {depth: null})}`)
+                    config.logger.debug(`${util.inspect(issues, {depth: null})}`);
                     config.logger.debug(`${util.inspect(status, {depth: null})}`);
                 }
             }
@@ -171,7 +175,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null) => {
         } catch (err) {
             return [err, null];
         }
-    }));
+    });
 
     return results.reduce((accum, curr) => {
         const [ err, obj ] = curr;
@@ -188,7 +192,7 @@ function doReport(config, objects, errors) {
     const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
     const eslintIssues = objects
         .map(obj => obj.getEslintIssues(spaceLimited))
-        .reduce((acc, curr) => acc.concat(curr), []);;
+        .reduce((acc, curr) => acc.concat(curr), []);
 
     // FIXME: temporary solution until backend will return correct filepath and output.
     const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
@@ -197,12 +201,12 @@ function doReport(config, objects, errors) {
     config.logger.log(formatter(eslintIssuesBtBaseName));
 
     if (errors.length > 0) {
-        config.logger.error("Internal MythX errors encountered:");
+        config.logger.error('Internal MythX errors encountered:');
         errors.forEach(err => {
             config.logger.error(err.error || err);
             if (config.debug > 1 && err.stack) {
                 config.logger.log(err.stack);
-            };
+            }
         });
     }
 }
@@ -211,11 +215,11 @@ function doReport(config, objects, errors) {
 // We will need this until we can beef up information in UUID retrieval
 function ghettoReport(logger, results) {
     if (results.length === 0) {
-        logger("No issues found");
-        return
+        logger('No issues found');
+        return;
     }
     for (const group of results) {
-        logger(group.sourceList.join(', '))
+        logger(group.sourceList.join(', '));
         for (const issue of group.issues) {
             logger(yaml.safeDump(issue));
         }
@@ -227,6 +231,11 @@ function ghettoReport(logger, results) {
  * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
+    const rateLimit = config.rateLimit || defaultAnalyzeRateLimit;
+    if (isNaN(rateLimit)) {
+        config.logger.log('rateLimit parameter should be a number.');
+        return;
+    }
     const armletOptions = {
         clientToolName: 'truffle'  // client chargeback
     };
@@ -265,10 +274,10 @@ async function analyze(config) {
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
     if (!config.style) {
-        config.style = 'stylish'
+        config.style = 'stylish';
     }
 
-    const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames);
+    const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames, rateLimit);
     doReport(config, objects, errors);
 }
 
@@ -305,14 +314,14 @@ function compareLineCol(line1, column1, line2, column2) {
 
 */
 function compareMessLCRange(mess1, mess2) {
-    const c = compareLineCol(mess1.line, mess1.column, mess2.line, mess2.column)
+    const c = compareLineCol(mess1.line, mess1.column, mess2.line, mess2.column);
     return c != 0 ? c : compareLineCol(mess1.endLine, mess1.endCol, mess2.endLine, mess2.endCol);
 }
 
 async function writeContracts(contracts, options) {
     var logger = options.logger || console;
 
-    const result = await promisify(mkdirp)(options.contracts_build_directory);
+    await promisify(mkdirp)(options.contracts_build_directory);
 
     if (options.quiet != true && options.quietWrite != true) {
         logger.log('Writing artifacts to .' + path.sep + path.relative(options.working_directory, options.contracts_build_directory) + OS.EOL);
@@ -375,7 +384,7 @@ const groupEslintIssuesByBasename = issues => {
             return compareMessLCRange(mess1, mess2);
         });
 
-    };
+    }
     return issueGroups;
 };
 
