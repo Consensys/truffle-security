@@ -82,7 +82,7 @@ $ truffle run verify --style table
 
 ```
 
-## Advanced Configuration
+## Advanced Options
 
 Run `truffle run verify --help` to show advanced configuration options.
 
