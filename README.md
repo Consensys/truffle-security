@@ -6,15 +6,13 @@
 
 This plugin adds automated smart contract security analysis to the [Truffle framework](https://truffleframework.com/docs/truffle/overview). It is based on [MythX](https://mythx.io), the security analysis API for Ethereum smart contracts. The plugin is compatible with Truffle 5.0 or higher.
 
-# Setup
-
-## Install the plugin:
+## Installing the Plugin
 
 ```console
 $ npm install truffle-security
 ```
 
-## Enable the plugin
+## Configuration
 
 Currently, the plugin must be activated on a per-project basis. Add the following to `truffle.js` in the root directory of your Truffle project:
 
@@ -33,7 +31,7 @@ export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
 export MYTHX_PASSWORD='Put your password in here!'
 ```
 
-# Running Security Analysis on your Truffle Project
+## Running Security Analyses
 
 Once the plugin is installed you'll have an additional command available. Running `truffle run verify` analyzes your project for security vulnerabilies. You can either analyze a specific contract by specifying a contract name (e.g. `truffle run verify MyContract` or the entire project by not providing a name/
 
@@ -76,7 +74,7 @@ $ truffle run verify --style table
 
 ```
 
-# Advanced Configuration
+## Advanced Configuration
 
 Run `truffle run verify --help` to show advanced configuration options.
 
