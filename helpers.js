@@ -138,8 +138,8 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
         const buildObj = await trufstuf.parseBuildJson(file);
 
         /**
-     * If contractNames have been passed then skip analyze for unwanted ones.
-     */
+         * If contractNames have been passed then skip analyze for unwanted ones.
+         */
         if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
             return [null, null];
         }
@@ -188,7 +188,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
     }, { errors: [], objects: [] });
 };
 
-function doReport(config, objects, errors) {
+function doReport(config, objects, errors, notFoundContracts) {
     const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
     const eslintIssues = objects
         .map(obj => obj.getEslintIssues(spaceLimited))
@@ -199,6 +199,10 @@ function doReport(config, objects, errors) {
 
     const formatter = getFormatter(config.style);
     config.logger.log(formatter(eslintIssuesBtBaseName));
+
+    if (notFoundContracts.length > 0) {
+        config.logger.error(`These smart contracts were not found: ${notFoundContracts.join(', ')}`);
+    }
 
     if (errors.length > 0) {
         config.logger.error('Internal MythX errors encountered:');
@@ -224,6 +228,14 @@ function ghettoReport(logger, results) {
             logger(yaml.safeDump(issue));
         }
     }
+}
+
+const getNotFoundContracts = (mythXIssuesObjects, contracts) => {
+    if (!contracts || contracts.length === 0) {
+        return [];
+    }
+    const mythxContracts = mythXIssuesObjects.map(({ contractName }) => contractName);
+    return contracts.filter(c => !mythxContracts.includes(c));
 }
 
 /**
@@ -278,7 +290,8 @@ async function analyze(config) {
     }
 
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames, rateLimit);
-    doReport(config, objects, errors);
+    const notFoundContracts = getNotFoundContracts(objects, contractNames);
+    doReport(config, objects, errors, notFoundContracts);
 }
 
 
