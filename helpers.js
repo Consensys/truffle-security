@@ -114,6 +114,29 @@ function printVersion() {
     });
 }
 
+// Temporary fix removes fields from analyze data input if empty
+const cleanAnalyDataEmptyProps = data => {
+    const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, ...props } = data;
+    const result = { ...props };
+
+    if (bytecode && bytecode !== '0x') {
+        result.bytecode = bytecode;
+    }
+
+    if (deployedBytecode && deployedBytecode !== '0x') {
+        result.deployedBytecode = deployedBytecode;
+    }
+
+    if(sourceMap) {
+        result.sourceMap = sourceMap;
+    }
+
+    if(deployedSourceMap) {
+        result.deployedSourceMap = deployedSourceMap;
+    }
+
+    return result;
+}
 
 /**
  * Runs MythX security analyses on smart contract build json files found
@@ -147,11 +170,11 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
         const obj = new MythXIssues(buildObj);
 
         let analyzeOpts = {
-            data: obj.buildObj,
             timeout: (config.timeout || 120) * 1000,
             clientToolName: 'truffle',
         };
 
+        analyzeOpts.data = cleanAnalyDataEmptyProps(obj.buildObj);
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'quick';
         if (config.debug > 1) {
             config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`);
