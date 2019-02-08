@@ -6,6 +6,7 @@ const armlet = require('armlet');
 const sinon = require('sinon');
 const trufstuf = require('../lib/trufstuf');
 const mythx = require('../lib/mythx');
+const reporter = require('../lib/reporter');
 const rewiredHelpers = rewire('../helpers');
 const util = require('util');
 
@@ -196,16 +197,18 @@ describe('helpers.js', function() {
     });
 
     describe('doAnalysis', () => {
-        let armletClient, stubAnalyze, debuggerStub;
+        let armletClient, stubAnalyze, debuggerStub, getFormatterStub;
 
         beforeEach(() => {
             armletClient = new armlet.Client({ apiKey: 'test' });
             stubAnalyze = sinon.stub(armletClient, 'analyzeWithStatus');
             debuggerStub = sinon.stub();
+            getFormatterStub = sinon.stub(reporter, 'getFormatter').returns(() => 'fake');
         });
 
         afterEach(() => {
             stubAnalyze.restore();
+            getFormatterStub.restore();
             stubAnalyze = null;
         });
 
@@ -214,7 +217,7 @@ describe('helpers.js', function() {
             const config = {
                 _: [],
                 debug: true,
-                logger: {debug: debuggerStub},
+                logger: { debug: debuggerStub, log: debuggerStub },
                 style: 'test-style',
             }
             const jsonFiles = [
@@ -227,7 +230,7 @@ describe('helpers.js', function() {
                 issues: [{
                     'sourceFormat': 'evm-byzantium-bytecode',
                     'sourceList': [
-                        `${__dirname}/sample-truffle/simple_dao/contracts/SimpleDAO.sol`
+                        `${__dirname}/sample-truffle/simple_dao/contracts/simple_dao.sol`
                     ],
                     'sourceType': 'raw-bytecode',
                     'issues': [{
@@ -266,7 +269,7 @@ describe('helpers.js', function() {
             const config = {
                 _: [],
                 debug: true,
-                logger: {debug: debuggerStub},
+                logger: { debug: debuggerStub, log: debuggerStub },
                 style: 'test-style',
             }
             const jsonFiles = [
@@ -294,7 +297,7 @@ describe('helpers.js', function() {
             const config = {
                 _: [],
                 debug: true,
-                logger: {debug: debuggerStub},
+                logger: { debug: debuggerStub, log: debuggerStub },
                 style: 'test-style',
             }
             const jsonFiles = [

@@ -8,6 +8,7 @@ const contracts = require('truffle-workflow-compile');
 const util = require('util');
 const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
+const reporter = require('./lib/reporter')
 
 
 const defaultAnalyzeRateLimit = 4;
@@ -24,25 +25,6 @@ const contractsCompile = config => {
         });
     });
 };
-
-/**
- *
- * Loads preferred ESLint formatter for warning reports.
- *
- * @param {String} config
- * @returns ESLint formatter module
- */
-function getFormatter(style) {
-    const formatterName = style || 'stylish';
-    try {
-        return require(`eslint/lib/formatters/${formatterName}`);
-    } catch (ex) {
-        ex.message = `\nThere was a problem loading formatter option: ${style} \nError: ${
-            ex.message
-        }`;
-        throw ex;
-    }
-}
 
 
 /**
@@ -134,7 +116,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
    * are finished.
    */
     const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
-    const formatter = getFormatter(config.style);
+    const formatter = reporter.getFormatter(config.style);
     const results = await asyncPool(rateLimit, jsonFiles, async file => {
         const buildObj = await trufstuf.parseBuildJson(file);
 
