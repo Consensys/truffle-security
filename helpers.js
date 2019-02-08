@@ -133,7 +133,8 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
    * async map is used and Promise.all to be notified when all analyses
    * are finished.
    */
-
+    const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
+    const formatter = getFormatter(config.style);
     const results = await asyncPool(rateLimit, jsonFiles, async file => {
         const buildObj = await trufstuf.parseBuildJson(file);
 
@@ -170,6 +171,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
                 return [status, null];
             } else {
                 obj.setIssues(issues);
+                config.logger.log(formatter(obj.getEslintIssues(spaceLimited)));
             }
             return [null, obj];
         } catch (err) {
@@ -188,18 +190,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
     }, { errors: [], objects: [] });
 };
 
-function doReport(config, objects, errors, notFoundContracts) {
-    const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
-    const eslintIssues = objects
-        .map(obj => obj.getEslintIssues(spaceLimited))
-        .reduce((acc, curr) => acc.concat(curr), []);
-
-    // FIXME: temporary solution until backend will return correct filepath and output.
-    const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
-
-    const formatter = getFormatter(config.style);
-    config.logger.log(formatter(eslintIssuesBtBaseName));
-
+function displayErrors(config, errors, notFoundContracts) {
     if (notFoundContracts.length > 0) {
         config.logger.error(`These smart contracts were not found: ${notFoundContracts.join(', ')}`);
     }
@@ -291,7 +282,7 @@ async function analyze(config) {
 
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames, rateLimit);
     const notFoundContracts = getNotFoundContracts(objects, contractNames);
-    doReport(config, objects, errors, notFoundContracts);
+    displayErrors(config, errors, notFoundContracts);
 }
 
 
