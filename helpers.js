@@ -126,16 +126,18 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
     const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, ...props } = data;
     const result = { ...props };
 
-    let unusedFields = [];
+    const unusedFields = [];
 
     if (bytecode && bytecode !== '0x') {
-        unusedFields.push('bytecode');
         result.bytecode = bytecode;
+    } else {
+        unusedFields.push('bytecode');
     }
 
     if (deployedBytecode && deployedBytecode !== '0x') {
-        unusedFields.push('deployedBytecode');
         result.deployedBytecode = deployedBytecode;
+    } else {
+        unusedFields.push('deployedBytecode');
     }
 
     if (sourceMap) {
@@ -150,9 +152,10 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
         unusedFields.push('deployedSourceMap');
     }
 
-    if (debug) {
+    if (debug && unusedFields.length > 0) {
         logger(`Empty JSON data fields from compilation in contract ${props.contractName}: ${unusedFields.join(', ')}`);
     }
+
     return result;
 }
 
@@ -451,4 +454,5 @@ module.exports = {
     printHelpMessage,
     contractsCompile,
     writeContracts,
+    cleanAnalyDataEmptyProps,
 };
