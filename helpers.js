@@ -9,7 +9,6 @@ const util = require('util');
 const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
 
-
 const defaultAnalyzeRateLimit = 4;
 // FIXME: util.promisify breaks compile internal call to writeContracts
 // const contractsCompile = util.promisify(contracts.compile);
@@ -114,27 +113,46 @@ function printVersion() {
     });
 }
 
-// Temporary fix removes fields from analyze data input if empty
-const cleanAnalyDataEmptyProps = data => {
-    const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, ...props } = data;
+/*
+
+   Removes bytecode fields from analyze data input if it is empty.
+   This which can as a result of minor compile problems.
+
+   We still want to submit to get analysis which can work just on the
+   source code or AST. But we want to remove the fields so we don't
+   get complaints from MythX. We will manage what we want to say.
+*/
+const cleanAnalyDataEmptyProps = (data, debug, logger) => {
+    const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, contractName, ...props } = data;
     const result = { ...props };
 
+    let unusedFields = [];
+
     if (bytecode && bytecode !== '0x') {
+        unusedFields.push('bytecode');
         result.bytecode = bytecode;
     }
 
     if (deployedBytecode && deployedBytecode !== '0x') {
+        unusedFields.push('deployedBytecode');
         result.deployedBytecode = deployedBytecode;
     }
 
-    if(sourceMap) {
+    if (sourceMap) {
         result.sourceMap = sourceMap;
+    } else {
+        unusedFields.push('sourceMap');
     }
 
-    if(deployedSourceMap) {
+    if (deployedSourceMap) {
         result.deployedSourceMap = deployedSourceMap;
+    } else {
+        unusedFields.push('deployedSourceMap');
     }
 
+    if (debug) {
+        logger(`Empty JSON data fields from compilation in contract ${contractName}: ${unusedFields.join(', ')}`);
+    }
     return result;
 }
 
@@ -174,7 +192,8 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
             clientToolName: 'truffle',
         };
 
-        analyzeOpts.data = cleanAnalyDataEmptyProps(obj.buildObj);
+        analyzeOpts.data = cleanAnalyDataEmptyProps(obj.buildObj, config.debug,
+                                                    config.logger.debug);
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'quick';
         if (config.debug > 1) {
             config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`);
