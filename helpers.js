@@ -123,7 +123,7 @@ function printVersion() {
    get complaints from MythX. We will manage what we want to say.
 */
 const cleanAnalyDataEmptyProps = (data, debug, logger) => {
-    const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, contractName, ...props } = data;
+    const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, ...props } = data;
     const result = { ...props };
 
     let unusedFields = [];
@@ -151,7 +151,7 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
     }
 
     if (debug) {
-        logger(`Empty JSON data fields from compilation in contract ${contractName}: ${unusedFields.join(', ')}`);
+        logger(`Empty JSON data fields from compilation in contract ${props.contractName}: ${unusedFields.join(', ')}`);
     }
     return result;
 }
