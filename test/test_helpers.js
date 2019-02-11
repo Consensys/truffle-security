@@ -72,6 +72,66 @@ describe('helpers.js', function() {
 
     });
 
+    describe('analyze', () => {
+        it('should call  doAnalyze and report issues', async () => {
+            const config = {
+                contracts_build_directory: '/build/contracts',
+                contracts_directory: '/contracts',
+                _: [],
+                logger: {
+                    log: sinon.stub(),
+                },
+                style: 'stylish',
+            }
+            const helpersModule = rewire('../helpers');
+            
+            const contractsCompileStub = sinon.stub();
+            const doReportStub = sinon.stub();
+            getTruffleBuildJsonFilesStub = sinon
+                .stub(trufstuf, 'getTruffleBuildJsonFiles')
+                .resolves(['test.json']);
+            const getNotFoundContractsStub = sinon.stub().returns([]);
+            const doAnalysisStub = sinon.stub();
+    
+            doAnalysisStub.resolves({ objects: 1, errors: 3 });
+    
+            helpersModule.__set__('doAnalysis', doAnalysisStub);
+            helpersModule.__set__('getNotFoundContracts', getNotFoundContractsStub);
+            helpersModule.__set__('contractsCompile', contractsCompileStub);
+            helpersModule.__set__('doReport', doReportStub);
+
+            await helpersModule.analyze(config);
+            assert.ok(getTruffleBuildJsonFilesStub.calledWith(config.contracts_build_directory));
+            assert.ok(doAnalysisStub.called);
+            assert.ok(getNotFoundContractsStub.calledWith(1, null));
+            assert.ok(doReportStub.calledWith(config, 1, 3, []));
+
+            getTruffleBuildJsonFilesStub.restore();
+        });
+
+        it('should call  doAnalyze and report issues', async () => {
+            const config = {
+                contracts_build_directory: '/build/contracts',
+                contracts_directory: '/contracts',
+                _: [],
+                logger: {
+                    log: sinon.stub(),
+                },
+                style: 'stylish',
+                uuid: 'uuid',
+            }
+            const helpersModule = rewire('../helpers');
+            const ghettoReportStub = sinon.stub();
+            const getIssues = sinon.stub(armlet.Client.prototype, 'getIssues');
+            helpersModule.__set__('ghettoReport', ghettoReportStub);
+            await helpersModule.analyze(config);
+            assert.ok(getIssues.called);
+            assert.ok(ghettoReportStub.called);
+
+            getIssues.restore();
+        });
+    });
+
     describe('Armlet authentication analyze', () => {
         let helpers;
         let readFileStub;
