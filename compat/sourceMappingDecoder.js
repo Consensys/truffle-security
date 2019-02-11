@@ -89,7 +89,7 @@ SourceMappingDecoder.prototype.getLinebreakPositions = function (source) {
 };
 
 /**
- * Retrieve the line/colum position for the given source mapping
+ * Retrieve the line/column position for the given source mapping
  *
  * @param {Object} sourceLocation - object containing attributes {source} and {length}
  * @param {Array} lineBreakPositions - array returned by the function 'getLinebreakPositions'
