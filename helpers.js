@@ -10,7 +10,7 @@ const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
 
 
-const defaultAnalyzeRateLimit = 4;
+const defaultAnalyzeRateLimit = 10;
 // FIXME: util.promisify breaks compile internal call to writeContracts
 // const contractsCompile = util.promisify(contracts.compile);
 const contractsCompile = config => {
@@ -84,7 +84,7 @@ Options:
   --timeout *seconds* ,
           Limit MythX analyses time to *s* seconds.
           The default is 120 seconds (two minutes).
-  --rateLimit *N*
+  --limit *N*
              Analyze maxmum N contracts at the moment.
   --version show package and MythX version information
 `;
@@ -125,7 +125,7 @@ function printVersion() {
  * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
-const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateLimit = defaultAnalyzeRateLimit) => {
+const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
     /**
    * Multiple smart contracts need to be run concurrently
    * to speed up analyze report output.
@@ -134,7 +134,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, rateL
    * are finished.
    */
 
-    const results = await asyncPool(rateLimit, jsonFiles, async file => {
+    const results = await asyncPool(limit, jsonFiles, async file => {
         const buildObj = await trufstuf.parseBuildJson(file);
 
         /**
