@@ -55,7 +55,7 @@ function getFormatter(style) {
  * @returns string  A comma-separated string of tool: version
  */
 function versionJSON2String(jsonResponse) {
-    return Object.keys(jsonResponse).map((key) => `${key}: ${jsonResponse[key]}`).join(', ');
+    return Object.keys(jsonResponse).sort().map((key) => `${key}: ${jsonResponse[key]}`).join(', ');
 }
 
 /**
@@ -106,16 +106,13 @@ Options:
  *
  * @returns promise which resolves after MythX version information is shown
  */
-function printVersion() {
-    return new Promise(resolve => {
-        const pjson = require('./package.json');
-        // FIXME: decide if this is okay or whether we need
-        // to pass in `config` and use `config.logger.log`.
-        console.log(`${pjson.name} ${pjson.version}`);
-        const version = armlet.ApiVersion();
-        console.log(versionJSON2String(version));
-        resolve(null);
-    });
+async function printVersion() {
+    const pjson = require('./package.json');
+    // FIXME: decide if this is okay or whether we need
+    // to pass in `config` and use `config.logger.log`.
+    console.log(`${pjson.name} ${pjson.version}`);
+    const versionInfo = await armlet.ApiVersion();
+    console.log(versionJSON2String(versionInfo));
 }
 
 /*
@@ -461,6 +458,7 @@ const groupEslintIssuesByBasename = issues => {
 module.exports = {
     analyze,
     compareLineCol,
+    versionJSON2String,
     printVersion,
     printHelpMessage,
     contractsCompile,

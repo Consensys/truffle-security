@@ -43,12 +43,13 @@ describe('helpers.js', function() {
         });
 
         it('should call printVersion', async () => {
-            const stubAPI = sinon.stub(armlet, 'ApiVersion').returns('1.0.0');
+            const stubAPI = sinon.stub(armlet, 'ApiVersion').returns({ 'api': '1.0.0' });
             const stubLog = sinon.stub(console, 'log');
             await helpers.printVersion();
             assert.ok(stubAPI.called);
             assert.ok(stubLog.called);
             stubLog.restore();
+            stubAPI.restore();
         });
 
         it('should display helpMessage', async () => {
@@ -68,8 +69,12 @@ describe('helpers.js', function() {
             for (const t of expected) {
                 compareTest(t[0], t[1], t[2], t[3], t[4]);
             }
-        });
+        }); 
 
+        it('should sort and convert object to a string', () => {
+            const res = helpers.versionJSON2String({ mythx: '1.0.1', 'solc': '0.5.0', 'api': '1.0.0' });
+            assert.equal(res, 'api: 1.0.0, mythx: 1.0.1, solc: 0.5.0');
+        })
     });
 
     describe('Armlet authentication analyze', () => {
