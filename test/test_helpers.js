@@ -457,4 +457,30 @@ describe('helpers.js', function() {
             assert.deepEqual(result, truffleJSON);
         });
     });
+
+    describe('analyze', () => {
+        let loggerStub;
+        let config;
+        beforeEach(() => {
+            helpers = rewire('../')
+            loggerStub = sinon.stub();
+            config = {
+                logger: {
+                    log: loggerStub,
+                },
+            };
+        });
+
+        it('should return error when passed value for limit is not a number', async () => {
+            config.limit = 'test';
+            await rewiredHelpers.analyze(config);
+            assert.equal(loggerStub.getCall(0).args[0], 'limit parameter should be a number; got test.')
+        });
+
+        it('should return error when limit is value is out of acceptible range', async () => {
+            config.limit = 20;
+            await rewiredHelpers.analyze(config);
+            assert.equal(loggerStub.getCall(0).args[0], 'limit should be between 0 and 10; got 20.')
+        });
+    });
 });

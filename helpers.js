@@ -290,14 +290,14 @@ const getNotFoundContracts = (mythXIssuesObjects, contracts) => {
  * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
-    const rateLimit = config.rateLimit || defaultAnalyzeRateLimit;
+    const limit = config.limit || defaultAnalyzeRateLimit;
     const log = config.logger.log;
-    if (isNaN(rateLimit)) {
-        log(`rateLimit parameter should be a number; got ${rateLimit}.`);
+    if (isNaN(limit)) {
+        log(`limit parameter should be a number; got ${limit}.`);
         return;
     }
-    if (rateLimit < 0 || rateLimit > defaultAnalyzeRateLimit) {
-        log(`rateLimit should be between 0 and ${defaultAnalyzeRateLimit}; got ${rateLimit}`);
+    if (limit < 0 || limit > defaultAnalyzeRateLimit) {
+        log(`limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`);
         return;
     }
     const armletOptions = {
@@ -342,7 +342,7 @@ async function analyze(config) {
         config.style = 'stylish';
     }
 
-    const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames, rateLimit);
+    const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames, limit);
     const notFoundContracts = getNotFoundContracts(objects, contractNames);
     doReport(config, objects, errors, notFoundContracts);
 }
