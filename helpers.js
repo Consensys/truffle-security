@@ -76,18 +76,21 @@ Options:
              verbose output
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
-             Note: this is still a bit raw and will be improved
+             Note: this is still a bit raw and will be improved.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
-  --style {stylish | unix | visualstudio | table | tap | ...},
+  --style { stylish | unix | visualstudio | table | tap | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
-          Limit MythX analyses time to *s* seconds.
-          The default is 120 seconds (two minutes).
+             Limit MythX analyses time to *s* seconds.
+             The default is 120 seconds (two minutes).
   --limit *N*
-             Analyze maxmum N contracts at the moment.
-  --version show package and MythX version information
+             Have no more than *N* analysis requests pending at a time.
+             As results come back, remaining contracts are submitted.
+             The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
+             set this lower.
+  --version  Show package and MythX version information.
 `;
         // FIXME: decide if this is okay or whether we need
         // to pass in `config` and use `config.logger.log`.
@@ -291,12 +294,18 @@ const getNotFoundContracts = (mythXIssuesObjects, contracts) => {
  */
 async function analyze(config) {
     const rateLimit = config.rateLimit || defaultAnalyzeRateLimit;
+    const log = config.logger.log;
     if (isNaN(rateLimit)) {
-        config.logger.log('rateLimit parameter should be a number.');
+        log(`rateLimit parameter should be a number; got ${rateLimit}.`);
+        return;
+    }
+    if (rateLimit < 0 || rateLimit > defaultAnalyzeRateLimit) {
+        log(`rateLimit should be between 0 and ${defaultAnalyzeRateLimit}; got ${rateLimit}`);
         return;
     }
     const armletOptions = {
-        clientToolName: 'truffle'  // client chargeback
+        // set up for client tool usage tracking under the name 'truffle'
+        clientToolName: 'truffle'
     };
 
     if (process.env.MYTHX_API_KEY) {
@@ -316,9 +325,9 @@ async function analyze(config) {
     if (config.uuid) {
         try {
             const results = await client.getIssues(config.uuid);
-            ghettoReport(config.logger.log, results);
+            ghettoReport(log, results);
         } catch (err) {
-            config.logger.log(err);
+            log(err);
         }
         return ;
     }
