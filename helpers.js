@@ -106,17 +106,13 @@ Options:
  *
  * @returns promise which resolves after MythX version information is shown
  */
-function printVersion() {
-    return new Promise(resolve => {
-        const pjson = require('./package.json');
-        // FIXME: decide if this is okay or whether we need
-        // to pass in `config` and use `config.logger.log`.
-        console.log(`${pjson.name} ${pjson.version}`);
-	armlet.ApiVersion().then(versionInfo => {
-            console.log(versionJSON2String(versionInfo));
-            resolve(null);
-	});
-    });
+async function printVersion() {
+    const pjson = require('./package.json');
+    // FIXME: decide if this is okay or whether we need
+    // to pass in `config` and use `config.logger.log`.
+    console.log(`${pjson.name} ${pjson.version}`);
+    const versionInfo = await armlet.ApiVersion();
+    console.log(versionJSON2String(versionInfo));
 }
 
 /*
