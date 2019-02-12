@@ -458,6 +458,7 @@ const groupEslintIssuesByBasename = issues => {
 module.exports = {
     analyze,
     compareLineCol,
+    versionJSON2String,
     printVersion,
     printHelpMessage,
     contractsCompile,
