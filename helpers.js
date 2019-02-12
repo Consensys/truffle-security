@@ -7,7 +7,7 @@ const { MythXIssues } = require('./lib/issues2eslint');
 const contracts = require('truffle-workflow-compile');
 const util = require('util');
 const yaml = require('js-yaml');
-const asyncPool = require('tiny-async-pool');
+const asyncPool = require('./lib/asyncPool');
 const multiProgress = require('multi-progress');
 const sleep = require('sleep');
 
@@ -294,6 +294,8 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             }
             return [err, null];
         }
+    }, config.debug && function () {
+        config.logger.warn('Maximum number of requests allowed to run analyze contracts is reached. Waiting for one to finish.');
     });
 
     return results.reduce((accum, curr) => {
@@ -317,6 +319,7 @@ function doReport(config, objects, errors, notFoundContracts) {
     const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
 
     const formatter = getFormatter(config.style);
+
     config.logger.log(formatter(eslintIssuesBtBaseName));
 
     if (notFoundContracts.length > 0) {
