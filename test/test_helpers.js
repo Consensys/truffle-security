@@ -43,12 +43,13 @@ describe('helpers.js', function() {
         });
 
         it('should call printVersion', async () => {
-            const stubAPI = sinon.stub(armlet, 'ApiVersion').returns('1.0.0');
+            const stubAPI = sinon.stub(armlet, 'ApiVersion').returns({ 'api': '1.0.0' });
             const stubLog = sinon.stub(console, 'log');
             await helpers.printVersion();
             assert.ok(stubAPI.called);
             assert.ok(stubLog.called);
             stubLog.restore();
+            stubAPI.restore();
         });
 
         it('should display helpMessage', async () => {
@@ -68,8 +69,12 @@ describe('helpers.js', function() {
             for (const t of expected) {
                 compareTest(t[0], t[1], t[2], t[3], t[4]);
             }
-        });
+        }); 
 
+        it('should sort and convert object to a string', () => {
+            const res = helpers.versionJSON2String({ mythx: '1.0.1', 'solc': '0.5.0', 'api': '1.0.0' });
+            assert.equal(res, 'api: 1.0.0, mythx: 1.0.1, solc: 0.5.0');
+        })
     });
 
     describe('analyze', () => {
@@ -133,7 +138,6 @@ describe('helpers.js', function() {
     });
 
     describe('Armlet authentication analyze', () => {
-        let helpers;
         let readFileStub;
         let getTruffleBuildJsonFilesStub;
         let initialEnVars;
@@ -422,6 +426,95 @@ describe('helpers.js', function() {
             assert.ok(!stubAnalyze.called);
             assert.equal(results.errors.length, 0);
             assert.equal(results.objects.length, 0);
+        });
+    });
+
+    describe('cleanAnalyDataEmptyProps', () => {
+        const contractJSON = `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`;
+        let truffleJSON;
+
+        beforeEach(done => {
+            fs.readFile(contractJSON, 'utf8', (err, data) => {
+                if (err) return done(err);
+                truffleJSON = JSON.parse(data);
+                done();
+            });
+        });
+
+        it('should return complete input data when all fields are present', () => {
+            const stub = sinon.stub();
+            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            assert.ok(!stub.called);
+            assert.deepEqual(result, truffleJSON);
+        });
+
+        it('should omit bytecode when bytecode is empty', () => {
+            const stub = sinon.stub();
+            truffleJSON.bytecode = '';
+            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            assert.ok(stub.called);
+            delete truffleJSON.bytecode;
+            assert.deepEqual(result, truffleJSON);
+        });
+
+        it('should omit bytecode when bytecode is 0x', () => {
+            const stub = sinon.stub();
+            truffleJSON.bytecode = '0x';
+            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            assert.ok(stub.called);
+            delete truffleJSON.bytecode;
+            assert.deepEqual(result, truffleJSON);
+        });
+
+        it('should omit deployedBytecode when deployedBytecode is empty', () => {
+            const stub = sinon.stub();
+            truffleJSON.deployedBytecode = '';
+            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            assert.ok(stub.called);
+            delete truffleJSON.deployedBytecode;
+            assert.deepEqual(result, truffleJSON);
+        });
+
+        it('should omit deployedBytecode when deployedBytecode is 0x', () => {
+            const stub = sinon.stub();
+            truffleJSON.deployedBytecode = '0x';
+            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            assert.ok(stub.called);
+            delete truffleJSON.deployedBytecode;
+            assert.deepEqual(result, truffleJSON);
+        });
+
+        it('should omit sourceMap when sourceMap is empty', () => {
+            const stub = sinon.stub();
+            truffleJSON.sourceMap = '';
+            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            assert.ok(stub.called);
+            delete truffleJSON.sourceMap;
+            assert.deepEqual(result, truffleJSON);
+        });
+
+        it('should omit deployedSourceMap when deployedSourceMap is empty', () => {
+            const stub = sinon.stub();
+            truffleJSON.deployedSourceMap = '';
+            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            assert.ok(stub.called);
+            delete truffleJSON.deployedSourceMap;
+            assert.deepEqual(result, truffleJSON);
+        });
+
+        it('should omit empty fields but not log  when debug is false', () => {
+            const stub = sinon.stub();
+            truffleJSON.deployedSourceMap = '';
+            truffleJSON.sourceMap = null;
+            truffleJSON.bytecode = '0x';
+            delete truffleJSON.deployedBytecode;
+            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, false, stub);
+            delete truffleJSON.sourceMap;
+            delete truffleJSON.deployedSourceMap;
+            delete truffleJSON.bytecode;
+            delete truffleJSON.deployedBytecode;
+            assert.ok(!stub.called);
+            assert.deepEqual(result, truffleJSON);
         });
     });
 });

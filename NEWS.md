@@ -7,6 +7,7 @@ v1.0.1 - 2019-02-06
   * truffle-analyze -> truffle-security
 - fix recent versions of truffle mangling bytecode
 - fix bux introduced in 1.0.0 to filter migrations
+- severity levels have been lowered over 1.0.0
 
 v1.0.0 - 2019-02-04
 -----------------------
