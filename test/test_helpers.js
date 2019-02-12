@@ -543,4 +543,36 @@ describe('helpers.js', function() {
             assert.deepEqual(result, truffleJSON);
         });
     });
+
+    describe('getNotFoundContracts', () => {
+        it('should collect contract names which are not found in truffle build contracts directory', () => {
+            const objects = [
+                { contractName: 'Contract1' },
+                { contractName: 'Contract2' },
+            ];
+
+            const result = rewiredHelpers.getNotFoundContracts(objects, ['Contract2', 'NotFoundContract']);
+            assert.deepEqual(result, ['NotFoundContract']);
+        });
+
+        it('should return empty array when contracts parameter is not passed', () => {
+            const objects = [
+                { contractName: 'Contract1' },
+                { contractName: 'Contract2' },
+            ];
+
+            const result = rewiredHelpers.getNotFoundContracts(objects, null);
+            assert.deepEqual(result, []);
+        });
+
+        it('should return empty array when contracts parameter is empty array', () => {
+            const objects = [
+                { contractName: 'Contract1' },
+                { contractName: 'Contract2' },
+            ];
+
+            const result = rewiredHelpers.getNotFoundContracts(objects, []);
+            assert.deepEqual(result, []);
+        });
+    });
 });
