@@ -437,4 +437,5 @@ module.exports = {
     contractsCompile,
     doAnalysis,
     cleanAnalyDataEmptyProps,
+    getNotFoundContracts,
 };
