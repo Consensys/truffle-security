@@ -254,7 +254,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
 	    debugger
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
-                config.logger.debug(`UUID for this job is ${status.uuid}`);
+                config.logger.debug(`UUID for Smart Contract ${obj.buildObj.contractName} is ${status.uuid}`);
                 if (config.debug > 1) {
                     config.logger.debug(`${util.inspect(issues, {depth: null})}`);
                     config.logger.debug(`${util.inspect(status, {depth: null})}`);
@@ -449,7 +449,6 @@ function compareMessLCRange(mess1, mess2) {
     const c = compareLineCol(mess1.line, mess1.column, mess2.line, mess2.column);
     return c != 0 ? c : compareLineCol(mess1.endLine, mess1.endCol, mess2.endLine, mess2.endCol);
 }
-
 
 /**
  * Temporary function which turns eslint issues grouped by filepath
