@@ -50,10 +50,7 @@ Here is the output of `truffle verify` for an [example](https://github.com/Conse
 ```console
 $ truffle run verify
 
-/Projects/mythx-playground/exercise2/contracts/Migrations.sol
-  1:0  warning  A floating pragma is set  SWC-103
-
-/Users/bernhardmueller/Projects/mythx-playground/exercise2/contracts/Tokensale.sol
+/Projects/mythx-playground/exercise2/contracts/Tokensale.sol
    1:0   warning  A floating pragma is set                SWC-103
   16:29  warning  The binary multiplication can overflow  SWC-101
   18:8   warning  The binary addition can overflow        SWC-101
@@ -89,24 +86,29 @@ Run `truffle run verify --help` to show advanced configuration options.
 ```console
 $ truffle run verify --help
 
-  Usage:        truffle run verify [options] [*contract-name1* [contract-name2*] ...]
+Usage: truffle run verify [options] [*contract-name1* [*contract-name2*] ...]
 
 Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
 
-  Options:
-    --debug     Provide additional debug output. Use --debug=2 for more
-                verbose output
-    --uuid *UUID*
-                Print JSON results from a prior run having *UUID*
-                Note: this is still a bit raw and will be improved
-    --mode { quick | full }
-                Perform quick or or in-depth (full) analysis
-    --style {stylish | unix | visualstudio | table | tap | ...}
-                Output reort in the given es-lint style.
-                See https://eslint.org/docs/user-guide/formatters/ for a full list.
-    --timeout *seconds* ,
-                Limit MythX analysis time to *s* seconds.
-                The default is 120 seconds (two minutes).
-    --version  Show package and MythX version information.
+Options:
+  --debug    Provide additional debug output. Use --debug=2 for more
+             verbose output
+  --uuid *UUID*
+             Print in YAML results from a prior run having *UUID*
+             Note: this is still a bit raw and will be improved.
+  --mode { quick | full }
+             Perform quick or in-depth (full) analysis.
+  --style { stylish | unix | json | table | tap | ... },
+             Output report in the given es-lint style style.
+             See https://eslint.org/docs/user-guide/formatters/ for a full list.
+  --timeout *seconds* ,
+             Limit MythX analyses time to *s* seconds.
+             The default is 120 seconds (two minutes).
+  --limit *N*
+             Have no more than *N* analysis requests pending at a time.
+             As results come back, remaining contracts are submitted.
+             The default is 10 contracts, the maximum value, but you can
+             set this lower.
+  --version  Show package and MythX version information.
 ```

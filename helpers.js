@@ -79,7 +79,7 @@ Options:
              Note: this is still a bit raw and will be improved.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
-  --style { stylish | unix | visualstudio | table | tap | ... },
+  --style { stylish | unix | json | table | tap | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
@@ -236,7 +236,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
 };
 
 function doReport(config, objects, errors, notFoundContracts) {
-    const spaceLimited = ['tap', 'markdown'].indexOf(config.style) === -1;
+    const spaceLimited = ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
     const eslintIssues = objects
         .map(obj => obj.getEslintIssues(spaceLimited))
         .reduce((acc, curr) => acc.concat(curr), []);
