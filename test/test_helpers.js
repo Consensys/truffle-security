@@ -147,11 +147,19 @@ describe('helpers.js', function() {
             assert.ok(doReportStub.calledWith(config, 1, 3, []));
         });
 
-        it('should call getIsues when uuid is provided', async () => {
+        it('should call getIssues when uuid is provided', async () => {
             config.uuid = 'test';
             await helpers.analyze(config);
             assert.ok(getIssues.called);
             assert.ok(ghettoReportStub.called);
+        });
+
+        it('should show error when getIssues break', async () => {
+            config.uuid = 'test';
+            getIssues.throws('Error')
+            await helpers.analyze(config);
+            assert.ok(getIssues.called);
+            assert.ok(loggerStub.getCall(0).args[0], 'Error');
         });
     });
 
