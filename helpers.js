@@ -348,12 +348,6 @@ async function analyze(config) {
 }
 
 
-// FIXME: this stuff is cut and paste from truffle-workflow-compile writeContracts
-var mkdirp = require('mkdirp');
-var path = require('path');
-var { promisify } = require('util');
-var OS = require('os');
-
 /**
  * A 2-level line-column comparison function.
  * @returns {integer} -
@@ -382,27 +376,6 @@ function compareLineCol(line1, column1, line2, column2) {
 function compareMessLCRange(mess1, mess2) {
     const c = compareLineCol(mess1.line, mess1.column, mess2.line, mess2.column);
     return c != 0 ? c : compareLineCol(mess1.endLine, mess1.endCol, mess2.endLine, mess2.endCol);
-}
-
-async function writeContracts(contracts, options) {
-    var logger = options.logger || console;
-
-    await promisify(mkdirp)(options.contracts_build_directory);
-
-    if (options.quiet != true && options.quietWrite != true) {
-        logger.log('Writing artifacts to .' + path.sep + path.relative(options.working_directory, options.contracts_build_directory) + OS.EOL);
-    }
-
-    var extra_opts = {
-        network_id: options.network_id
-    };
-
-    const contractNames = Object.keys(contracts).sort();
-    const sources = contractNames.map(c => contracts[c].sourcePath);
-    for (let c of contractNames) {
-        contracts[c].sources = sources;
-    }
-    await options.artifactor.saveAll(contracts, extra_opts);
 }
 
 
@@ -462,6 +435,7 @@ module.exports = {
     printVersion,
     printHelpMessage,
     contractsCompile,
-    writeContracts,
+    doAnalysis,
     cleanAnalyDataEmptyProps,
+    getNotFoundContracts,
 };
