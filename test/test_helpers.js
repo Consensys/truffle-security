@@ -483,4 +483,35 @@ describe('helpers.js', function() {
             assert.equal(loggerStub.getCall(0).args[0], 'limit should be between 0 and 10; got 20.')
         });
     });
+
+    describe('getArmletClient', () => {
+        it('should instantiate as trial user if nothing is passed', () => {
+            const client = rewiredHelpers.getArmletClient();
+            assert.equal(client.ethAddress, rewiredHelpers.trialEthAddress);
+            assert.equal(client.password, rewiredHelpers.trialPassword);
+        });
+
+        it('should create client instance with Api Key', () => {
+            const client = rewiredHelpers.getArmletClient('API_KEY');
+            assert.equal(client.accessToken, 'API_KEY');
+        });
+
+        it('should create client instance with ethAddress and password', () => {
+            const client = rewiredHelpers.getArmletClient(undefined, '0x123456789012345678901234', 'password');
+            assert.equal(client.ethAddress, '0x123456789012345678901234');
+            assert.equal(client.password, 'password');
+        });
+
+        it('should throw error if password is missing', () => {
+            assert.throws(() => {
+                rewiredHelpers.getArmletClient(undefined, '0x123456789012345678901234')
+            });
+        });
+
+        it('should throw error if ethAddress is missing', () => {
+            assert.throws(() => {
+                rewiredHelpers.getArmletClient(undefined, undefined, 'password')
+            });
+        });
+    });
 });

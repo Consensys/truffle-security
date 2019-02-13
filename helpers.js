@@ -10,6 +10,8 @@ const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
 
 
+const trialEthAddress = '0x0000000000000000000000000000000000000000';
+const trialPassword = 'trial';
 const defaultAnalyzeRateLimit = 10;
 
 // FIXME: util.promisify breaks compile internal call to writeContracts
@@ -285,6 +287,21 @@ const getNotFoundContracts = (mythXIssuesObjects, contracts) => {
     return contracts.filter(c => !mythxContracts.includes(c));
 }
 
+const getArmletClient = (apiKey, ethAddress, password, clientToolName = 'truffle') => {
+    const options = { clientToolName };
+    if (apiKey) {
+        options.apiKey = apiKey;
+    } else if (password && ethAddress) {
+        options.ethAddress = ethAddress;
+        options.password = password;
+    } else if (!password && !ethAddress) {
+        options.ethAddress = trialEthAddress;
+        options.password = trialPassword;
+    }
+
+    return new armlet.Client(options);
+}
+
 /**
  *
  * @param {Object} config - truffle configuration object.
@@ -300,24 +317,12 @@ async function analyze(config) {
         log(`limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`);
         return;
     }
-    const armletOptions = {
-        // set up for client tool usage tracking under the name 'truffle'
-        clientToolName: 'truffle'
-    };
 
-    if (process.env.MYTHX_API_KEY) {
-        armletOptions.apiKey = process.env.MYTHX_API_KEY;
-    } else {
-        armletOptions.password = process.env.MYTHX_PASSWORD;
-
-        if (process.env.MYTHX_ETH_ADDRESS) {
-            armletOptions.ethAddress = process.env.MYTHX_ETH_ADDRESS;
-        } else if (process.env.MYTHX_EMAIL) {
-            armletOptions.email = process.env.MYTHX_EMAIL;
-        }
-    }
-
-    const client = new armlet.Client(armletOptions);
+    const client = getArmletClient(
+        process.env.MYTHX_API_KEY,
+        process.env.MYTHX_ETH_ADDRESS,
+        process.env.MYTHX_PASSWORD
+    )
 
     if (config.uuid) {
         try {
@@ -464,4 +469,7 @@ module.exports = {
     contractsCompile,
     writeContracts,
     cleanAnalyDataEmptyProps,
+    getArmletClient,
+    trialEthAddress,
+    trialPassword,
 };
