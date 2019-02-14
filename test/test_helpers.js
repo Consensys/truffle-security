@@ -77,6 +77,92 @@ describe('helpers.js', function() {
         })
     });
 
+    describe('analyze', () => {
+        let loggerStub;
+        let config;
+        let getTruffleBuildJsonFilesStub;
+
+        let contractsCompileStub;
+        let doReportStub;
+        let getNotFoundContractsStub;
+        let doAnalysisStub;
+        let ghettoReportStub;
+        let getIssues;
+            
+
+        beforeEach(() => {
+            getTruffleBuildJsonFilesStub = sinon.stub(trufstuf, 'getTruffleBuildJsonFiles');
+            contractsCompileStub = sinon.stub();
+            doReportStub = sinon.stub();
+            getNotFoundContractsStub = sinon.stub();
+            doAnalysisStub = sinon.stub();
+            loggerStub = sinon.stub();
+            ghettoReportStub = sinon.stub();
+            getIssues = sinon.stub(armlet.Client.prototype, 'getIssues');
+
+            config = {
+                contracts_build_directory: '/build/contracts',
+                contracts_directory: '/contracts',
+                _: [],
+                logger: {
+                    log: loggerStub,
+                },
+                style: 'stylish',
+            };
+
+            helpers = rewire('../helpers');
+            helpers.__set__('doAnalysis', doAnalysisStub);
+            helpers.__set__('getNotFoundContracts', getNotFoundContractsStub);
+            helpers.__set__('contractsCompile', contractsCompileStub);
+            helpers.__set__('doReport', doReportStub);
+            helpers.__set__('ghettoReport', ghettoReportStub);
+        });
+
+        afterEach(() => {
+            getTruffleBuildJsonFilesStub.restore();
+            getIssues.restore();
+        });
+        
+        it('should return error when passed value for limit is not a number', async () => {
+            config.limit = 'test';
+            await rewiredHelpers.analyze(config);
+            assert.equal(loggerStub.getCall(0).args[0], 'limit parameter should be a number; got test.')
+        });
+
+        it('should return error when limit is value is out of acceptible range', async () => {
+            config.limit = 20;
+            await rewiredHelpers.analyze(config);
+            assert.equal(loggerStub.getCall(0).args[0], 'limit should be between 0 and 10; got 20.')
+        });
+
+        it('should call doAnalyze and report issues', async () => {
+            doAnalysisStub.resolves({ objects: 1, errors: 3 });
+            getTruffleBuildJsonFilesStub.resolves(['test.json']);
+            getNotFoundContractsStub.returns([])
+
+            await helpers.analyze(config);
+            assert.ok(getTruffleBuildJsonFilesStub.calledWith(config.contracts_build_directory));
+            assert.ok(doAnalysisStub.called);
+            assert.ok(getNotFoundContractsStub.calledWith(1, null));
+            assert.ok(doReportStub.calledWith(config, 1, 3, []));
+        });
+
+        it('should call getIssues when uuid is provided', async () => {
+            config.uuid = 'test';
+            await helpers.analyze(config);
+            assert.ok(getIssues.called);
+            assert.ok(ghettoReportStub.called);
+        });
+
+        it('should show error when getIssues break', async () => {
+            config.uuid = 'test';
+            getIssues.throws('Error')
+            await helpers.analyze(config);
+            assert.ok(getIssues.called);
+            assert.ok(loggerStub.getCall(0).args[0], 'Error');
+        });
+    });
+
     describe('Armlet authentication analyze', () => {
         let readFileStub;
         let getTruffleBuildJsonFilesStub;
@@ -458,29 +544,35 @@ describe('helpers.js', function() {
         });
     });
 
-    describe('analyze', () => {
-        let loggerStub;
-        let config;
-        beforeEach(() => {
-            helpers = rewire('../')
-            loggerStub = sinon.stub();
-            config = {
-                logger: {
-                    log: loggerStub,
-                },
-            };
+    describe('getNotFoundContracts', () => {
+        it('should collect contract names which are not found in truffle build contracts directory', () => {
+            const objects = [
+                { contractName: 'Contract1' },
+                { contractName: 'Contract2' },
+            ];
+
+            const result = rewiredHelpers.getNotFoundContracts(objects, ['Contract2', 'NotFoundContract']);
+            assert.deepEqual(result, ['NotFoundContract']);
         });
 
-        it('should return error when passed value for limit is not a number', async () => {
-            config.limit = 'test';
-            await rewiredHelpers.analyze(config);
-            assert.equal(loggerStub.getCall(0).args[0], 'limit parameter should be a number; got test.')
+        it('should return empty array when contracts parameter is not passed', () => {
+            const objects = [
+                { contractName: 'Contract1' },
+                { contractName: 'Contract2' },
+            ];
+
+            const result = rewiredHelpers.getNotFoundContracts(objects, null);
+            assert.deepEqual(result, []);
         });
 
-        it('should return error when limit is value is out of acceptible range', async () => {
-            config.limit = 20;
-            await rewiredHelpers.analyze(config);
-            assert.equal(loggerStub.getCall(0).args[0], 'limit should be between 0 and 10; got 20.')
+        it('should return empty array when contracts parameter is empty array', () => {
+            const objects = [
+                { contractName: 'Contract1' },
+                { contractName: 'Contract2' },
+            ];
+
+            const result = rewiredHelpers.getNotFoundContracts(objects, []);
+            assert.deepEqual(result, []);
         });
     });
 
