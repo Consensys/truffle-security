@@ -8,6 +8,7 @@ const contracts = require('truffle-workflow-compile');
 const util = require('util');
 const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
+const multiProgress = require('multi-progress');
 
 
 const defaultAnalyzeRateLimit = 10;
@@ -173,6 +174,18 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
  */
 const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
     /**
+   * Prepare for progress bar
+   */
+  const multi = new multiProgress();
+  let contractNameLengths = []
+  await Promise.all(jsonFiles.map(async file => {
+      const buildObj = await trufstuf.parseBuildJson(file);
+      const contractName = buildObj.contractName;
+      contractNameLengths.push(contractName.length);
+  }));
+  const indent = Math.max(...contractNameLengths);
+
+    /**
    * Multiple smart contracts need to be run concurrently
    * to speed up analyze report output.
    * Because simple forEach or map can't handle async operations -
@@ -191,9 +204,11 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         }
 
         const obj = new MythXIssues(buildObj);
+        
+        const timeout = (config.timeout || 120) * 1000;
 
         let analyzeOpts = {
-            timeout: (config.timeout || 120) * 1000,
+            timeout,
             clientToolName: 'truffle',
         };
 
@@ -204,6 +219,23 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`);
         }
 
+        // create progress bars.
+        let bar = multi.newBar(`${buildObj.contractName.padStart(indent)} |` + ':bar'.cyan + '| :percent || Elapsed: :elapseds :status', {
+            complete: '*',
+            incomplete: ' ',
+            width: 40,
+            total: timeout / 1000
+          });
+        let timer = setInterval(() => {
+            bar.tick({
+                'status': 'in progress...'
+            });
+            if (bar.complete) {
+                clearInterval(timer);
+            }
+        }, 1000);
+
+        // request analysis to armlet.
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
@@ -213,13 +245,26 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
                     config.logger.debug(`${util.inspect(status, {depth: null})}`);
                 }
             }
+
+            clearInterval(timer);
+
             if (status.status === 'Error') {
+                bar.tick({
+                    'status': '✗ Error'.red
+                });
                 return [status, null];
             } else {
+                bar.tick(timeout / 1000, {
+                    'status': '✓ completed'.green
+                });
                 obj.setIssues(issues);
             }
             return [null, obj];
         } catch (err) {
+            clearInterval(timer);
+            bar.tick({
+                'status': '✗ error'.red
+            });
             return [err, null];
         }
     });
