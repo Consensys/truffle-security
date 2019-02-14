@@ -9,6 +9,7 @@ const util = require('util');
 const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
 const multiProgress = require('multi-progress');
+const sleep = require('sleep');
 
 
 const defaultAnalyzeRateLimit = 10;
@@ -92,6 +93,8 @@ Options:
              The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
   --version  Show package and MythX version information.
+  --noprogress
+             Not display progress bars during analysis.
 `;
         // FIXME: decide if this is okay or whether we need
         // to pass in `config` and use `config.logger.log`.
@@ -176,14 +179,19 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     /**
    * Prepare for progress bar
    */
-  const multi = new multiProgress();
-  let contractNameLengths = []
-  await Promise.all(jsonFiles.map(async file => {
-      const buildObj = await trufstuf.parseBuildJson(file);
-      const contractName = buildObj.contractName;
-      contractNameLengths.push(contractName.length);
-  }));
-  const indent = Math.max(...contractNameLengths);
+    const progress = !config.noprogress;
+    let multi;
+    let indent;
+    if (progress) {
+        multi = new multiProgress();
+        let contractNameLengths = []
+        await Promise.all(jsonFiles.map(async file => {
+            const buildObj = await trufstuf.parseBuildJson(file);
+            const contractName = buildObj.contractName;
+            contractNameLengths.push(contractName.length);
+        }));
+        indent = Math.max(...contractNameLengths);  
+    }
 
     /**
    * Multiple smart contracts need to be run concurrently
@@ -220,20 +228,24 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         }
 
         // create progress bars.
-        let bar = multi.newBar(`${buildObj.contractName.padStart(indent)} |` + ':bar'.cyan + '| :percent || Elapsed: :elapseds :status', {
-            complete: '*',
-            incomplete: ' ',
-            width: 40,
-            total: timeout / 1000
-          });
-        let timer = setInterval(() => {
-            bar.tick({
-                'status': 'in progress...'
+        let bar;
+        let timer;
+        if (progress) {
+            bar = multi.newBar(`${buildObj.contractName.padStart(indent)} |` + ':bar'.cyan + '| :percent || Elapsed: :elapseds :status', {
+                complete: '*',
+                incomplete: ' ',
+                width: 40,
+                total: timeout / 1000
             });
-            if (bar.complete) {
-                clearInterval(timer);
-            }
-        }, 1000);
+            timer = setInterval(() => {
+                bar.tick({
+                    'status': 'in progress...'
+                });
+                if (bar.complete) {
+                    clearInterval(timer);
+                }
+            }, 1000);
+        }
 
         // request analysis to armlet.
         try {
@@ -246,25 +258,37 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
                 }
             }
 
-            clearInterval(timer);
+            if (progress) {
+                clearInterval(timer);
+                sleep.msleep(1000); // wait for last setInterval finising
+            }
 
             if (status.status === 'Error') {
-                bar.tick({
-                    'status': '✗ Error'.red
-                });
+                if (progress) {
+                    bar.tick({
+                        'status': '✗ Error'.red
+                    });
+                    bar.terminate();    // terminate since bar.complete is false at this time
+                }
                 return [status, null];
             } else {
-                bar.tick(timeout / 1000, {
-                    'status': '✓ completed'.green
-                });
+                if (progress) {
+                    bar.tick(timeout / 1000, {
+                        'status': '✓ completed'.green
+                    });
+                }
                 obj.setIssues(issues);
             }
             return [null, obj];
         } catch (err) {
-            clearInterval(timer);
-            bar.tick({
-                'status': '✗ error'.red
-            });
+            if (progress) {
+                clearInterval(timer);
+                sleep.msleep(1000); // wait for last setInterval finising
+                bar.tick({
+                    'status': '✗ error'.red
+                });
+                bar.terminate();    // terminate since bar.complete is false at this time
+            }
             return [err, null];
         }
     });
