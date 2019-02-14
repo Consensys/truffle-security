@@ -97,6 +97,7 @@ describe('helpers.js', function() {
             getNotFoundContractsStub = sinon.stub();
             doAnalysisStub = sinon.stub();
             loggerStub = sinon.stub();
+            warnStub = sinon.stub();
             ghettoReportStub = sinon.stub();
             getIssues = sinon.stub(armlet.Client.prototype, 'getIssues');
 
@@ -106,6 +107,7 @@ describe('helpers.js', function() {
                 _: [],
                 logger: {
                     log: loggerStub,
+                    warn: warnStub,
                 },
                 style: 'stylish',
             };
@@ -125,14 +127,15 @@ describe('helpers.js', function() {
 
         it('should return error when passed value for limit is not a number', async () => {
             config.limit = 'test';
-            await rewiredHelpers.analyze(config);
-            assert.equal(loggerStub.getCall(0).args[0], 'limit parameter should be a number; got test.')
+            await helpers.analyze(config);
+            assert.equal(loggerStub.getCall(0).args[0], 'Rate limit value should be a number; got test.')
         });
 
         it('should return error when limit is value is out of acceptible range', async () => {
             config.limit = 20;
-            await rewiredHelpers.analyze(config);
-            assert.equal(loggerStub.getCall(0).args[0], 'limit should be between 0 and 10; got 20.')
+            doAnalysisStub.resolves({ objects: [], errors: [] });
+            await helpers.analyze(config);
+            assert.equal(warnStub.getCall(0).args[0], 'Rate limit value should be between at most 10; got 20. Keeping default value.')
         });
 
         it('should call doAnalyze and report issues', async () => {

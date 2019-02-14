@@ -25,7 +25,7 @@
     "node": ">=8.10.0"
   },
   "scripts": {
-    "test": "nyc mocha",
+    "test": "nyc mocha test/**/test_*.js",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
