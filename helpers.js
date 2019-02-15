@@ -93,8 +93,8 @@ Options:
              The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
   --version  Show package and MythX version information.
-  --noprogress
-             Not display progress bars during analysis.
+  --no-progress
+             Do not display progress bars during analysis.
 `;
         // FIXME: decide if this is okay or whether we need
         // to pass in `config` and use `config.logger.log`.
@@ -179,7 +179,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     /**
    * Prepare for progress bar
    */
-    const progress = !config.noprogress;
+    const progress = config.progress;
     let multi;
     let indent;
     if (progress) {
@@ -190,7 +190,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             const contractName = buildObj.contractName;
             contractNameLengths.push(contractName.length);
         }));
-        indent = Math.max(...contractNameLengths);  
+        indent = Math.max(...contractNameLengths);
     }
 
     /**
@@ -212,7 +212,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         }
 
         const obj = new MythXIssues(buildObj);
-        
+
         const timeout = (config.timeout || 120) * 1000;
 
         let analyzeOpts = {
