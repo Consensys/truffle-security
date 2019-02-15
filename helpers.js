@@ -179,7 +179,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     /**
    * Prepare for progress bar
    */
-    const progress = config.progress;
+    const progress = ('progress' in config) ? config.progress : true;
     let multi;
     let indent;
     if (progress) {
