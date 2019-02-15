@@ -8,8 +8,10 @@
     "configstore": "^4.0.0",
     "js-yaml": "^3.12.1",
     "mocha": "^5.2.0",
+    "multi-progress": "^2.0.0",
     "proxyquire": "^2.1.0",
     "remix-lib": ">=0.4.1",
+    "sleep": "^6.0.0",
     "tiny-async-pool": "^1.0.4",
     "truffle-workflow-compile": ">=2.0.2"
   },
