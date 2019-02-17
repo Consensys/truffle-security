@@ -207,6 +207,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         }
 
         try {
+	    debugger
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
                 config.logger.debug(`UUID for this job is ${status.uuid}`);
@@ -287,11 +288,9 @@ const getNotFoundContracts = (mythXIssuesObjects, contracts) => {
     return contracts.filter(c => !mythxContracts.includes(c));
 }
 
-const getArmletClient = (apiKey, ethAddress, password, clientToolName = 'truffle') => {
+const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     const options = { clientToolName };
-    if (apiKey) {
-        options.apiKey = apiKey;
-    } else if (password && ethAddress) {
+    if (password && ethAddress) {
         options.ethAddress = ethAddress;
         options.password = password;
     } else if (!password && !ethAddress) {
@@ -319,7 +318,6 @@ async function analyze(config) {
     }
 
     const client = getArmletClient(
-        process.env.MYTHX_API_KEY,
         process.env.MYTHX_ETH_ADDRESS,
         process.env.MYTHX_PASSWORD
     )

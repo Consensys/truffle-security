@@ -4,7 +4,7 @@
   "version": "1.0.1",
   "description": "MythX security analysis plugin for Truffle Framework",
   "dependencies": {
-    "armlet": "^1.2.0",
+    "armlet": "git+ssh://git@github.com:consensys/armlet.git",
     "configstore": "^4.0.0",
     "js-yaml": "^3.12.1",
     "mocha": "^5.2.0",

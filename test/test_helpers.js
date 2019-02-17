@@ -69,7 +69,7 @@ describe('helpers.js', function() {
             for (const t of expected) {
                 compareTest(t[0], t[1], t[2], t[3], t[4]);
             }
-        }); 
+        });
 
         it('should sort and convert object to a string', () => {
             const res = helpers.versionJSON2String({ mythx: '1.0.1', 'solc': '0.5.0', 'api': '1.0.0' });
@@ -88,7 +88,7 @@ describe('helpers.js', function() {
         let doAnalysisStub;
         let ghettoReportStub;
         let getIssues;
-            
+
 
         beforeEach(() => {
             getTruffleBuildJsonFilesStub = sinon.stub(trufstuf, 'getTruffleBuildJsonFiles');
@@ -122,7 +122,7 @@ describe('helpers.js', function() {
             getTruffleBuildJsonFilesStub.restore();
             getIssues.restore();
         });
-        
+
         it('should return error when passed value for limit is not a number', async () => {
             config.limit = 'test';
             await rewiredHelpers.analyze(config);
@@ -289,7 +289,10 @@ describe('helpers.js', function() {
         let armletClient, stubAnalyze, debuggerStub;
 
         beforeEach(() => {
-            armletClient = new armlet.Client({ apiKey: 'test' });
+            armletClient = new armlet.Client({
+		ethAddress: rewiredHelpers.trialEthAddress,
+		password: rewiredHelpers.trialPassword
+	    });
             stubAnalyze = sinon.stub(armletClient, 'analyzeWithStatus');
             debuggerStub = sinon.stub();
         });
@@ -583,13 +586,8 @@ describe('helpers.js', function() {
             assert.equal(client.password, rewiredHelpers.trialPassword);
         });
 
-        it('should create client instance with Api Key', () => {
-            const client = rewiredHelpers.getArmletClient('API_KEY');
-            assert.equal(client.accessToken, 'API_KEY');
-        });
-
         it('should create client instance with ethAddress and password', () => {
-            const client = rewiredHelpers.getArmletClient(undefined, '0x123456789012345678901234', 'password');
+            const client = rewiredHelpers.getArmletClient('0x123456789012345678901234', 'password');
             assert.equal(client.ethAddress, '0x123456789012345678901234');
             assert.equal(client.password, 'password');
         });
@@ -602,7 +600,7 @@ describe('helpers.js', function() {
 
         it('should throw error if ethAddress is missing', () => {
             assert.throws(() => {
-                rewiredHelpers.getArmletClient(undefined, undefined, 'password')
+                rewiredHelpers.getArmletClient('password', undefined)
             });
         });
     });
