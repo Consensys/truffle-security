@@ -289,7 +289,10 @@ describe('helpers.js', function() {
         let armletClient, stubAnalyze, debuggerStub;
 
         beforeEach(() => {
-            armletClient = new armlet.Client({ apiKey: 'test' });
+            armletClient = new armlet.Client({
+		ethAddress: rewiredHelpers.trialEthAddress,
+		password: rewiredHelpers.trialPassword
+	    });
             stubAnalyze = sinon.stub(armletClient, 'analyzeWithStatus');
             debuggerStub = sinon.stub();
         });
@@ -573,6 +576,32 @@ describe('helpers.js', function() {
 
             const result = rewiredHelpers.getNotFoundContracts(objects, []);
             assert.deepEqual(result, []);
+        });
+    });
+
+    describe('getArmletClient', () => {
+        it('should instantiate as trial user if nothing is passed', () => {
+            const client = rewiredHelpers.getArmletClient();
+            assert.equal(client.ethAddress, rewiredHelpers.trialEthAddress);
+            assert.equal(client.password, rewiredHelpers.trialPassword);
+        });
+
+        it('should create client instance with ethAddress and password', () => {
+            const client = rewiredHelpers.getArmletClient('0x123456789012345678901234', 'password');
+            assert.equal(client.ethAddress, '0x123456789012345678901234');
+            assert.equal(client.password, 'password');
+        });
+
+        it('should throw error if password is missing', () => {
+            assert.throws(() => {
+                rewiredHelpers.getArmletClient(undefined, '0x123456789012345678901234')
+            });
+        });
+
+        it('should throw error if ethAddress is missing', () => {
+            assert.throws(() => {
+                rewiredHelpers.getArmletClient('password', undefined)
+            });
         });
     });
 });
