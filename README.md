@@ -1,6 +1,10 @@
 [![CircleCI](https://circleci.com/gh/ConsenSys/truffle-analyze.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-analyze)
 [![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-analyze/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-analyze?branch=master)
 
+# OUTDATED
+
+Truffle Analyze has been superseded by [Truffle Security](https://www.npmjs.com/package/truffle-security). Truffle Analyze will no longer be maintained.
+
 # Introduction
 
 "Truffle" is a world-class development environment, testing framework and asset pipeline for blockchains using the Ethereum Virtual Machine (EVM), aiming to make life as a developer easier. Read more about it on the [truffle suite website](https://truffleframework.com/docs/truffle/overview).
