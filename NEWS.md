@@ -1,3 +1,45 @@
+Release 1.1.0
+=================
+
+
+Progress Bars
+-----------------
+
+This version has elaborate progress bars which track
+
+* the contracts that have been submitted to MythX, and
+* how far along each is in its allotted time.
+
+They are on by default. To turn them off set `--no-progress`.
+
+This work was kindly contributed by Teruhiro Tagomori at NRISecure.
+
+
+Changes for MythX API 1.4
+-------------------------------
+
+In version 1.4 of the MythX API, various authentication options involving an API key or an email address are no longer supported.
+If you haven't registered, jobs are submitted as a trial user.
+
+
+Limiting the number of simultaneous jobs
+--------------------------------------------------
+
+We noticed that there was a lot of overhead created on the back end by polling for analysis status. So, this version limits the maximum number of concurrent pending analyses, with a default of 10. You can lower this with the `--limit` option.
+
+Miscellaneous other Changes
+----------------------------------
+
+The help now includes the eslint style option `--style=json`. Thanks to tintin at Diligence who realized that this is a useful style setting. The json style is not space limited like many of the others are.
+
+There are miscellaneous changes to the data sent to MythX in order to improve performance and to report errors in a more meaningful way.
+
+Additional tests were added and test-code coverage has been increased. This is the work of Daniyar Chambylov at Maddevs.
+
+
+Older Releases
+=================
+
 v1.0.1 - 2019-02-06
 -----------------------
 
