@@ -381,11 +381,11 @@ async function analyze(config) {
     const limit = config.limit || defaultAnalyzeRateLimit;
     const log = config.logger.log;
     if (isNaN(limit)) {
-        log(`limit parameter should be a number; got ${limit}.`);
+        log(`Limit parameter should be a number; got ${limit}.`);
         return;
     }
     if (limit < 0 || limit > defaultAnalyzeRateLimit) {
-        log(`limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`);
+        log(`Limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`);
         return;
     }
 
