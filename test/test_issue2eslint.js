@@ -226,7 +226,7 @@ describe('issues2Eslint', function() {
 
         it('It normalize and store mythX API output', () => {
             const issuesObject = new MythXIssues(truffleJSON);
-            const mythXOutput = [{
+            const mythXOutput = {
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
                 'sourceList': [
@@ -249,7 +249,7 @@ describe('issues2Eslint', function() {
                     'error': [],
                     'warning': []
                 }
-            }];
+            };
 
             issuesObject.setIssues(mythXOutput);
             assert.deepEqual(issuesObject.issues, [{
@@ -272,7 +272,7 @@ describe('issues2Eslint', function() {
 
         it('It converts mythX issues to ESLint issues output format', () => {
             const issuesObject = new MythXIssues(truffleJSON);
-            const mythXOutput = [{
+            const mythXOutput = {
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
                 'sourceList': [
@@ -295,7 +295,7 @@ describe('issues2Eslint', function() {
                     'error': [],
                     'warning': []
                 }
-            }];
+            };
             issuesObject.setIssues(mythXOutput);
             const result = issuesObject.getEslintIssues(true);
             assert.deepEqual(result, [{
