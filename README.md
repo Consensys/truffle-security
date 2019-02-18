@@ -2,24 +2,24 @@
 
 Truffle Analyze has been superseded by [Truffle Security](https://www.npmjs.com/package/truffle-security). Truffle Analyze will no longer be maintained. See you on the other side!
 
-# Introduction
+~~# Introduction
 
-"Truffle" is a world-class development environment, testing framework and asset pipeline for blockchains using the Ethereum Virtual Machine (EVM), aiming to make life as a developer easier. Read more about it on the [truffle suite website](https://truffleframework.com/docs/truffle/overview).
+~~"Truffle" is a world-class development environment, testing framework and asset pipeline for blockchains using the Ethereum Virtual Machine (EVM), aiming to make life as a developer easier. Read more about it on the [truffle suite website]!!(https://truffleframework.com/docs/truffle/overview).
 
-Here we have a [truffle "run" plugin](https://truffleframework.com/docs/truffle/getting-started/writing-external-scripts) that runs [MythX](https://mythx.io) Smart Contract analyses on truffle projects.
+~~Here we have a [truffle "run" plugin](https://truffleframework.com/docs/truffle/getting-started/writing-external-scripts) that runs [MythX](https://mythx.io) Smart Contract analyses on truffle projects.
 
-_This is alpha code. You won't be able to use this without a MythX account,
+~~_This is alpha code. You won't be able to use this without a MythX account,
 and will be more generally distributed in the January-February time period._
 
-Preliminary pre 5.0.0 versions were demo'd at
+~~Preliminary pre 5.0.0 versions were demo'd at
 [trufflecon2018](https://truffleframework.com/trufflecon2018) and
 [devcon4](https://devcon4.ethereum.org/).
 
-# Setup
+~~# Setup
 
-## Install plugin:
+~~## Install plugin:
 
-```console
+~~```console
 $ npm install truffle-analyze
 ```
 
