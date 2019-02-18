@@ -27,7 +27,7 @@ Limiting the number of simultaneous jobs
 
 We noticed that there was a lot of overhead created on the back end by polling for analysis status. So, this version limits the maximum number of concurrent pending analyses, with a default of 10. You can lower this with the `--limit` option.
 
-Miscellaneous other Changes
+Miscellaneous other changes
 ----------------------------------
 
 The help now includes the eslint style option `--style=json`. Thanks to tintin at Diligence who realized that this is a useful style setting. The json style is not space limited like many of the others are.
@@ -37,7 +37,7 @@ There are miscellaneous changes to the data sent to MythX in order to improve pe
 Additional tests were added and test-code coverage has been increased. This is the work of Daniyar Chambylov at Maddevs.
 
 
-Older Releases
+Older releases
 =================
 
 v1.0.1 - 2019-02-06
