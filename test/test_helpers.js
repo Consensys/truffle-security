@@ -319,7 +319,7 @@ describe('helpers.js', function() {
             const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFiles[0], 'utf8');
             const mythXInput = mythx.truffle2MythXJSON(JSON.parse(simpleDaoJSON));
             stubAnalyze.resolves({
-                issues: {
+                issues: [{
                     'sourceFormat': 'evm-byzantium-bytecode',
                     'sourceList': [
                         `${__dirname}/sample-truffle/simple_dao/contracts/SimpleDAO.sol`
@@ -342,7 +342,7 @@ describe('helpers.js', function() {
                         'error': [],
                         'warning': []
                     }
-                },
+                }],
                 status: { status: 'Finished' },
             });
             const results = await doAnalysis(armletClient, config, jsonFiles);
@@ -406,7 +406,7 @@ describe('helpers.js', function() {
                 status: { status: 'Error' },
             });
             stubAnalyze.onSecondCall().resolves({
-                issues: {
+                issues: [{
                     'sourceFormat': 'evm-byzantium-bytecode',
                     'sourceList': [
                         `${__dirname}/sample-truffle/simple_dao/contracts/simple_dao.sol`
@@ -429,7 +429,7 @@ describe('helpers.js', function() {
                         'error': [],
                         'warning': []
                     },
-                },
+                }],
                 status: {status: 'Pending' },
             });
             const results = await doAnalysis(armletClient, config, jsonFiles);
