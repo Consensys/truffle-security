@@ -111,4 +111,7 @@ Options:
              The default is 10 contracts, the maximum value, but you can
              set this lower.
   --version  Show package and MythX version information.
+  --no-progress
+             Do not display progress bars during analysis.
+
 ```
