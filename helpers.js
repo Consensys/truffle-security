@@ -4,6 +4,7 @@
 const armlet = require('armlet');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
+const eslintHelpers = require('./lib/eslint');
 const contracts = require('truffle-workflow-compile');
 const util = require('util');
 const yaml = require('js-yaml');
@@ -314,10 +315,12 @@ function doReport(config, objects, errors, notFoundContracts) {
         .reduce((acc, curr) => acc.concat(curr), []);
 
     // FIXME: temporary solution until backend will return correct filepath and output.
-    const eslintIssuesBtBaseName = groupEslintIssuesByBasename(eslintIssues);
+    const eslintIssuesByBaseName = groupEslintIssuesByBasename(eslintIssues);
+
+    const uniqueIssues = eslintHelpers.getUniqueIssues(eslintIssuesByBaseName);
 
     const formatter = getFormatter(config.style);
-    config.logger.log(formatter(eslintIssuesBtBaseName));
+    config.logger.log(formatter(uniqueIssues));
 
     if (notFoundContracts.length > 0) {
         config.logger.error(`These smart contracts were not found: ${notFoundContracts.join(', ')}`);
