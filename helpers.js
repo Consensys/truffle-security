@@ -216,7 +216,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
 
         const obj = new MythXIssues(buildObj);
 
-        const timeout = (config.timeout || 120) * 1000;
+        const timeout = (config.timeout || 300) * 1000;
 
         let analyzeOpts = {
             timeout,
