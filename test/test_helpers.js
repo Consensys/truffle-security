@@ -349,7 +349,7 @@ describe('helpers.js', function() {
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 data: mythXInput,
-                timeout: 120000,
+                timeout: 300000,
                 clientToolName: 'truffle',
             }));
             assert.equal(results.errors.length, 0);
@@ -378,7 +378,7 @@ describe('helpers.js', function() {
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 data: mythXInput,
-                timeout: 120000,
+                timeout: 300000,
                 clientToolName: 'truffle',
             }));
             assert.equal(results.errors.length, 1);
@@ -436,7 +436,7 @@ describe('helpers.js', function() {
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 data: mythXInput,
-                timeout: 120000,
+                timeout: 300000,
                 clientToolName: 'truffle',
             }));
             assert.equal(results.errors.length, 1);
