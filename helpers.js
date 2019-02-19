@@ -14,7 +14,7 @@ const sleep = require('sleep');
 
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
 const trialPassword = 'trial';
-const defaultAnalyzeRateLimit = 10;
+const defaultAnalyzeRateLimit = 4;
 
 // FIXME: util.promisify breaks compile internal call to writeContracts
 // const contractsCompile = util.promisify(contracts.compile);
@@ -502,6 +502,7 @@ const groupEslintIssuesByBasename = issues => {
 
 module.exports = {
     analyze,
+    defaultAnalyzeRateLimit,
     compareLineCol,
     versionJSON2String,
     printVersion,

@@ -131,9 +131,9 @@ describe('helpers.js', function() {
         });
 
         it('should return error when limit is value is out of acceptible range', async () => {
-            config.limit = 20;
+            config.limit = rewiredHelpers.defaultAnalyzeRateLimit + 5;
             await rewiredHelpers.analyze(config);
-            assert.equal(loggerStub.getCall(0).args[0], 'limit should be between 0 and 10; got 20.')
+            assert.equal(loggerStub.getCall(0).args[0], `limit should be between 0 and ${rewiredHelpers.defaultAnalyzeRateLimit}; got ${rewiredHelpers.defaultAnalyzeRateLimit + 5}.`)
         });
 
         it('should call doAnalyze and report issues', async () => {
