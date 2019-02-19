@@ -11,7 +11,7 @@
     "proxyquire": "^2.1.0",
     "remix-lib": ">=0.4.1",
     "tiny-async-pool": "^1.0.4",
-    "truffle-workflow-compile": ">=2.0.2"
+    "truffle-workflow-compile": "^2.0.4"
   },
   "nyc": {
     "exclude": [
@@ -57,7 +57,7 @@
     "coveralls": "^3.0.2",
     "eslint": ">=5.9.0",
     "ipfsd-ctl": "^0.21.0",
-    "nyc": "^13.1.0",
+    "nyc": "^13.3.0",
     "rewire": "^4.0.1",
     "sinon": "^7.2.2",
     "truffle-blockchain-utils": "^0.0.5"
