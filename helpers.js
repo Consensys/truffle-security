@@ -180,6 +180,20 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
  */
 const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
     /**
+   * set the number of audited contracts
+   */
+    let contractNameLengths = []
+    await Promise.all(jsonFiles.map(async file => {
+        const buildObj = await trufstuf.parseBuildJson(file);
+        const contractName = buildObj.contractName;
+        if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
+            return;
+        }
+        contractNameLengths.push(contractName.length);
+    }));
+    const numOfAuditedContracts = contractNameLengths.length;
+
+    /**
    * Prepare for progress bar
    */
     const progress = ('progress' in config) ? config.progress : true;
@@ -187,14 +201,20 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     let indent;
     if (progress) {
         multi = new multiProgress();
-        let contractNameLengths = []
-        await Promise.all(jsonFiles.map(async file => {
-            const buildObj = await trufstuf.parseBuildJson(file);
-            const contractName = buildObj.contractName;
-            contractNameLengths.push(contractName.length);
-        }));
         indent = Math.max(...contractNameLengths);
     }
+
+    const timeout = (config.timeout || 300) * 1000;
+
+    /**
+   * Start
+   */
+    console.log('The number of audited contracts => ' + `${numOfAuditedContracts}`.green);
+    console.log('Timeout for each contract => ' + `${timeout / 1000}s`.green);
+    console.log('Please be * PATIENT * until all of the audits finish.');
+    console.log('------------------------------------------------------');
+ 
+    
 
     /**
    * Multiple smart contracts need to be run concurrently
@@ -216,8 +236,6 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
 
         const obj = new MythXIssues(buildObj);
 
-        const timeout = (config.timeout || 300) * 1000;
-
         let analyzeOpts = {
             timeout,
             clientToolName: 'truffle',
@@ -237,7 +255,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             bar = multi.newBar(`${buildObj.contractName.padStart(indent)} |` + ':bar'.cyan + '| :percent || Elapsed: :elapseds :status', {
                 complete: '*',
                 incomplete: ' ',
-                width: 40,
+                width: Math.max(Math.min(parseInt((timeout / 1000) / 300 * 100), 100), 40), // based on timeout, but the cap is 300 and the floor is 40.
                 total: timeout / 1000
             });
             timer = setInterval(() => {
