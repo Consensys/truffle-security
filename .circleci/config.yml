@@ -1,24 +1,13 @@
-# Javascript Node CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
 version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
       - image: circleci/node:10.14.2
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
     working_directory: ~/repo
 
     steps:
       - checkout
 
-      # Download and cache dependencies
       - restore_cache:
           keys:
           - v2-dependencies-{{ checksum "package.json" }}
@@ -34,7 +23,6 @@ jobs:
             - node_modules
           key: v2-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
       - run:
           name: Run tests
           command: npm test
@@ -53,12 +41,68 @@ jobs:
       - run:
           command: |
             IMAGE=mythrilapiplatform/truffle-security
-            TAG=${CIRCLE_TAG:-$(git describe --tags)}
+            TAG=${CIRCLE_SHA1}
 
-            docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
             docker build -t ${IMAGE}:${TAG} .
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
             docker push ${IMAGE}:${TAG}
 
+  integrationTests:
+    docker:
+      - image: mythrilapiplatform/truffle-security:${CIRCLE_SHA1}
+    steps:
+      - checkout
+      - run:
+          command: |
+            cd integration-tests/project
+            MYTHX_API_URL=https://staging.api.mythx.io
+            if [ ! -z "${CIRCLE_TAG}" ]; then
+              MYTHX_API_URL=https://api.mythx.io
+            fi
+            truffle compile
+            CONTRACT_NAME=$(pwgen 16)
+            sed -i "s/\"contractName\": \"FunctionTypes\"/\"contractName\": \"${CONTRACT_NAME}\"/" build/contracts/FunctionTypes.json
+            truffle run verify --style json | tee result.json
+
+            ordered_messages=$(cat result.json | jq .[0].messages | jq 'sort_by(.ruleId)')
+
+            firstID=$(echo $ordered_messages | jq -r .[0].ruleId)
+            if [ $firstID != "SWC-101" ]; then
+              echo "Unexpected swcID, expected SWC-101, got $firstID"
+              exit 1
+            fi
+            secondID=$(echo $ordered_messages | jq -r .[1].ruleId)
+            if [ $secondID != "SWC-103" ]; then
+              echo "Unexpected swcID, expected SWC-103, got $secondID"
+              exit 1
+            fi
+            thirdID=$(echo $ordered_messages | jq -r .[2].ruleId)
+            if [ $thirdID != "SWC-127" ]; then
+              echo "Unexpected swcID, expected SWC-127, got $thirdID"
+              exit 1
+            fi
+
+  tagImage:
+    docker:
+      - image: mythril/api-k8s-ci:v0.1.3
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          command: |
+            IMAGE=mythrilapiplatform/truffle-security
+            TAG=${CIRCLE_TAG:-$(git describe --tags)}
+
+            docker pull ${IMAGE}:${CIRCLE_SHA1}
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+            docker tag ${IMAGE}:${CIRCLE_SHA1} ${IMAGE}:${TAG}
+            docker push ${IMAGE}:${TAG}
+
+            if [ ! -z "${CIRCLE_TAG}" ]; then
+              docker tag ${IMAGE}:${CIRCLE_SHA1} ${IMAGE}:latest
+              docker push ${IMAGE}:latest
+            fi
 
 workflows:
   version: 2
@@ -68,3 +112,9 @@ workflows:
       - publishImage:
           requires:
             - build
+      - integrationTests:
+          requires:
+            - publishImage
+      - tagImage:
+          requires:
+            - integrationTests
