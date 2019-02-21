@@ -291,9 +291,9 @@ describe('helpers.js', function() {
 
         beforeEach(() => {
             armletClient = new armlet.Client({
-		ethAddress: rewiredHelpers.trialEthAddress,
-		password: rewiredHelpers.trialPassword
-	    });
+                ethAddress: rewiredHelpers.trialEthAddress,
+                password: rewiredHelpers.trialPassword
+            });
             stubAnalyze = sinon.stub(armletClient, 'analyzeWithStatus');
             debuggerStub = sinon.stub();
         });
@@ -348,9 +348,10 @@ describe('helpers.js', function() {
             const results = await doAnalysis(armletClient, config, jsonFiles);
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
-                data: mythXInput,
-                timeout: 300000,
                 clientToolName: 'truffle',
+                data: mythXInput,
+                noCacheLookup: false,
+                timeout: 300000,
             }));
             assert.equal(results.errors.length, 0);
             assert.equal(results.objects.length, 1);
@@ -377,9 +378,10 @@ describe('helpers.js', function() {
             const results = await doAnalysis(armletClient, config, jsonFiles);
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
-                data: mythXInput,
-                timeout: 300000,
                 clientToolName: 'truffle',
+                data: mythXInput,
+                noCacheLookup: false,
+                timeout: 300000,
             }));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 0);
@@ -435,9 +437,10 @@ describe('helpers.js', function() {
             const results = await doAnalysis(armletClient, config, jsonFiles);
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
-                data: mythXInput,
-                timeout: 300000,
                 clientToolName: 'truffle',
+                data: mythXInput,
+                noCacheLookup: false,
+                timeout: 300000,
             }));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 1);

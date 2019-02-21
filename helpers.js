@@ -183,6 +183,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
    * Prepare for progress bar
    */
     const progress = ('progress' in config) ? config.progress : true;
+    const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
     let multi;
     let indent;
     if (progress) {
@@ -219,8 +220,9 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         const timeout = (config.timeout || 300) * 1000;
 
         let analyzeOpts = {
-            timeout,
             clientToolName: 'truffle',
+            noCacheLookup: !cacheLookup,
+            timeout,
         };
 
         analyzeOpts.data = cleanAnalyDataEmptyProps(obj.buildObj, config.debug,
@@ -252,7 +254,6 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
 
         // request analysis to armlet.
         try {
-	    debugger
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
                 config.logger.debug(`UUID for this job is ${status.uuid}`);
