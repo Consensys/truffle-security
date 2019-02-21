@@ -31,25 +31,6 @@ const contractsCompile = config => {
     });
 };
 
-/**
- *
- * Loads preferred ESLint formatter for warning reports.
- *
- * @param {String} config
- * @returns ESLint formatter module
- */
-function getFormatter(style) {
-    const formatterName = style || 'stylish';
-    try {
-        return require(`eslint/lib/formatters/${formatterName}`);
-    } catch (ex) {
-        ex.message = `\nThere was a problem loading formatter option: ${style} \nError: ${
-            ex.message
-        }`;
-        throw ex;
-    }
-}
-
 
 /**
  *
@@ -314,12 +295,15 @@ function doReport(config, objects, errors, notFoundContracts) {
         .map(obj => obj.getEslintIssues(spaceLimited))
         .reduce((acc, curr) => acc.concat(curr), []);
 
-    // FIXME: temporary solution until backend will return correct filepath and output.
-    const eslintIssuesByBaseName = groupEslintIssuesByBasename(eslintIssues);
+    const eslintIssuesByBaseName = eslintHelpers.groupEslintIssuesByFilePath(eslintIssues);
+
+    eslintIssuesByBaseName.forEach(issues => {
+        issues.messages = eslintHelpers.sortMessages(issues.messages);
+    });
 
     const uniqueIssues = eslintHelpers.getUniqueIssues(eslintIssuesByBaseName);
 
-    const formatter = getFormatter(config.style);
+    const formatter = eslintHelpers.getFormatter(config.style);
     config.logger.log(formatter(uniqueIssues));
 
     if (notFoundContracts.length > 0) {
@@ -423,90 +407,9 @@ async function analyze(config) {
 }
 
 
-/**
- * A 2-level line-column comparison function.
- * @returns {integer} -
-      zero:      line1/column1 == line2/column2
-      negative:  line1/column1 < line2/column2
-      positive:  line1/column1 > line2/column2
-*/
-function compareLineCol(line1, column1, line2, column2) {
-    return line1 === line2 ?
-        (column1 - column2) :
-        (line1 - line2);
-}
-
-/**
- * A 2-level comparison function for eslint message structure ranges
- * the fields off a message
- * We use the start position in the first comparison and then the
- * end position only when the start positions are the same.
- *
- * @returns {integer} -
-      zero:      range(mess1) == range(mess2)
-      negative:  range(mess1) <  range(mess2)
-      positive:  range(mess1) > range(mess)
-
-*/
-function compareMessLCRange(mess1, mess2) {
-    const c = compareLineCol(mess1.line, mess1.column, mess2.line, mess2.column);
-    return c != 0 ? c : compareLineCol(mess1.endLine, mess1.endCol, mess2.endLine, mess2.endCol);
-}
-
-
-/**
- * Temporary function which turns eslint issues grouped by filepath
- * to eslint issues rouped by filename.
-
- * @param {ESLintIssue[]}
- * @returns {ESListIssue[]}
- */
-const groupEslintIssuesByBasename = issues => {
-    const path = require('path');
-    const mappedIssues = issues.reduce((accum, issue) => {
-        const {
-            errorCount,
-            warningCount,
-            fixableErrorCount,
-            fixableWarningCount,
-            filePath,
-            messages,
-        } = issue;
-
-        const basename = path.basename(filePath);
-        if (!accum[basename]) {
-            accum[basename] = {
-                errorCount: 0,
-                warningCount: 0,
-                fixableErrorCount: 0,
-                fixableWarningCount: 0,
-                filePath: filePath,
-                messages: [],
-            };
-        }
-        accum[basename].errorCount += errorCount;
-        accum[basename].warningCount += warningCount;
-        accum[basename].fixableErrorCount += fixableErrorCount;
-        accum[basename].fixableWarningCount += fixableWarningCount;
-        accum[basename].messages = accum[basename].messages.concat(messages);
-        return accum;
-    }, {});
-
-    const issueGroups = Object.values(mappedIssues);
-    for (const group of issueGroups) {
-        group.messages = group.messages.sort(function(mess1, mess2) {
-            return compareMessLCRange(mess1, mess2);
-        });
-
-    }
-    return issueGroups;
-};
-
-
 module.exports = {
     analyze,
     defaultAnalyzeRateLimit,
-    compareLineCol,
     versionJSON2String,
     printVersion,
     printHelpMessage,
