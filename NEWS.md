@@ -12,7 +12,7 @@ Increase default time out to 5 minutes (rationale: Analysis times of up to 223s 
 Change Progress Bar changes
 ----------------------------------
 
-The logic of setting the width of progress bars changed since the default timeout changed from 2 minues to 5 minutes.
+The logic of setting the width of progress bars changed since the default timeout changed from 2 minutes to 5 minutes.
 
 The coded was refactored and a user-friendlly log added.
 
