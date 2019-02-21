@@ -1,3 +1,36 @@
+Release 1.1.1
+=================
+
+
+Default values have been tweaked to give better performance
+--------------------------------------------------------------------------
+
+Decrease the default pending-analysis limit to 4. (rationale: For the time being it doesn't make sense to ever queue more than 4 analyses because only 4 will be processed at a time on the MythX side).
+
+Increase default time out to 5 minutes (rationale: Analysis times of up to 223s have been observed. While the reason for the lengthy analysis must be investigated as well, right now we need sensible default settings that don't bombard the user with errors).
+
+Change Progress Bar changes
+----------------------------------
+
+The logic of setting the width of progress bars changed since the default timeout changed from 2 minues to 5 minutes.
+
+The coded was refactored and a user-friendlly log added.
+
+Contracts which are not audited are no longer considered for `progress bars' indent`.
+
+
+As before, this work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment)NRISecure.
+
+Miscellaneous
+----------------
+
+Remove duplicate SWC issues which can occur when there are multiple projects that refer to common files.
+
+Add experimental option: `--no-default-cache`
+
+Some small documentation corrections were made.
+
+
 Release 1.1.0
 =================
 
@@ -12,7 +45,7 @@ This version has elaborate progress bars which track
 
 They are on by default. To turn them off set `--no-progress`.
 
-This work was kindly contributed by Teruhiro Tagomori at NRISecure.
+This work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment)NRISecure.
 
 
 Changes for MythX API 1.4
