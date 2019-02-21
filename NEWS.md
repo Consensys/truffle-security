@@ -14,7 +14,7 @@ Change Progress Bar changes
 
 The logic of setting the width of progress bars changed since the default timeout changed from 2 minutes to 5 minutes.
 
-The coded was refactored and a user-friendlly log added.
+The coded was refactored and a user-friendly log added.
 
 Contracts which are not audited are no longer considered for `progress bars' indent`.
 
