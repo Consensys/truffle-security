@@ -89,7 +89,7 @@ Options:
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
              Limit MythX analyses time to *s* seconds.
-             The default is 120 seconds (two minutes).
+             The default is 300 seconds (five minutes).
   --limit *N*
              Have no more than *N* analysis requests pending at a time.
              As results come back, remaining contracts are submitted.
