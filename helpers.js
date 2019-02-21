@@ -179,19 +179,7 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
 const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
-    /**
-   * set the number of audited contracts
-   */
-    let contractNameLengths = []
-    await Promise.all(jsonFiles.map(async file => {
-        const buildObj = await trufstuf.parseBuildJson(file);
-        const contractName = buildObj.contractName;
-        if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
-            return;
-        }
-        contractNameLengths.push(contractName.length);
-    }));
-    const numOfAuditedContracts = contractNameLengths.length;
+    const timeout = (config.timeout || 300) * 1000;
 
     /**
    * Prepare for progress bar
@@ -199,22 +187,19 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     const progress = ('progress' in config) ? config.progress : true;
     let multi;
     let indent;
-    if (progress) {
+    if(progress) {
         multi = new multiProgress();
+        let contractNameLengths = [];
+        await Promise.all(jsonFiles.map(async file => {
+            const buildObj = await trufstuf.parseBuildJson(file);
+            const contractName = buildObj.contractName;
+            if (contractNames && contractNames.indexOf(contractName) < 0) {
+                return;
+            }
+            contractNameLengths.push(contractName.length);
+        }));
         indent = Math.max(...contractNameLengths);
     }
-
-    const timeout = (config.timeout || 300) * 1000;
-
-    /**
-   * Start
-   */
-    console.log('The number of audited contracts => ' + `${numOfAuditedContracts}`.green);
-    console.log('Timeout for each contract => ' + `${timeout / 1000}s`.green);
-    console.log('Please be * PATIENT * until all of the audits finish.');
-    console.log('------------------------------------------------------');
- 
-    
 
     /**
    * Multiple smart contracts need to be run concurrently
