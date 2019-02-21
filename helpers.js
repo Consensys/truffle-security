@@ -160,18 +160,23 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
 const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
+    const timeout = (config.timeout || 300) * 1000;
+
     /**
    * Prepare for progress bar
    */
     const progress = ('progress' in config) ? config.progress : true;
     let multi;
     let indent;
-    if (progress) {
+    if(progress) {
         multi = new multiProgress();
-        let contractNameLengths = []
+        let contractNameLengths = [];
         await Promise.all(jsonFiles.map(async file => {
             const buildObj = await trufstuf.parseBuildJson(file);
             const contractName = buildObj.contractName;
+            if (contractNames && contractNames.indexOf(contractName) < 0) {
+                return;
+            }
             contractNameLengths.push(contractName.length);
         }));
         indent = Math.max(...contractNameLengths);
@@ -197,8 +202,6 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
 
         const obj = new MythXIssues(buildObj);
 
-        const timeout = (config.timeout || 300) * 1000;
-
         let analyzeOpts = {
             timeout,
             clientToolName: 'truffle',
@@ -218,7 +221,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             bar = multi.newBar(`${buildObj.contractName.padStart(indent)} |` + ':bar'.cyan + '| :percent || Elapsed: :elapseds :status', {
                 complete: '*',
                 incomplete: ' ',
-                width: 40,
+                width: Math.max(Math.min(parseInt((timeout / 1000) / 300 * 100), 100), 40), // based on timeout, but the cap is 300 and the floor is 40.
                 total: timeout / 1000
             });
             timer = setInterval(() => {
