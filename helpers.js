@@ -178,7 +178,7 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
  * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
-const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
+const doAnalysis = async (client, config, jsonFiles, sortedSolidityFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
     const timeout = (config.timeout || 300) * 1000;
 
     /**
@@ -220,7 +220,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             return [null, null];
         }
 
-        const obj = new MythXIssues(buildObj);
+        const obj = new MythXIssues(buildObj, sortedSolidityFiles);
 
         let analyzeOpts = {
             clientToolName: 'truffle',
@@ -417,11 +417,18 @@ async function analyze(config) {
     // Get list of smart contract build json files from truffle build folder
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
 
+    const filteredJsonFiles = jsonFiles.filter(f => f !== 'Migrations.json');
+
+    let objs = await Promise.all(jsonFiles.map(file => trufstuf.parseBuildJson(file)));
+    const sortedSolidityFiles = objs.map(trufstuf.getSolidityFileFromJson).sort();
+    objs = null;
+
+
     if (!config.style) {
         config.style = 'stylish';
     }
 
-    const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames, limit);
+    const { objects, errors } = await doAnalysis(client, config, filteredJsonFiles, sortedSolidityFiles, contractNames, limit);
     const notFoundContracts = getNotFoundContracts(objects, contractNames);
     doReport(config, objects, errors, notFoundContracts);
 }
