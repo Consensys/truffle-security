@@ -79,12 +79,15 @@ describe('helpers.js', function() {
 
     describe('analyze', () => {
         let loggerStub;
+        let errorStub;
         let config;
         let getTruffleBuildJsonFilesStub;
 
         let contractsCompileStub;
         let doReportStub;
+        let getNotAnalyzedContractsStub;
         let getNotFoundContractsStub;
+        let getFoundContractNamesStub;
         let doAnalysisStub;
         let ghettoReportStub;
         let getIssues;
@@ -94,9 +97,12 @@ describe('helpers.js', function() {
             getTruffleBuildJsonFilesStub = sinon.stub(trufstuf, 'getTruffleBuildJsonFiles');
             contractsCompileStub = sinon.stub();
             doReportStub = sinon.stub();
+            getNotAnalyzedContractsStub = sinon.stub();
             getNotFoundContractsStub = sinon.stub();
+            getFoundContractNamesStub = sinon.stub();
             doAnalysisStub = sinon.stub();
             loggerStub = sinon.stub();
+            errorStub = sinon.stub();
             ghettoReportStub = sinon.stub();
             getIssues = sinon.stub(armlet.Client.prototype, 'getIssues');
 
@@ -106,6 +112,7 @@ describe('helpers.js', function() {
                 _: [],
                 logger: {
                     log: loggerStub,
+                    error: errorStub,
                 },
                 style: 'stylish',
                 progress: false,
@@ -113,7 +120,9 @@ describe('helpers.js', function() {
 
             helpers = rewire('../helpers');
             helpers.__set__('doAnalysis', doAnalysisStub);
+            helpers.__set__('getNotAnalyzedContracts', getNotAnalyzedContractsStub);
             helpers.__set__('getNotFoundContracts', getNotFoundContractsStub);
+            helpers.__set__('getFoundContractNames', getFoundContractNamesStub);
             helpers.__set__('contractsCompile', contractsCompileStub);
             helpers.__set__('doReport', doReportStub);
             helpers.__set__('ghettoReport', ghettoReportStub);
@@ -139,13 +148,16 @@ describe('helpers.js', function() {
         it('should call doAnalyze and report issues', async () => {
             doAnalysisStub.resolves({ objects: 1, errors: 3 });
             getTruffleBuildJsonFilesStub.resolves(['test.json']);
-            getNotFoundContractsStub.returns([])
+            getNotAnalyzedContractsStub.returns(['Contract1']);
+            getFoundContractNamesStub.returns(['Contract2']);
+            getNotFoundContractsStub.returns(['Contract3']);
 
             await helpers.analyze(config);
             assert.ok(getTruffleBuildJsonFilesStub.calledWith(config.contracts_build_directory));
+            assert.ok(config.logger.error.called);
             assert.ok(doAnalysisStub.called);
-            assert.ok(getNotFoundContractsStub.calledWith(1, null));
-            assert.ok(doReportStub.calledWith(config, 1, 3, []));
+            assert.ok(getNotAnalyzedContractsStub.calledWith(1, ['Contract2']));
+            assert.ok(doReportStub.calledWith(config, 1, 3, ['Contract1']));
         });
 
         it('should call getIssues when uuid is provided', async () => {
@@ -556,13 +568,23 @@ describe('helpers.js', function() {
     });
 
     describe('getNotFoundContracts', () => {
-        it('should collect contract names which are not found in truffle build contracts directory', () => {
+        it('should return a list containing the not found contracts', () => {
+            const allContractNames = ['Contract1', 'Contract2', 'Contract3', 'Contract4'];
+            const foundContractNames = ['Contract1', 'Contract3'];
+
+            const result = helpers.getNotFoundContracts(allContractNames, foundContractNames);
+            assert.equal(result.length, 2);
+        });
+    });
+
+    describe('getNotAnalyzedContracts', () => {
+        it('should collect contract names which are not analyzed in truffle build contracts directory', () => {
             const objects = [
                 { contractName: 'Contract1' },
                 { contractName: 'Contract2' },
             ];
 
-            const result = rewiredHelpers.getNotFoundContracts(objects, ['Contract2', 'NotFoundContract']);
+            const result = rewiredHelpers.getNotAnalyzedContracts(objects, ['Contract2', 'NotFoundContract']);
             assert.deepEqual(result, ['NotFoundContract']);
         });
 
@@ -572,7 +594,7 @@ describe('helpers.js', function() {
                 { contractName: 'Contract2' },
             ];
 
-            const result = rewiredHelpers.getNotFoundContracts(objects, null);
+            const result = rewiredHelpers.getNotAnalyzedContracts(objects, null);
             assert.deepEqual(result, []);
         });
 
@@ -582,7 +604,7 @@ describe('helpers.js', function() {
                 { contractName: 'Contract2' },
             ];
 
-            const result = rewiredHelpers.getNotFoundContracts(objects, []);
+            const result = rewiredHelpers.getNotAnalyzedContracts(objects, []);
             assert.deepEqual(result, []);
         });
     });
