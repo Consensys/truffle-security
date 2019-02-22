@@ -108,7 +108,7 @@ Options:
   --limit *N*
              Have no more than *N* analysis requests pending at a time.
              As results come back, remaining contracts are submitted.
-             The default is 10 contracts, the maximum value, but you can
+             The default is 4 contracts, the maximum value, but you can
              set this lower.
   --version  Show package and MythX version information.
   --no-progress
