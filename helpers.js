@@ -2,10 +2,11 @@
 
 
 const armlet = require('armlet');
+const path = require('path');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
 const eslintHelpers = require('./lib/eslint');
-const contracts = require('truffle-workflow-compile');
+const contracts = require('./lib/wfc');
 const util = require('util');
 const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
@@ -427,6 +428,7 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
 async function analyze(config) {
     const limit = config.limit || defaultAnalyzeRateLimit;
     const log = config.logger.log;
+
     if (isNaN(limit)) {
         log(`limit parameter should be a number; got ${limit}.`);
         return;
@@ -451,6 +453,8 @@ async function analyze(config) {
         return ;
     }
 
+    config.build_mythx_snapshots = path.join(config.build_directory,
+					     "mythx", "snapshots");
     await contractsCompile(config);
 
 
@@ -458,7 +462,7 @@ async function analyze(config) {
     const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
 
     // Get list of smart contract build json files from truffle build folder
-    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
+    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.build_mythx_snapshots);
 
     if (!config.style) {
         config.style = 'stylish';
