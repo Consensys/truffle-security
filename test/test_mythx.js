@@ -20,6 +20,7 @@ describe('mythx.js', () => {
                     'simple_dao.sol': {
                         source: truffleJSON.source,
                         ast: truffleJSON.ast,
+                        legacyAST: truffleJSON.legacyAST,
                     },
                 },
                 toolId: 'test-truffle-analyze',
