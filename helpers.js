@@ -305,7 +305,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
                 }
                 bar.terminate();    // terminate since bar.complete is false at this time
             }
-            return [err, null];
+            return [(buildObj.contractName + ": ").yellow + err, null];
         }
     });
 
@@ -339,7 +339,7 @@ function doReport(config, objects, errors, notFoundContracts) {
     }
 
     if (errors.length > 0) {
-        config.logger.error('Internal MythX errors encountered:');
+        config.logger.error('Internal MythX errors encountered:'.red);
         errors.forEach(err => {
             config.logger.error(err.error || err);
             if (config.debug > 1 && err.stack) {
