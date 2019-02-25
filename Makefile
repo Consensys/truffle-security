@@ -1,4 +1,4 @@
-.PHONY: test check lint lint-fix
+.PHONY: test check check-integration lint lint-fix
 
 
 #: Run lint and then tests
@@ -22,6 +22,10 @@ lint:
 #: Look and fix nodejs lint violations
 lint-fix:
 	npx eslint --fix --rulesdir=tools/eslint-rules lib
+
+#: Run integration test
+check-integration:
+	./integration-tests/run-tests.sh
 
 RM      ?= rm
 GIT2CL ?= git2cl

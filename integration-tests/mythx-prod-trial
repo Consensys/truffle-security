@@ -1,0 +1,7 @@
+# Source this to set up to run as a trial user
+unset MYTHX_API_KEY
+export MYTHX_ETH_ADDRESS='0x0000000000000000000000000000000000000000'
+MYTHX_API_URL=${MYTHX_API_URL:-'https://api.mythx.io'}
+export MYTHX_API_URL
+export MYTHX_PASSWORD='trial'
+echo Set up to use MythX as trial user
