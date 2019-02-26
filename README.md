@@ -99,7 +99,7 @@ Options:
              Note: this is still a bit raw and will be improved.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
-  --style { stylish | unix | json | table | tap | ... },
+  --style { stylish | json | table | tap | unix | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,

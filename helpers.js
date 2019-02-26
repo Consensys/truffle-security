@@ -84,7 +84,7 @@ Options:
              Note: this is still a bit raw and will be improved.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
-  --style { stylish | unix | json | table | tap | ... },
+  --style { stylish | json | table | tap | unix | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
   --timeout *seconds* ,
@@ -284,12 +284,20 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             if (progress) {
                 clearInterval(timer);
                 sleep.msleep(1000); // wait for last setInterval finising
-                bar.tick({
-                    'status': '✗ error'.red
-                });
+                // Check error message from armlet to determine if a timeout occured.
+                if(err.includes('User or default timeout reached after')
+                   || err.includes('Timeout reached after')) {
+                  bar.tick({
+                      'status': `✗ timeout`.yellow
+                  });
+                } else {
+                  bar.tick({
+                      'status': '✗ error'.red
+                  });
+                }
                 bar.terminate();    // terminate since bar.complete is false at this time
             }
-            return [err, null];
+            return [(buildObj.contractName + ": ").yellow + err, null];
         }
     });
 
@@ -323,7 +331,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     }
 
     if (errors.length > 0) {
-        config.logger.error('Internal MythX errors encountered:');
+        config.logger.error('Internal MythX errors encountered:'.red);
         errors.forEach(err => {
             config.logger.error(err.error || err);
             if (config.debug > 1 && err.stack) {
