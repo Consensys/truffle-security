@@ -98,6 +98,8 @@ Options:
   --version  Show package and MythX version information.
   --no-progress
              Do not display progress bars during analysis.
+  --no-color
+             Do not display colors.
 `;
         // FIXME: decide if this is okay or whether we need
         // to pass in `config` and use `config.logger.log`.
