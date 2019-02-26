@@ -370,7 +370,10 @@ async function getFoundContractNames(jsonFiles, contractNames) {
 }
 
 const getNotFoundContracts = (allContractNames, foundContracts) => {
-    return allContractNames.filter(function(i) {return foundContracts.indexOf(i) < 0;});
+    if (allContractNames) {
+      return allContractNames.filter(function(i) {return foundContracts.indexOf(i) < 0;});
+    }
+    return [];
 }
 
 const getNotAnalyzedContracts = (mythXIssuesObjects, contracts) => {
