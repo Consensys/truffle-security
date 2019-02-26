@@ -420,7 +420,7 @@ async function analyze(config) {
     const filteredJsonFiles = jsonFiles.filter(f => f !== 'Migrations.json');
 
     let objs = await Promise.all(jsonFiles.map(file => trufstuf.parseBuildJson(file)));
-    const sortedSolidityFiles = objs.map(trufstuf.getSolidityFileFromJson).sort();
+    const sortedSolidityFiles = [ ...new Set(objs.map(trufstuf.getSolidityFileFromJson).sort()) ];
     objs = null;
 
 
