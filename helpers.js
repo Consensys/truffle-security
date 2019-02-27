@@ -27,6 +27,7 @@ const contractsCompile = config => {
                 reject(err);
                 return ;
             }
+	    debugger
             resolve(result);
         });
     });
@@ -453,8 +454,8 @@ async function analyze(config) {
         return ;
     }
 
-    config.build_mythx_snapshots = path.join(config.build_directory,
-					     "mythx", "snapshots");
+    config.build_mythx_contracts = path.join(config.build_directory,
+					     "mythx", "contracts");
     await contractsCompile(config);
 
 
