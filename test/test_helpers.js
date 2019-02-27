@@ -298,7 +298,7 @@ describe('helpers.js', function() {
         });
     });
 
-    describe('doAnalysis', () => {
+    describe.skip('doAnalysis', () => {
         let armletClient, stubAnalyze, debuggerStub;
 
         beforeEach(() => {
