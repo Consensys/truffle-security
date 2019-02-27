@@ -463,7 +463,7 @@ async function analyze(config) {
     const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
 
     // Get list of smart contract build json files from truffle build folder
-    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.build_mythx_snapshots);
+    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.build_mythx_contracts);
 
     if (!config.style) {
         config.style = 'stylish';
