@@ -27,7 +27,6 @@ const contractsCompile = config => {
                 reject(err);
                 return ;
             }
-	    debugger
             resolve(result);
         });
     });

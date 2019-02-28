@@ -15,7 +15,8 @@ module.exports = {
     expect.options(options, ["resolver"]);
 
     var contracts_directory = options.contracts_directory;
-    var build_directory = options.contracts_build_directory;
+
+    var build_directory = options.build_mythx_contracts;
 
     function getFiles(done) {
       if (options.files) {

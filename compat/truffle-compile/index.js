@@ -78,8 +78,16 @@ var compile = function(sourcePath, sourceText, options, callback) {
   var originalPathMappings = {};
 
   var defaultSelectors = {
-    "": ["*"],
-    "*": ["*"],
+    "": ["legacyAST", "ast"],
+    "*": [
+      "abi",
+      "evm.bytecode.object",
+      "evm.bytecode.sourceMap",
+      "evm.deployedBytecode.object",
+      "evm.deployedBytecode.sourceMap",
+      "userdoc",
+      "devdoc"
+    ]
   };
 
   // Specify compilation targets
@@ -177,14 +185,16 @@ var compile = function(sourcePath, sourceText, options, callback) {
         name: "solc",
         version: solcVersion
       };
-      // FIXME: the below return path is hoaky, becaseu it is in the format that
-      // the MutiPromisify'd caller in workflow-compile expects.
+      standardOutput.updatedAt = new Date();
+
+      // FIXME: the below return path is hoaky, because it is in the format that
+      // the multiPromisify'd caller in workflow-compile expects.
       let shortName = path.basename(sourcePath);
       if (shortName.endsWith('.sol')) {
         shortName = shortName.slice(0, -4)
       }
 
-      callback(null, {[shortName]: standardOutput}, [sourcePath]);
+      callback(null, sourcePath, {[shortName]: standardOutput});
     })
     .catch(callback);
 };
@@ -342,9 +352,11 @@ compile.with_dependencies = function(options, callback) {
         ? self.display(required, options)
         : self.display(allSources, options);
 
-      options.compilationTargets = required;
-      for (const sourcePath of Object.keys(allSources)) {
-        compile(sourcePath, allSources[sourcePath], options, callback);
+      for (const sourcePath of options.paths) {
+        if (!sourcePath.endsWith('/Migrations.sol')) {
+          // FIXME do dependency or stat test?
+          compile(sourcePath, allSources[sourcePath], options, callback);
+        }
       }
     });
 };
