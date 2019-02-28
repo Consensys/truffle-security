@@ -36,49 +36,36 @@ const cleanBytecode = bytecode => {
   return cleanedBytecode;
 }
 
-const deconstructJsonObjectToContracts = jsonObject => {
+const normalizeJsonOuput = jsonObject => {
   const { contracts, sources, compiler, source, updatedAt } = jsonObject;
-  const objs = {};
 
-  for (const [ sourcePath, solData ] of Object.entries(contracts)) {
-      if (!objs[sourcePath]) {
-          objs[sourcePath] = {
-              contracts: [],
-          };
-      }
-      for (const [ contractName, contractData ] of Object.entries(solData)) {
-          const o = {
-              contractName,
-              sourcePath,
-              bytecode: cleanBytecode(contractData.evm.bytecode.object),
-              deployedBytecode: cleanBytecode(contractData.evm.deployedBytecode.object),
-              sourceMap: contractData.evm.bytecode.sourceMap,
-              deployedSourceMap: contractData.evm.deployedBytecode.sourceMap,
-              source,
-              updatedAt,
-              compiler,
-          };
-
-          objs[sourcePath].contracts.push(o);
-      }
-  }
+  const result = {
+    source,
+    contracts: [],
+    compiler,
+    updatedAt,
+  };
 
   for (const [ sourcePath, solData ] of Object.entries(sources)) {
-      if (!objs[sourcePath]) {
-          continue;
-      }
-      objs[sourcePath].contracts.map(o => {
-          o.ast = solData.ast;
-          o.legacyAST = solData.legacyAST;
-          o.id = solData.id;
-      });
+    result.sourcePath = sourcePath;
+    result.ast = solData.ast;
+    result.legacyAST = solData.legacyAST;
+    result.sourceMapIndex = solData.id;
   }
 
-  const result = Object.values(objs).reduce((acc, o) => {
-      acc = acc.concat(o.contracts);
-      return acc;
-  }, []);
+  Object.values(contracts).forEach(solData => {
+    for (const [ contractName, contractData ] of Object.entries(solData)) {
+      const contract = {
+        contractName,
+        bytecode: cleanBytecode(contractData.evm.bytecode.object),
+        deployedBytecode: cleanBytecode(contractData.evm.deployedBytecode.object),
+        sourceMap: contractData.evm.bytecode.sourceMap,
+        deployedSourceMap: contractData.evm.deployedBytecode.sourceMap,
+    };
 
+    result.contracts.push(contract);
+  }
+  })
   return result;
 };
 
@@ -220,7 +207,7 @@ var compile = function(sourcePath, sourceText, options, callback) {
       standardOutput.source = sourceText;
       standardOutput.updatedAt = new Date();
 
-      const contracts = deconstructJsonObjectToContracts(standardOutput)
+      const contracts = normalizeJsonOuput(standardOutput)
 
       // FIXME: the below return path is hoaky, because it is in the format that
       // the multiPromisify'd caller in workflow-compile expects.
