@@ -431,6 +431,13 @@ async function analyze(config) {
         config.style = 'stylish';
     }
 
+    // Do login before calling `analyzeWithStatus` of `armlet` which is called in `doAnalysis`.
+    // `analyzeWithStatus` does login to Mythril-API within it.
+    // However `doAnalysis` calls `analyzeWithStatus` simultaneously several times,
+    // as a result, it causes unnecesarry login requests to Mythril-API. (It ia a kind of race condition problem)
+    // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
+    await client.login();
+
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames, limit);
     const notFoundContracts = getNotFoundContracts(objects, contractNames);
     doReport(config, objects, errors, notFoundContracts);
