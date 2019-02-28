@@ -29,6 +29,59 @@ function findImports(pathName) {
 }
 
 
+// Recent versions of truffle seem to add __ to the end of the bytecode
+const cleanBytecode = bytecode => {
+  let cleanedBytecode = bytecode.replace(/_.+$/, '');
+  cleanedBytecode = `0x${cleanedBytecode}`;
+  return cleanedBytecode;
+}
+
+const deconstructJsonObjectToContracts = jsonObject => {
+  const { contracts, sources, compiler, source, updatedAt } = jsonObject;
+  const objs = {};
+
+  for (const [ sourcePath, solData ] of Object.entries(contracts)) {
+      if (!objs[sourcePath]) {
+          objs[sourcePath] = {
+              contracts: [],
+          };
+      }
+      for (const [ contractName, contractData ] of Object.entries(solData)) {
+          const o = {
+              contractName,
+              sourcePath,
+              bytecode: cleanBytecode(contractData.evm.bytecode.object),
+              deployedBytecode: cleanBytecode(contractData.evm.deployedBytecode.object),
+              sourceMap: contractData.evm.bytecode.sourceMap,
+              deployedSourceMap: contractData.evm.deployedBytecode.sourceMap,
+              source,
+              updatedAt,
+              compiler,
+          };
+
+          objs[sourcePath].contracts.push(o);
+      }
+  }
+
+  for (const [ sourcePath, solData ] of Object.entries(sources)) {
+      if (!objs[sourcePath]) {
+          continue;
+      }
+      objs[sourcePath].contracts.map(o => {
+          o.ast = solData.ast;
+          o.legacyAST = solData.legacyAST;
+          o.id = solData.id;
+      });
+  }
+
+  const result = Object.values(objs).reduce((acc, o) => {
+      acc = acc.concat(o.contracts);
+      return acc;
+  }, []);
+
+  return result;
+};
+
 
 // Most basic of the compile commands. Takes a sources, where
 // the keys are file or module paths and the values are the bodies of
@@ -164,7 +217,10 @@ var compile = function(sourcePath, sourceText, options, callback) {
         name: "solc",
         version: solcVersion
       };
+      standardOutput.source = sourceText;
       standardOutput.updatedAt = new Date();
+
+      const contracts = deconstructJsonObjectToContracts(standardOutput)
 
       // FIXME: the below return path is hoaky, because it is in the format that
       // the multiPromisify'd caller in workflow-compile expects.
@@ -173,7 +229,7 @@ var compile = function(sourcePath, sourceText, options, callback) {
         shortName = shortName.slice(0, -4)
       }
 
-      callback(null, sourcePath, {[shortName]: standardOutput});
+      callback(null, sourcePath, {[shortName]: contracts});
     })
     .catch(callback);
 };
