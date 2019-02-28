@@ -96,10 +96,10 @@ Options:
              The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
   --version  Show package and MythX version information.
-  --no-progress
-             Do not display progress bars during analysis.
-  --no-color
-             Do not display colors.
+  --progress, no-progress
+             enable/disable progress bars during analysis. The default is enabled.
+  --color, --no-color
+             enabling/disabling output coloring. The default is enabled.
 `;
         // FIXME: decide if this is okay or whether we need
         // to pass in `config` and use `config.logger.log`.
@@ -261,7 +261,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
-                config.logger.debug(`UUID for this job is ${status.uuid}`);
+                config.logger.debug(`UUID for ${analyzeOpts.data.contractName} is ${status.uuid}`);
                 if (config.debug > 1) {
                     config.logger.debug(`${util.inspect(issues, {depth: null})}`);
                     config.logger.debug(`${util.inspect(status, {depth: null})}`);
