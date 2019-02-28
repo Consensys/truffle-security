@@ -87,7 +87,7 @@ Options:
   --style { stylish | json | table | tap | unix | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
-  --timeout *seconds* ,
+  --timeout *seconds*
              Limit MythX analyses time to *s* seconds.
              The default is 300 seconds (five minutes).
   --limit *N*
