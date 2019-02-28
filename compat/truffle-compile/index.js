@@ -10,13 +10,6 @@ const find_contracts = require("truffle-contract-sources");
 const Config = require("truffle-config");
 const debug = require("debug")("compile"); // eslint-disable-line no-unused-vars
 
-function isSolcV4(solc_version) {
-    return solc_version.startsWith("0.4")
-}
-
-function isSolcV5(solc_version) {
-    return solc_version.startsWith("0.5")
-}
 
 function getFileContent(filepath) {
   const stats = fs.statSync(filepath);
@@ -118,27 +111,13 @@ var compile = function(sourcePath, sourceText, options, callback) {
     .then(solc => {
 
       const solcVersion = solc.version();
-      if (isSolcV4(solcVersion)) {
-        solcStandardInput.sources = {
-          [sourcePath]: {
-            content: sourceText
-          }
-        };
-      } else {
-        assert(isSolcV5(solcVersion));
-        solcStandardInput.sources = {
-          [sourcePath]: {
-            content: sourceText
-          }
-        };
-      }
+      solcStandardInput.sources = {
+        [sourcePath]: {
+          content: sourceText
+        }
+      };
 
-      let result;
-      if (isSolcV4(solcVersion)) {
-        result = solc.compile(solcStandardInput, null, findImports);
-      } else {
-        result = solc.compile(JSON.stringify(solcStandardInput), findImports);
-      }
+      const result = solc.compile(JSON.stringify(solcStandardInput), findImports);
 
       var standardOutput = JSON.parse(result);
 
