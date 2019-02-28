@@ -7,6 +7,7 @@ const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
 const eslintHelpers = require('./lib/eslint');
 const contracts = require('./lib/wfc');
+const mythx = require('./lib/mythx');
 const util = require('util');
 const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
@@ -210,8 +211,9 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
    */
 
     const results = await asyncPool(limit, jsonFiles, async file => {
-        const buildObj = await trufstuf.parseBuildJson(file);
-
+        const solObjs = await trufstuf.parseBuildJson(file);
+        const contractsObjs = mythx.newTruffleObjToOldTruffleByContracts(solObjs);
+        const buildObj = contractsObjs[0];
         /**
          * If contractNames have been passed then skip analyze for unwanted ones.
          */
