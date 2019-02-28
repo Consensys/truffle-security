@@ -188,6 +188,7 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
  */
 const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
     const timeout = (config.timeout || 300) * 1000;
+    const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
 
     /**
    * Prepare for progress bar
@@ -198,22 +199,31 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     let indent;
     if(progress) {
         multi = new multiProgress();
+<<<<<<< HEAD
         const contractNameLengths = contractNames.map(name => name.length);
+=======
+        let contractNameLengths = [];
+        const allContractNames = buildObjs.reduce((accum, obj) => {
+            const names = obj.contracts.map(({ contractName }) => contractName);
+            return accum.concat(names);
+        }, []);
+
+        allContractNames.forEach(contractName => {
+            if (contractNames && contractNames.indexOf(contractName) < 0) {
+                return;
+            }
+            contractNameLengths.push(contractName.length);
+        })
+>>>>>>> add analyze multiple contracts
         indent = Math.max(...contractNameLengths);
     }
 
-    /**
-   * Multiple smart contracts need to be run concurrently
-   * to speed up analyze report output.
-   * Because simple forEach or map can't handle async operations -
-   * async map is used and Promise.all to be notified when all analyses
-   * are finished.
-   */
+    const objContracts = buildObjs.reduce((resultContracts, obj) => {
+        const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
+        return resultContracts.concat(contracts);
+    }, []);
 
-    const results = await asyncPool(limit, jsonFiles, async file => {
-        const solObjs = await trufstuf.parseBuildJson(file);
-        const contractsObjs = mythx.newTruffleObjToOldTruffleByContracts(solObjs);
-        const buildObj = contractsObjs[0];
+    const results = await asyncPool(limit, objContracts, async buildObj => {
         /**
          * If contractNames have been passed then skip analyze for unwanted ones.
          */
