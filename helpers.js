@@ -87,7 +87,7 @@ Options:
   --style { stylish | json | table | tap | unix | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
-  --timeout *seconds* ,
+  --timeout *seconds*
              Limit MythX analyses time to *s* seconds.
              The default is 300 seconds (five minutes).
   --limit *N*
@@ -96,8 +96,10 @@ Options:
              The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
   --version  Show package and MythX version information.
-  --no-progress
-             Do not display progress bars during analysis.
+  --progress, no-progress
+             enable/disable progress bars during analysis. The default is enabled.
+  --color, --no-color
+             enabling/disabling output coloring. The default is enabled.
 `;
         // FIXME: decide if this is okay or whether we need
         // to pass in `config` and use `config.logger.log`.
@@ -251,7 +253,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
-                config.logger.debug(`UUID for this job is ${status.uuid}`);
+                config.logger.debug(`UUID for ${analyzeOpts.data.contractName} is ${status.uuid}`);
                 if (config.debug > 1) {
                     config.logger.debug(`${util.inspect(issues, {depth: null})}`);
                     config.logger.debug(`${util.inspect(status, {depth: null})}`);
@@ -447,7 +449,14 @@ async function analyze(config) {
     if (notFoundContracts.length > 0) {
         config.logger.error(`These smart contracts were not found: ${notFoundContracts.join(', ')}`);
     }
-
+  
+    // Do login before calling `analyzeWithStatus` of `armlet` which is called in `doAnalysis`.
+    // `analyzeWithStatus` does login to Mythril-API within it.
+    // However `doAnalysis` calls `analyzeWithStatus` simultaneously several times,
+    // as a result, it causes unnecesarry login requests to Mythril-API. (It ia a kind of race condition problem)
+    // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
+    await client.login();
+  
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, foundContractNames, limit);
     const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
     doReport(config, objects, errors, notAnalyzedContracts);
