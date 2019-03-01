@@ -36,39 +36,47 @@ const cleanBytecode = bytecode => {
   return cleanedBytecode;
 }
 
-const normalizeJsonOuput = jsonObject => {
-  const { contracts, sources, compiler, source, updatedAt } = jsonObject;
 
+const normalizeJsonOutput = jsonObject => {
+  const { contracts, sources, compiler, updatedAt } = jsonObject;
   const result = {
-    source,
-    contracts: [],
     compiler,
     updatedAt,
+    sources: {},
   };
 
+  for (const [ sourcePath, solData ] of Object.entries(contracts)) {
+      if (!result.sources[sourcePath]) {
+          result.sources[sourcePath] = {
+              // sourcePath,
+              contracts: [],
+          };
+      }
+      for (const [ contractName, contractData ] of Object.entries(solData)) {
+          const o = {
+              contractName,
+              bytecode: cleanBytecode(contractData.evm.bytecode.object),
+              deployedBytecode: cleanBytecode(contractData.evm.deployedBytecode.object),
+              sourceMap: contractData.evm.bytecode.sourceMap,
+              deployedSourceMap: contractData.evm.deployedBytecode.sourceMap,
+          };
+
+          result.sources[sourcePath].contracts.push(o);
+      }
+  }
+
   for (const [ sourcePath, solData ] of Object.entries(sources)) {
-    result.sourcePath = sourcePath;
-    result.ast = solData.ast;
-    result.legacyAST = solData.legacyAST;
-    result.sourceMapIndex = solData.id;
+    if (!result.sources[sourcePath]) {
+      continue;
+    }
+    result.sources[sourcePath].ast = solData.ast;
+    result.sources[sourcePath].legacyAST = solData.legacyAST;
+    result.sources[sourcePath].id = solData.id;
+    result.sources[sourcePath].source = getFileContent(sourcePath)
   }
 
-  Object.values(contracts).forEach(solData => {
-    for (const [ contractName, contractData ] of Object.entries(solData)) {
-      const contract = {
-        contractName,
-        bytecode: cleanBytecode(contractData.evm.bytecode.object),
-        deployedBytecode: cleanBytecode(contractData.evm.deployedBytecode.object),
-        sourceMap: contractData.evm.bytecode.sourceMap,
-        deployedSourceMap: contractData.evm.deployedBytecode.sourceMap,
-    };
-
-    result.contracts.push(contract);
-  }
-  })
   return result;
 };
-
 
 // Most basic of the compile commands. Takes a sources, where
 // the keys are file or module paths and the values are the bodies of
@@ -207,7 +215,7 @@ var compile = function(sourcePath, sourceText, options, callback) {
       standardOutput.source = sourceText;
       standardOutput.updatedAt = new Date();
 
-      const contracts = normalizeJsonOuput(standardOutput)
+      const normalizedOutput = normalizeJsonOutput(standardOutput)
 
       // FIXME: the below return path is hoaky, because it is in the format that
       // the multiPromisify'd caller in workflow-compile expects.
@@ -216,7 +224,7 @@ var compile = function(sourcePath, sourceText, options, callback) {
         shortName = shortName.slice(0, -4)
       }
 
-      callback(null, sourcePath, {[shortName]: contracts});
+      callback(null, sourcePath, {[shortName]: normalizedOutput});
     })
     .catch(callback);
 };

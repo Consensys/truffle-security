@@ -176,6 +176,16 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
     return result;
 }
 
+const removeDuplicateContracts = (contracts) => {
+    const uniqContracts = {};
+    contracts.forEach(contract => {
+        if (!uniqContracts[contract.contractName]) {
+            uniqContracts[contract.contractName] = contract
+        }
+    });
+    return Object.values(uniqContracts);
+}
+
 /**
  * Runs MythX security analyses on smart contract build json files found
  * in truffle build folder
@@ -190,6 +200,12 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     const timeout = (config.timeout || 300) * 1000;
     const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
 
+    const objContracts = buildObjs.reduce((resultContracts, obj) => {
+        const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
+        return resultContracts.concat(contracts);
+    }, []);
+
+    const noDuplicateContracts = removeDuplicateContracts(objContracts);
     /**
    * Prepare for progress bar
    */
@@ -203,10 +219,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         const contractNameLengths = contractNames.map(name => name.length);
 =======
         let contractNameLengths = [];
-        const allContractNames = buildObjs.reduce((accum, obj) => {
-            const names = obj.contracts.map(({ contractName }) => contractName);
-            return accum.concat(names);
-        }, []);
+        const allContractNames = noDuplicateContracts.map(({ contractName }) => contractName);
 
         allContractNames.forEach(contractName => {
             if (contractNames && contractNames.indexOf(contractName) < 0) {
@@ -218,12 +231,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         indent = Math.max(...contractNameLengths);
     }
 
-    const objContracts = buildObjs.reduce((resultContracts, obj) => {
-        const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
-        return resultContracts.concat(contracts);
-    }, []);
-
-    const results = await asyncPool(limit, objContracts, async buildObj => {
+    const results = await asyncPool(limit, noDuplicateContracts, async buildObj => {
         /**
          * If contractNames have been passed then skip analyze for unwanted ones.
          */
