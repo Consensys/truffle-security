@@ -192,15 +192,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     let indent;
     if(progress) {
         multi = new multiProgress();
-        let contractNameLengths = [];
-        await Promise.all(jsonFiles.map(async file => {
-            const buildObj = await trufstuf.parseBuildJson(file);
-            const contractName = buildObj.contractName;
-            if (contractNames && contractNames.indexOf(contractName) < 0) {
-                return;
-            }
-            contractNameLengths.push(contractName.length);
-        }));
+        const contractNameLengths = contractNames.map(name => name.length);
         indent = Math.max(...contractNameLengths);
     }
 
@@ -322,7 +314,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     }, { errors: [], objects: [] });
 };
 
-function doReport(config, objects, errors, notFoundContracts) {
+function doReport(config, objects, errors, notAnalyzedContracts) {
     const spaceLimited = ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
     const eslintIssues = objects
         .map(obj => obj.getEslintIssues(spaceLimited))
@@ -336,8 +328,8 @@ function doReport(config, objects, errors, notFoundContracts) {
     const formatter = getFormatter(config.style);
     config.logger.log(formatter(uniqueIssues));
 
-    if (notFoundContracts.length > 0) {
-        config.logger.error(`These smart contracts were not found: ${notFoundContracts.join(', ')}`);
+    if (notAnalyzedContracts.length > 0) {
+        config.logger.error(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`);
     }
 
     if (errors.length > 0) {
@@ -366,7 +358,27 @@ function ghettoReport(logger, results) {
     }
 }
 
-const getNotFoundContracts = (mythXIssuesObjects, contracts) => {
+async function getFoundContractNames(jsonFiles, contractNames) {
+    let foundContractNames = [];
+    await Promise.all(jsonFiles.map(async file => {
+        const buildObj = await trufstuf.parseBuildJson(file);
+        const contractName = buildObj.contractName;
+        if (contractNames && contractNames.indexOf(contractName) < 0) {
+            return;
+        }
+        foundContractNames.push(contractName);
+    }));
+    return foundContractNames;
+}
+
+const getNotFoundContracts = (allContractNames, foundContracts) => {
+    if (allContractNames) {
+      return allContractNames.filter(function(i) {return foundContracts.indexOf(i) < 0;});
+    }
+    return [];
+}
+
+const getNotAnalyzedContracts = (mythXIssuesObjects, contracts) => {
     if (!contracts || contracts.length === 0) {
         return [];
     }
@@ -431,16 +443,23 @@ async function analyze(config) {
         config.style = 'stylish';
     }
 
+    const foundContractNames = await getFoundContractNames(jsonFiles, contractNames);
+    const notFoundContracts = getNotFoundContracts(contractNames, foundContractNames);
+
+    if (notFoundContracts.length > 0) {
+        config.logger.error(`These smart contracts were not found: ${notFoundContracts.join(', ')}`);
+    }
+  
     // Do login before calling `analyzeWithStatus` of `armlet` which is called in `doAnalysis`.
     // `analyzeWithStatus` does login to Mythril-API within it.
     // However `doAnalysis` calls `analyzeWithStatus` simultaneously several times,
     // as a result, it causes unnecesarry login requests to Mythril-API. (It ia a kind of race condition problem)
     // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
     await client.login();
-
-    const { objects, errors } = await doAnalysis(client, config, jsonFiles, contractNames, limit);
-    const notFoundContracts = getNotFoundContracts(objects, contractNames);
-    doReport(config, objects, errors, notFoundContracts);
+  
+    const { objects, errors } = await doAnalysis(client, config, jsonFiles, foundContractNames, limit);
+    const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
+    doReport(config, objects, errors, notAnalyzedContracts);
 }
 
 
@@ -537,5 +556,6 @@ module.exports = {
     getArmletClient,
     trialEthAddress,
     trialPassword,
+    getNotAnalyzedContracts,
     getNotFoundContracts,
 };
