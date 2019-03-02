@@ -286,22 +286,31 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             if (progress) {
                 clearInterval(timer);
                 sleep.msleep(1000); // wait for last setInterval finising
-                // Check error message from armlet to determine if a timeout occurred.
-                // Coerce err to string just in case it is not one.
-                const errStr =`${err}`;
-                if (errStr.includes('User or default timeout reached after')
-                   || errStr.includes('Timeout reached after')) {
-                  bar.tick({
-                      'status': `✗ timeout`.yellow
-                  });
-                } else {
-                  bar.tick({
-                      'status': '✗ error'.red
-                  });
-                }
-                bar.terminate();    // terminate since bar.complete is false at this time
             }
-            return [(buildObj.contractName + ": ").yellow + err, null];
+
+            // Get message property of err.
+            // If err is not Error object, coerce err to string to avoid possible problem in subsequent processing.
+            const errStr = (typeof err.message) === 'string' ? err.message : `${err}`;
+
+            // Check error message from armlet to determine if a timeout occurred.
+            if (errStr.includes('User or default timeout reached after')
+               || errStr.includes('Timeout reached after')) {
+                if (progress) {
+                    bar.tick({
+                        'status': `✗ timeout`.yellow
+                    });
+                    bar.terminate();    // terminate since bar.complete is false at this time
+                }
+                return [(buildObj.contractName + ": ").yellow + errStr, null];
+            } else {
+                if (progress) {
+                    bar.tick({
+                        'status': '✗ error'.red
+                    });
+                    bar.terminate();    // terminate since bar.complete is false at this time
+                }
+                return [(buildObj.contractName + ": ").red + errStr, null];
+            }
         }
     });
 
