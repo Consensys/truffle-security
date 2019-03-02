@@ -286,9 +286,11 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             if (progress) {
                 clearInterval(timer);
                 sleep.msleep(1000); // wait for last setInterval finising
-                // Check error message from armlet to determine if a timeout occured.
-                if(err.includes('User or default timeout reached after')
-                   || err.includes('Timeout reached after')) {
+                // Check error message from armlet to determine if a timeout occurred.
+                // Coerce err to string just in case it is not one.
+                const errStr =`${err}`;
+                if (errStr.includes('User or default timeout reached after')
+                   || errStr.includes('Timeout reached after')) {
                   bar.tick({
                       'status': `✗ timeout`.yellow
                   });
