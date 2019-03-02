@@ -257,7 +257,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
-                config.logger.debug(`UUID for ${analyzeOpts.data.contractName} is ${status.uuid}`);
+                config.logger.debug(`${analyzeOpts.data.contractName}: UUID is ${status.uuid}`);
                 if (config.debug > 1) {
                     config.logger.debug(`${util.inspect(issues, {depth: null})}`);
                     config.logger.debug(`${util.inspect(status, {depth: null})}`);
