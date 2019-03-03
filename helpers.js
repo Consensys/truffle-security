@@ -206,19 +206,21 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     }, []);
 
     const noDuplicateContracts = removeDuplicateContracts(objContracts);
+
+    /* FIXME: there currently is a bug in the caller  where contractNames is not
+       set properly. So we compute it here overriding what is passed in.
+     */
+    contractNames = noDuplicateContracts.map(contract => contract.contractName);
     /**
-   * Prepare for progress bar
-   */
+     * Prepare for progress bar
+     */
     const progress = ('progress' in config) ? config.progress : true;
     const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
     let multi;
     let indent;
-    if(progress) {
+    if (progress) {
         multi = new multiProgress();
-<<<<<<< HEAD
         const contractNameLengths = contractNames.map(name => name.length);
-=======
-        let contractNameLengths = [];
         const allContractNames = noDuplicateContracts.map(({ contractName }) => contractName);
 
         allContractNames.forEach(contractName => {
@@ -227,7 +229,6 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
             }
             contractNameLengths.push(contractName.length);
         })
->>>>>>> add analyze multiple contracts
         indent = Math.max(...contractNameLengths);
     }
 
@@ -370,9 +371,11 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
         config.logger.log(formatter(uniqueIssues));
     }
 
+    /* FIXME: not analyzedContracts was not computed correctly.
     if (notAnalyzedContracts.length > 0) {
         config.logger.error(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`);
     }
+    */
 
     if (errors.length > 0) {
         config.logger.error('Internal MythX errors encountered:'.red);
@@ -474,7 +477,7 @@ async function analyze(config) {
     }
 
     config.build_mythx_contracts = path.join(config.build_directory,
-					     "mythx", "contracts");
+                                             "mythx", "contracts");
     await contractsCompile(config);
 
 
@@ -489,6 +492,8 @@ async function analyze(config) {
     }
 
     const foundContractNames = await getFoundContractNames(jsonFiles, contractNames);
+
+    // FIXME: foundContrctNames is not right
     const notFoundContracts = getNotFoundContracts(contractNames, foundContractNames);
 
     if (notFoundContracts.length > 0) {
