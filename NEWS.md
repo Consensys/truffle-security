@@ -1,16 +1,74 @@
+Release 1.2.0
+=============
+
+
+Reduced MythX login calls
+-------------------------
+
+`truffle-security` can perform analyses on multiple contracts in a project, including
+the all of those in a truffle project,
+
+Rather than issue a login request for each contract, only a single
+login now issued to MythX.
+
+
+This work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment).
+
+Improved Error Reporting
+------------------------
+
+We now separate MythX internal error messages by contract, and give a summary list
+of all those where an error was encountered.
+
+Similar but separate are errors that come from the MythX API, e.g.
+server overloaded, invalid input, invalid login.
+
+These messages too are tagged with the Smart Contract name where these errors first start occurring.
+
+New Options --json and --yaml.
+------------------------------
+
+Two options provide showing data as it comes back from MythX without processing. For the cat-like curious, You might find information there that isn't in any report.
+
+When these options are given es-lint-style report generation is omitted.
+
+Note that:
+
+```
+truffle run --json
+```
+
+is different from:
+
+```
+truffle run --type=json
+```
+
+The later still processes the returned JSON into eslnt-style JSON,
+while the former is more verbose and does not attempt to correlate and
+piece together sections of the JSON returned.
+
+
+Miscellaneous
+-------------
+
+When a contract errors, the timeout value is displayed rather than the word error.
+
+The previously undocumented `--colors`, `--no-colors` is displayed.
+
 Release 1.1.1
 =================
 
 
 Default values have been tweaked to give better performance
---------------------------------------------------------------------------
+-----------------------------------------------------------
 
 Decrease the default pending-analysis limit to 4. (rationale: For the time being it doesn't make sense to ever queue more than 4 analyses because only 4 will be processed at a time on the MythX side).
 
 Increase default time out to 5 minutes (rationale: Analysis times of up to 223s have been observed. While the reason for the lengthy analysis must be investigated as well, right now we need sensible default settings that don't bombard the user with errors).
 
 Change Progress Bar changes
-----------------------------------
+---------------------------
 
 The logic of setting the width of progress bars changed since the default timeout changed from 2 minutes to 5 minutes.
 
@@ -22,7 +80,7 @@ Contracts which are not audited are no longer considered for `progress bars' ind
 As before, this work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment)NRISecure.
 
 Miscellaneous
-----------------
+-------------
 
 Remove duplicate SWC issues which can occur when there are multiple projects that refer to common files.
 
@@ -36,7 +94,7 @@ Release 1.1.0
 
 
 Progress Bars
------------------
+-------------
 
 This version has elaborate progress bars which track
 
@@ -49,19 +107,19 @@ This work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologie
 
 
 Changes for MythX API 1.4
--------------------------------
+-------------------------
 
 In version 1.4 of the MythX API, various authentication options involving an API key or an email address are no longer supported.
 If you haven't registered, jobs are submitted as a trial user.
 
 
 Limiting the number of simultaneous jobs
---------------------------------------------------
+----------------------------------------
 
 We noticed that there was a lot of overhead created on the back end by polling for analysis status. So, this version limits the maximum number of concurrent pending analyses, with a default of 10. You can lower this with the `--limit` option.
 
 Miscellaneous other changes
-----------------------------------
+---------------------------
 
 The help now includes the eslint style option `--style=json`. Thanks to tintin at Diligence who realized that this is a useful style setting. The json style is not space limited like many of the others are.
 
@@ -71,7 +129,7 @@ Additional tests were added and test-code coverage has been increased. This is t
 
 
 Older releases
-=================
+==============
 
 v1.0.1 - 2019-02-06
 -----------------------
