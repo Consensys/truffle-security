@@ -87,8 +87,12 @@ Options:
   --style { stylish | json | table | tap | unix | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
-  --timeout *seconds*
-             Limit MythX analyses time to *s* seconds.
+  --json | --yaml
+             Dump results in unprocessed JSON or YAML format as it comes back from MythX.
+             Note: this disables providing any es-lint style reports, and that
+             --style=json is processed for eslint, while --json is not.
+  --timeout *secs*
+             Limit MythX analyses time to *secs* seconds.
              The default is 300 seconds (five minutes).
   --limit *N*
              Have no more than *N* analysis requests pending at a time.
@@ -96,7 +100,7 @@ Options:
              The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
   --version  Show package and MythX version information.
-  --progress, no-progress
+  --progress, --no-progress
              enable/disable progress bars during analysis. The default is enabled.
   --color, --no-color
              enabling/disabling output coloring. The default is enabled.
@@ -253,7 +257,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
-                config.logger.debug(`UUID for ${analyzeOpts.data.contractName} is ${status.uuid}`);
+                config.logger.debug(`${analyzeOpts.data.contractName}: UUID is ${status.uuid}`);
                 if (config.debug > 1) {
                     config.logger.debug(`${util.inspect(issues, {depth: null})}`);
                     config.logger.debug(`${util.inspect(status, {depth: null})}`);
@@ -326,18 +330,24 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
 };
 
 function doReport(config, objects, errors, notAnalyzedContracts) {
-    const spaceLimited = ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
-    const eslintIssues = objects
-        .map(obj => obj.getEslintIssues(spaceLimited))
-        .reduce((acc, curr) => acc.concat(curr), []);
+    if (config.yaml) {
+        config.logger.log(yaml.safeDump(issueGroup.issues));
+    } else if (config.json) {
+        config.logger.log(JSON.stringify(objects, null, 4));
+    } else {
+        const spaceLimited = ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
+        const eslintIssues = objects
+              .map(obj => obj.getEslintIssues(spaceLimited))
+              .reduce((acc, curr) => acc.concat(curr), []);
 
-    // FIXME: temporary solution until backend will return correct filepath and output.
-    const eslintIssuesByBaseName = groupEslintIssuesByBasename(eslintIssues);
+        // FIXME: temporary solution until backend will return correct filepath and output.
+        const eslintIssuesByBaseName = groupEslintIssuesByBasename(eslintIssues);
 
-    const uniqueIssues = eslintHelpers.getUniqueIssues(eslintIssuesByBaseName);
+        const uniqueIssues = eslintHelpers.getUniqueIssues(eslintIssuesByBaseName);
 
-    const formatter = getFormatter(config.style);
-    config.logger.log(formatter(uniqueIssues));
+        const formatter = getFormatter(config.style);
+        config.logger.log(formatter(uniqueIssues));
+    }
 
     if (notAnalyzedContracts.length > 0) {
         config.logger.error(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`);
@@ -460,14 +470,14 @@ async function analyze(config) {
     if (notFoundContracts.length > 0) {
         config.logger.error(`These smart contracts were not found: ${notFoundContracts.join(', ')}`);
     }
-  
+
     // Do login before calling `analyzeWithStatus` of `armlet` which is called in `doAnalysis`.
     // `analyzeWithStatus` does login to Mythril-API within it.
     // However `doAnalysis` calls `analyzeWithStatus` simultaneously several times,
     // as a result, it causes unnecesarry login requests to Mythril-API. (It ia a kind of race condition problem)
     // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
     await client.login();
-  
+
     const { objects, errors } = await doAnalysis(client, config, jsonFiles, foundContractNames, limit);
     const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
     doReport(config, objects, errors, notAnalyzedContracts);

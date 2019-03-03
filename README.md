@@ -102,16 +102,22 @@ Options:
   --style { stylish | json | table | tap | unix | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
-  --timeout *seconds* ,
-             Limit MythX analyses time to *s* seconds.
-             The default is 120 seconds (two minutes).
+  --json | --yaml
+             Dump results in unprocessed JSON or YAML format as it comes back from MythX.
+             Note: this disables providing any es-lint style reports, and that
+             --style=json is processed for eslint, while --json is not.
+  --timeout *secs*
+             Limit MythX analyses time to *secs* seconds.
+             The default is 300 seconds (five minutes).
   --limit *N*
              Have no more than *N* analysis requests pending at a time.
              As results come back, remaining contracts are submitted.
-             The default is 4 contracts, the maximum value, but you can
+             The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
   --version  Show package and MythX version information.
-  --no-progress
-             Do not display progress bars during analysis.
+  --progress, --no-progress
+             enable/disable progress bars during analysis. The default is enabled.
+  --color, --no-color
+             enabling/disabling output coloring. The default is enabled.
 
 ```
