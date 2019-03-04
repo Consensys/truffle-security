@@ -187,30 +187,17 @@ const removeDuplicateContracts = (contracts) => {
 }
 
 /**
- * Runs MythX security analyses on smart contract build json files found
+ * Runs MythX security analyses on smart contract files found
  * in truffle build folder
  *
  * @param {armlet.Client} client - instance of armlet.Client to send data to API.
  * @param {Object} config - Truffle configuration object.
- * @param {Array<String>} jsonFiles - List of smart contract build json files.
+ * @param {Array<String>} constracts - List of smart contract.
  * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
-const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
+const doAnalysis = async (client, config, contracts, contractNames = null, limit = defaultAnalyzeRateLimit) => {
     const timeout = (config.timeout || 300) * 1000;
-    const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
-
-    const objContracts = buildObjs.reduce((resultContracts, obj) => {
-        const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
-        return resultContracts.concat(contracts);
-    }, []);
-
-    const noDuplicateContracts = removeDuplicateContracts(objContracts);
-
-    /* FIXME: there currently is a bug in the caller  where contractNames is not
-       set properly. So we compute it here overriding what is passed in.
-     */
-    contractNames = noDuplicateContracts.map(contract => contract.contractName);
     /**
      * Prepare for progress bar
      */
@@ -220,9 +207,8 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
     let indent;
     if (progress) {
         multi = new multiProgress();
-        const contractNameLengths = contractNames.map(name => name.length);
-        const allContractNames = noDuplicateContracts.map(({ contractName }) => contractName);
-
+        const contractNameLengths = [];
+        const allContractNames = contracts.map(({ contractName }) => contractName);
         allContractNames.forEach(contractName => {
             if (contractNames && contractNames.indexOf(contractName) < 0) {
                 return;
@@ -232,7 +218,7 @@ const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit
         indent = Math.max(...contractNameLengths);
     }
 
-    const results = await asyncPool(limit, noDuplicateContracts, async buildObj => {
+    const results = await asyncPool(limit, contracts, async buildObj => {
         /**
          * If contractNames have been passed then skip analyze for unwanted ones.
          */
@@ -371,11 +357,9 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
         config.logger.log(formatter(uniqueIssues));
     }
 
-    /* FIXME: not analyzedContracts was not computed correctly.
     if (notAnalyzedContracts.length > 0) {
         config.logger.error(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`);
     }
-    */
 
     if (errors.length > 0) {
         config.logger.error('Internal MythX errors encountered:'.red);
@@ -403,16 +387,14 @@ function ghettoReport(logger, results) {
     }
 }
 
-async function getFoundContractNames(jsonFiles, contractNames) {
+function getFoundContractNames(contracts, contractNames) {
     let foundContractNames = [];
-    await Promise.all(jsonFiles.map(async file => {
-        const buildObj = await trufstuf.parseBuildJson(file);
-        const contractName = buildObj.contractName;
+    contracts.forEach(({ contractName }) => {
         if (contractNames && contractNames.indexOf(contractName) < 0) {
             return;
         }
         foundContractNames.push(contractName);
-    }));
+    });
     return foundContractNames;
 }
 
@@ -491,9 +473,13 @@ async function analyze(config) {
         config.style = 'stylish';
     }
 
-    const foundContractNames = await getFoundContractNames(jsonFiles, contractNames);
-
-    // FIXME: foundContrctNames is not right
+    const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
+    const objContracts = buildObjs.reduce((resultContracts, obj) => {
+        const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
+        return resultContracts.concat(contracts);
+    }, []);
+    const noDuplicateContracts = removeDuplicateContracts(objContracts);
+    const foundContractNames = await getFoundContractNames(noDuplicateContracts, contractNames);
     const notFoundContracts = getNotFoundContracts(contractNames, foundContractNames);
 
     if (notFoundContracts.length > 0) {
@@ -507,7 +493,7 @@ async function analyze(config) {
     // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
     await client.login();
 
-    const { objects, errors } = await doAnalysis(client, config, jsonFiles, foundContractNames, limit);
+    const { objects, errors } = await doAnalysis(client, config, noDuplicateContracts, foundContractNames, limit);
     const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
     doReport(config, objects, errors, notAnalyzedContracts);
 }
