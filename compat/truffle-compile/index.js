@@ -28,11 +28,16 @@ function findImports(pathName) {
   }
 }
 
-function sourcePath2BuildPath(sourcePath, buildDir) {
+const getSourceFileName = sourcePath => {
   let shortName = path.basename(sourcePath);
   if (shortName.endsWith('.sol')) {
     shortName = shortName.slice(0, -4)
   }
+  return shortName;
+}
+
+function sourcePath2BuildPath(sourcePath, buildDir) {
+  const shortName = getSourceFileName(sourcePath);
   return path.join(buildDir, shortName + '.json')
 }
 
@@ -247,10 +252,7 @@ var compile = function(sourcePath, sourceText, options, callback) {
 
       // FIXME: the below return path is hoaky, because it is in the format that
       // the multiPromisify'd caller in workflow-compile expects.
-      let shortName = path.basename(sourcePath);
-      if (shortName.endsWith('.sol')) {
-        shortName = shortName.slice(0, -4)
-      }
+      const shortName = getSourceFileName(sourcePath);
 
       callback(null, sourcePath, {[shortName]: normalizedOutput});
     })
@@ -417,15 +419,8 @@ compile.with_dependencies = function(options, callback) {
           // Pick up from existing JSON
           const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
           const buildObj = JSON.parse(buildJson);
-          console.log("FIXME: danyiar");
-          const normalizedOutput = normalizeJsonOutput(buildObj)
-
-          // FIXME: DRY with a subroutine - this code appears 3 times.
-          let shortName = path.basename(sourcePath);
-          if (shortName.endsWith('.sol')) {
-            shortName = shortName.slice(0, -4)
-          }
-          callback(null, sourcePath, {[shortName]: normalizedOutput});
+          const shortName = getSourceFileName(sourcePath);
+          callback(null, sourcePath, {[shortName]: buildObj});
         }
       }
       var hasTargets = filteredRequired.length;
