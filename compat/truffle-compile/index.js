@@ -28,6 +28,34 @@ function findImports(pathName) {
   }
 }
 
+function sourcePath2BuildPath(sourcePath, buildDir) {
+  let shortName = path.basename(sourcePath);
+  if (shortName.endsWith('.sol')) {
+    shortName = shortName.slice(0, -4)
+  }
+  return path.join(buildDir, shortName + '.json')
+}
+
+/* returns true if directory/file out of date
+*/
+function staleBuildContract (sourcePath, buildPath) {
+    let sourcePathStat, buildPathStat;
+    try {
+        sourcePathStat = fs.statSync(sourcePath);
+    } catch (err) {
+        return true;
+    }
+    try {
+        buildPathStat = fs.statSync(buildPath);
+    } catch (err) {
+        return true;
+    }
+
+    const sourceMtime = sourcePathStat.mtime;
+    const buildMtime = buildPath.mtime;
+    return sourceMtime > buildMtime;
+};
+
 
 // Recent versions of truffle seem to add __ to the end of the bytecode
 const cleanBytecode = bytecode => {
@@ -376,15 +404,39 @@ compile.with_dependencies = function(options, callback) {
     (err, allSources, required) => {
       if (err) return callback(err);
 
-      var hasTargets = required.length;
+
+      // Filter out of the list of files to be compiled those for which we have a JSON that
+      // is newer than the last modified time of the source file.
+      const filteredRequired = [];
+      for (const sourcePath of options.paths) {
+        const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
+        if (staleBuildContract(sourcePath, targetJsonPath)) {
+          // Set for compilation
+          filteredRequired.push(sourcePath);
+        } else {
+          // Pick up from existing JSON
+          const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
+          const buildObj = JSON.parse(buildJson);
+          console.log("FIXME: danyiar");
+          const normalizedOutput = normalizeJsonOutput(buildObj)
+
+          // FIXME: DRY with a subroutine - this code appears 3 times.
+          let shortName = path.basename(sourcePath);
+          if (shortName.endsWith('.sol')) {
+            shortName = shortName.slice(0, -4)
+          }
+          callback(null, sourcePath, {[shortName]: normalizedOutput});
+        }
+      }
+      var hasTargets = filteredRequired.length;
 
       hasTargets
-        ? self.display(required, options)
+        ? self.display(filteredRequired, options)
         : self.display(allSources, options);
 
-      for (const sourcePath of options.paths) {
+      for (const sourcePath of filteredRequired) {
         if (!sourcePath.endsWith('/Migrations.sol')) {
-          // FIXME do dependency or stat test?
+          debugger
           compile(sourcePath, allSources[sourcePath], options, callback);
         }
       }
