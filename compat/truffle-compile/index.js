@@ -254,7 +254,7 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
       // the multiPromisify'd caller in workflow-compile expects.
       const shortName = getSourceFileName(sourcePath);
 
-      callback(null, sourcePath, {[shortName]: normalizedOutput}, isStale);
+      callback(null, {[shortName]: normalizedOutput}, isStale);
     })
     .catch(callback);
 };
@@ -420,7 +420,7 @@ compile.with_dependencies = function(options, callback) {
           const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
           const buildObj = JSON.parse(buildJson);
           const shortName = getSourceFileName(sourcePath);
-          callback(null, sourcePath, {[shortName]: buildObj}, false);
+          callback(null, {[shortName]: buildObj}, false);
           return
         }
       }
