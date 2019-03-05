@@ -96,11 +96,18 @@ Options:
   --timeout *secs*
              Limit MythX analyses time to *secs* seconds.
              The default is 300 seconds (five minutes).
+  --initial-delay *secs*
+             Minimum amount of time to wait before attempting a first status poll to MythX.
+             The default is ${armlet.defaultInitialDelay / 1000} seconds.
+             See https://github.com/ConsenSys/armlet#improving-polling-response
   --limit *N*
              Have no more than *N* analysis requests pending at a time.
              As results come back, remaining contracts are submitted.
              The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
+  --cache-lookup
+             enable/disable cache lookup. The default is enable.
+             If a request has been cached in MythX, then results come back immediately.
   --version  Show package and MythX version information.
   --progress, --no-progress
              enable/disable progress bars during analysis. The default is enabled.
@@ -198,11 +205,13 @@ const removeDuplicateContracts = (contracts) => {
  */
 const doAnalysis = async (client, config, contracts, contractNames = null, limit = defaultAnalyzeRateLimit) => {
     const timeout = (config.timeout || 300) * 1000;
+    const initialDelay = ('initial-delay' in config) ? config['initial-delay'] * 1000 : undefined;
+    const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
+
     /**
      * Prepare for progress bar
      */
     const progress = ('progress' in config) ? config.progress : true;
-    const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
     let multi;
     let indent;
     if (progress) {
@@ -232,6 +241,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
             clientToolName: 'truffle',
             noCacheLookup: !cacheLookup,
             timeout,
+            initialDelay
         };
 
         analyzeOpts.data = cleanAnalyzeDataEmptyProps(obj.buildObj, config.debug,
