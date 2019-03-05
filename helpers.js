@@ -366,7 +366,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     if (logs.length > 0) {
         config.logger.log('MythX Logs:'.yellow);
         logs.forEach(log => {
-            config.logger.log(`${log.level}: ${log.msg}`);
+	          config.logger.log(`${log.level}: ${log.msg}`);
         });
     }
 
