@@ -173,7 +173,6 @@ describe('issues2Eslint', function() {
             spyIsDynamicArray.restore();
         });
 
-
         it('should convert mythX report to Eslint issues', () => {
             const mythXOutput = {
                 'sourceType': 'solidity-file',
@@ -196,7 +195,7 @@ describe('issues2Eslint', function() {
                 'meta': {
                     'selected_compiler': '0.5.0',
                     'error': [],
-                    'warning': []
+                    'warning': [],
                 }
             };
 
@@ -247,11 +246,14 @@ describe('issues2Eslint', function() {
                 'meta': {
                     'selected_compiler': '0.5.0',
                     'error': [],
-                    'warning': []
+                    'warning': [],
+                    'logs': [{'level': 'info', 'msg': 'log message one'}, {'level': 'debug', 'msg': 'log message two'}]
                 }
             }];
 
             issuesObject.setIssues(mythXOutput);
+
+            assert.deepEqual(issuesObject.logs, [{'level': 'info', 'msg': 'log message one'}, {'level': 'debug', 'msg': 'log message two'}]);
             assert.deepEqual(issuesObject.issues, [{
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
@@ -268,6 +270,37 @@ describe('issues2Eslint', function() {
                     'extra': undefined,
                 }],
             }]);
+        });
+
+        it('It stores an empty array of logs when no logs object is in mythXOutput', () => {
+            const issuesObject = new MythXIssues(truffleJSON);
+            const mythXOutput = [{
+                'sourceType': 'solidity-file',
+                'sourceFormat': 'text',
+                'sourceList': [
+                    `/tmp/contracts/${sourceName}`,
+                ],
+                'issues': [{
+                    'description': {
+                        'head': 'Head message',
+                        'tail': 'Tail message'
+                    },
+                    'locations': [{
+                        'sourceMap': '310:23:0'
+                    }],
+                    'severity': 'High',
+                    'swcID': 'SWC-000',
+                    'swcTitle': 'Test Title'
+                }],
+                'meta': {
+                    'selected_compiler': '0.5.0',
+                    'error': [],
+                    'warning': [],
+                }
+            }];
+
+            issuesObject.setIssues(mythXOutput);
+            assert.deepEqual(issuesObject.logs, []);
         });
 
         it('It converts mythX issues to ESLint issues output format', () => {
