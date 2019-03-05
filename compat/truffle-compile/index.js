@@ -420,7 +420,8 @@ compile.with_dependencies = function(options, callback) {
           const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
           const buildObj = JSON.parse(buildJson);
           const shortName = getSourceFileName(sourcePath);
-          callback(null, sourcePath, {[shortName]: buildObj});
+          callback(null, sourcePath, {[shortName]: buildObj}, false);
+          return
         }
       }
       var hasTargets = filteredRequired.length;
@@ -431,8 +432,7 @@ compile.with_dependencies = function(options, callback) {
 
       for (const sourcePath of filteredRequired) {
         if (!sourcePath.endsWith('/Migrations.sol')) {
-          debugger
-          compile(sourcePath, allSources[sourcePath], options, callback);
+          compile(sourcePath, allSources[sourcePath], options, callback, true);
         }
       }
     });
