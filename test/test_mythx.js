@@ -1,6 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const mythx = require('../lib/mythx');
+const srcmap = require('../lib/srcmap');
 
 describe('mythx.js', () => {
     it('should turn truffle contract json to mythx compatible object', done => {
@@ -13,8 +14,8 @@ describe('mythx.js', () => {
                 contractName: truffleJSON.contractName,
                 bytecode: truffleJSON.bytecode,
                 deployedBytecode: truffleJSON.deployedBytecode,
-                sourceMap: truffleJSON.sourceMap,
-                deployedSourceMap: truffleJSON.deployedSourceMap,
+                sourceMap: srcmap.zeroedSourceMap(truffleJSON.sourceMap),
+                deployedSourceMap: srcmap.zeroedSourceMap(truffleJSON.deployedSourceMap),
                 sourceList: [ truffleJSON.sourcePath ],
                 sources: {
                     'simple_dao.sol': {
@@ -99,10 +100,8 @@ describe('mythx.js', () => {
         }]
         );
     });
-    
-    /*
-    FIXME: skip it for now truffle generates wrong indexed json files
-    it('should remap MythX Output object to array grouped by sourceLocation when outpit is multiple', () => {
+
+    it.skip('should remap MythX Output object to array grouped by sourceLocation when output is multiple', () => {
         const mythXOutput = {
             'sourceType': 'solidity-file',
             'sourceFormat': 'text',
@@ -191,5 +190,4 @@ describe('mythx.js', () => {
         }]
         );
     });
-    */
 });
