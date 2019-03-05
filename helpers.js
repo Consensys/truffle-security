@@ -361,6 +361,15 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
         config.logger.error(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`);
     }
 
+    const logs = objects.map(obj => obj.logs)
+        .reduce((acc, curr) => acc.concat(curr), []);
+    if (logs.length > 0) {
+        config.logger.log('MythX Logs:'.yellow);
+        logs.forEach(log => {
+            config.logger.log(`${log.level}: ${log.msg}`);
+        });
+    }
+
     if (errors.length > 0) {
         config.logger.error('Internal MythX errors encountered:'.red);
         errors.forEach(err => {
