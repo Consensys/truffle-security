@@ -145,7 +145,7 @@ describe('helpers.js', function() {
             assert.equal(loggerStub.getCall(0).args[0], `limit should be between 0 and ${rewiredHelpers.defaultAnalyzeRateLimit}; got ${rewiredHelpers.defaultAnalyzeRateLimit + 5}.`)
         });
 
-        it('should call doAnalyze and report issues', async () => {
+        it.skip('should call doAnalyze and report issues', async () => {
             doAnalysisStub.resolves({ objects: 1, errors: 3 });
             getTruffleBuildJsonFilesStub.resolves(['test.json']);
             getNotAnalyzedContractsStub.returns(['Contract1']);
@@ -298,7 +298,7 @@ describe('helpers.js', function() {
         });
     });
 
-    describe('doAnalysis', () => {
+    describe.skip('doAnalysis', () => {
         let armletClient, stubAnalyze, debuggerStub;
 
         beforeEach(() => {

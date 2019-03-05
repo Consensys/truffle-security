@@ -2,10 +2,12 @@
 
 
 const armlet = require('armlet');
+const path = require('path');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
 const eslintHelpers = require('./lib/eslint');
-const contracts = require('truffle-workflow-compile');
+const contracts = require('./lib/wfc');
+const mythx = require('./lib/mythx');
 const util = require('util');
 const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
@@ -174,43 +176,49 @@ const cleanAnalyDataEmptyProps = (data, debug, logger) => {
     return result;
 }
 
+const removeDuplicateContracts = (contracts) => {
+    const uniqContracts = {};
+    contracts.forEach(contract => {
+        if (!uniqContracts[contract.contractName]) {
+            uniqContracts[contract.contractName] = contract
+        }
+    });
+    return Object.values(uniqContracts);
+}
+
 /**
- * Runs MythX security analyses on smart contract build json files found
+ * Runs MythX security analyses on smart contract files found
  * in truffle build folder
  *
  * @param {armlet.Client} client - instance of armlet.Client to send data to API.
  * @param {Object} config - Truffle configuration object.
- * @param {Array<String>} jsonFiles - List of smart contract build json files.
+ * @param {Array<String>} constracts - List of smart contract.
  * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
-const doAnalysis = async (client, config, jsonFiles, contractNames = null, limit = defaultAnalyzeRateLimit) => {
+const doAnalysis = async (client, config, contracts, contractNames = null, limit = defaultAnalyzeRateLimit) => {
     const timeout = (config.timeout || 300) * 1000;
-
     /**
-   * Prepare for progress bar
-   */
+     * Prepare for progress bar
+     */
     const progress = ('progress' in config) ? config.progress : true;
     const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
     let multi;
     let indent;
-    if(progress) {
+    if (progress) {
         multi = new multiProgress();
-        const contractNameLengths = contractNames.map(name => name.length);
+        const contractNameLengths = [];
+        const allContractNames = contracts.map(({ contractName }) => contractName);
+        allContractNames.forEach(contractName => {
+            if (contractNames && contractNames.indexOf(contractName) < 0) {
+                return;
+            }
+            contractNameLengths.push(contractName.length);
+        })
         indent = Math.max(...contractNameLengths);
     }
 
-    /**
-   * Multiple smart contracts need to be run concurrently
-   * to speed up analyze report output.
-   * Because simple forEach or map can't handle async operations -
-   * async map is used and Promise.all to be notified when all analyses
-   * are finished.
-   */
-
-    const results = await asyncPool(limit, jsonFiles, async file => {
-        const buildObj = await trufstuf.parseBuildJson(file);
-
+    const results = await asyncPool(limit, contracts, async buildObj => {
         /**
          * If contractNames have been passed then skip analyze for unwanted ones.
          */
@@ -388,16 +396,14 @@ function ghettoReport(logger, results) {
     }
 }
 
-async function getFoundContractNames(jsonFiles, contractNames) {
+function getFoundContractNames(contracts, contractNames) {
     let foundContractNames = [];
-    await Promise.all(jsonFiles.map(async file => {
-        const buildObj = await trufstuf.parseBuildJson(file);
-        const contractName = buildObj.contractName;
+    contracts.forEach(({ contractName }) => {
         if (contractNames && contractNames.indexOf(contractName) < 0) {
             return;
         }
         foundContractNames.push(contractName);
-    }));
+    });
     return foundContractNames;
 }
 
@@ -436,6 +442,7 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
 async function analyze(config) {
     const limit = config.limit || defaultAnalyzeRateLimit;
     const log = config.logger.log;
+
     if (isNaN(limit)) {
         log(`limit parameter should be a number; got ${limit}.`);
         return;
@@ -460,6 +467,8 @@ async function analyze(config) {
         return ;
     }
 
+    config.build_mythx_contracts = path.join(config.build_directory,
+                                             "mythx", "contracts");
     await contractsCompile(config);
 
 
@@ -467,13 +476,19 @@ async function analyze(config) {
     const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
 
     // Get list of smart contract build json files from truffle build folder
-    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.contracts_build_directory);
+    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.build_mythx_contracts);
 
     if (!config.style) {
         config.style = 'stylish';
     }
 
-    const foundContractNames = await getFoundContractNames(jsonFiles, contractNames);
+    const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
+    const objContracts = buildObjs.reduce((resultContracts, obj) => {
+        const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
+        return resultContracts.concat(contracts);
+    }, []);
+    const noDuplicateContracts = removeDuplicateContracts(objContracts);
+    const foundContractNames = await getFoundContractNames(noDuplicateContracts, contractNames);
     const notFoundContracts = getNotFoundContracts(contractNames, foundContractNames);
 
     if (notFoundContracts.length > 0) {
@@ -487,7 +502,7 @@ async function analyze(config) {
     // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
     await client.login();
 
-    const { objects, errors } = await doAnalysis(client, config, jsonFiles, foundContractNames, limit);
+    const { objects, errors } = await doAnalysis(client, config, noDuplicateContracts, foundContractNames, limit);
     const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
     doReport(config, objects, errors, notAnalyzedContracts);
 }
