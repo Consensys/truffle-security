@@ -57,7 +57,7 @@ function staleBuildContract (sourcePath, buildPath) {
     }
 
     const sourceMtime = sourcePathStat.mtime;
-    const buildMtime = buildPath.mtime;
+    const buildMtime = buildPathStat.mtime;
     return sourceMtime > buildMtime;
 };
 
@@ -121,7 +121,7 @@ const normalizeJsonOutput = jsonObject => {
 //   quiet: false,
 //   logger: console
 // }
-var compile = function(sourcePath, sourceText, options, callback) {
+var compile = function(sourcePath, sourceText, options, callback, isStale) {
   if (typeof options === "function") {
     callback = options;
     options = {};
@@ -254,7 +254,7 @@ var compile = function(sourcePath, sourceText, options, callback) {
       // the multiPromisify'd caller in workflow-compile expects.
       const shortName = getSourceFileName(sourcePath);
 
-      callback(null, sourcePath, {[shortName]: normalizedOutput});
+      callback(null, sourcePath, {[shortName]: normalizedOutput}, isStale);
     })
     .catch(callback);
 };
