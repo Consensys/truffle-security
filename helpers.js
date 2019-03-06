@@ -339,7 +339,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 
 function doReport(config, objects, errors, notAnalyzedContracts) {
     if (config.yaml) {
-        config.logger.log(yaml.safeDump(issueGroup.issues));
+        config.logger.log(yaml.safeDump(objects));
     } else if (config.json) {
         config.logger.log(JSON.stringify(objects, null, 4));
     } else {
