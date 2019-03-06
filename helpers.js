@@ -139,7 +139,7 @@ async function printVersion() {
    source code or AST. But we want to remove the fields so we don't
    get complaints from MythX. We will manage what we want to say.
 */
-const cleanAnalyDataEmptyProps = (data, debug, logger) => {
+const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
     const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, ...props } = data;
     const result = { ...props };
 
@@ -234,7 +234,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
             timeout,
         };
 
-        analyzeOpts.data = cleanAnalyDataEmptyProps(obj.buildObj, config.debug,
+        analyzeOpts.data = cleanAnalyzeDataEmptyProps(obj.buildObj, config.debug,
                                                     config.logger.debug);
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'quick';
         if (config.debug > 1) {
@@ -597,7 +597,7 @@ module.exports = {
     printHelpMessage,
     contractsCompile,
     doAnalysis,
-    cleanAnalyDataEmptyProps,
+    cleanAnalyzeDataEmptyProps,
     getArmletClient,
     trialEthAddress,
     trialPassword,

@@ -506,7 +506,7 @@ describe('helpers.js', function() {
         });
     });
 
-    describe('cleanAnalyDataEmptyProps', () => {
+    describe('cleanAnalyzeDataEmptyProps', () => {
         const contractJSON = `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`;
         let truffleJSON;
 
@@ -520,7 +520,7 @@ describe('helpers.js', function() {
 
         it('should return complete input data when all fields are present', () => {
             const stub = sinon.stub();
-            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            const result = rewiredHelpers.cleanAnalyzeDataEmptyProps(truffleJSON, true, stub);
             assert.ok(!stub.called);
             assert.deepEqual(result, truffleJSON);
         });
@@ -528,7 +528,7 @@ describe('helpers.js', function() {
         it('should omit bytecode when bytecode is empty', () => {
             const stub = sinon.stub();
             truffleJSON.bytecode = '';
-            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            const result = rewiredHelpers.cleanAnalyzeDataEmptyProps(truffleJSON, true, stub);
             assert.ok(stub.called);
             delete truffleJSON.bytecode;
             assert.deepEqual(result, truffleJSON);
@@ -537,7 +537,7 @@ describe('helpers.js', function() {
         it('should omit bytecode when bytecode is 0x', () => {
             const stub = sinon.stub();
             truffleJSON.bytecode = '0x';
-            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            const result = rewiredHelpers.cleanAnalyzeDataEmptyProps(truffleJSON, true, stub);
             assert.ok(stub.called);
             delete truffleJSON.bytecode;
             assert.deepEqual(result, truffleJSON);
@@ -546,7 +546,7 @@ describe('helpers.js', function() {
         it('should omit deployedBytecode when deployedBytecode is empty', () => {
             const stub = sinon.stub();
             truffleJSON.deployedBytecode = '';
-            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            const result = rewiredHelpers.cleanAnalyzeDataEmptyProps(truffleJSON, true, stub);
             assert.ok(stub.called);
             delete truffleJSON.deployedBytecode;
             assert.deepEqual(result, truffleJSON);
@@ -555,7 +555,7 @@ describe('helpers.js', function() {
         it('should omit deployedBytecode when deployedBytecode is 0x', () => {
             const stub = sinon.stub();
             truffleJSON.deployedBytecode = '0x';
-            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            const result = rewiredHelpers.cleanAnalyzeDataEmptyProps(truffleJSON, true, stub);
             assert.ok(stub.called);
             delete truffleJSON.deployedBytecode;
             assert.deepEqual(result, truffleJSON);
@@ -564,7 +564,7 @@ describe('helpers.js', function() {
         it('should omit sourceMap when sourceMap is empty', () => {
             const stub = sinon.stub();
             truffleJSON.sourceMap = '';
-            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            const result = rewiredHelpers.cleanAnalyzeDataEmptyProps(truffleJSON, true, stub);
             assert.ok(stub.called);
             delete truffleJSON.sourceMap;
             assert.deepEqual(result, truffleJSON);
@@ -573,7 +573,7 @@ describe('helpers.js', function() {
         it('should omit deployedSourceMap when deployedSourceMap is empty', () => {
             const stub = sinon.stub();
             truffleJSON.deployedSourceMap = '';
-            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, true, stub);
+            const result = rewiredHelpers.cleanAnalyzeDataEmptyProps(truffleJSON, true, stub);
             assert.ok(stub.called);
             delete truffleJSON.deployedSourceMap;
             assert.deepEqual(result, truffleJSON);
@@ -585,7 +585,7 @@ describe('helpers.js', function() {
             truffleJSON.sourceMap = null;
             truffleJSON.bytecode = '0x';
             delete truffleJSON.deployedBytecode;
-            const result = rewiredHelpers.cleanAnalyDataEmptyProps(truffleJSON, false, stub);
+            const result = rewiredHelpers.cleanAnalyzeDataEmptyProps(truffleJSON, false, stub);
             delete truffleJSON.sourceMap;
             delete truffleJSON.deployedSourceMap;
             delete truffleJSON.bytecode;
