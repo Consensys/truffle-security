@@ -20,9 +20,5 @@ module.exports = async (config) => {
     if (config.help) return helpers.printHelpMessage();
     if (config.version) return helpers.printVersion();
 
-    // FIXME: This is still not right. Figure out what's up and how to fix.
-    // This can cause vyper to fail if you don't have vyper installed
-    // This might be a bug in truffle?
-    delete config.compilers.vyper;
     return await helpers.analyze(config);
 };

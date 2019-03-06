@@ -16,11 +16,11 @@ module.exports = {
     // See <http://truffleframework.com/docs/advanced/configuration>
     // to customize your Truffle configuration!
     compilers: {
-        solc: {
-            version: "0.4.25"  // ex:  "0.4.20". (Default: Truffle's installed solc)
-        }
+      solc: {
+        version: "0.5.2"  // ex:  "0.4.20". (Default: Truffle's installed solc)
+      }
     },
     plugins: [
-        'truffle-security'
+    "truffle-security"
     ]
 };
