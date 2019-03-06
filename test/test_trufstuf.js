@@ -3,7 +3,7 @@ const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
 
 
-describe.skip('trufstuf', () => {
+describe('trufstuf', () => {
     let trufstuf;
     const statStub = sinon.stub();
     const readdirStub = sinon.stub();
@@ -43,43 +43,6 @@ describe.skip('trufstuf', () => {
         const result = await trufstuf.parseBuildJson('filePath');
         assert.deepEqual(result, { content: 'content' });
     });
-    
-    it('should identify json as non-stale when mtime of json and source file are the same', async () => {
-        const parseBuildJson = sinon.stub(trufstuf, 'parseBuildJson');
-
-        statStub.yields(null, { mtime: 1000000 })
-        parseBuildJson.resolves({ sourcePath: 'test/contract.sol' });
-
-        const result = await trufstuf.staleBuildContract('test/build/contracts', 'Contract.json');
-        assert.deepEqual(result, false);
-    });
-
-    it('should identify json as stale when source file does not exist', async () => {
-        const parseBuildJson = sinon.stub(trufstuf, 'parseBuildJson');
-
-        statStub
-            .onFirstCall().yields(null, { mtime: 1000000 });
-        statStub
-            .onSecondCall().yields('error');
-        
-        parseBuildJson.resolves({ sourcePath: 'test/contract.sol' });
-
-        const result = await trufstuf.staleBuildContract('test/build/contracts', 'Contract.json');
-        assert.ok(result);
-    });
-
-    it('should identify json as stale when json file is older than source', async () => {
-        const parseBuildJson = sinon.stub(trufstuf, 'parseBuildJson');
-        statStub
-            .onFirstCall().yields(null, { mtime: 1000000 });
-        statStub
-            .onSecondCall().yields(null, { mtime: 1000001 });
-        
-        parseBuildJson.resolves({ sourcePath: 'test/contract.sol' });
-
-        const result = await trufstuf.staleBuildContract('test/build/contracts', 'Contract.json');
-        assert.ok(result);
-    });
 
     it('should return paths of filtered JSON files', async () => {
         statStub.yields(null, { mtime: 1000000 });
@@ -94,6 +57,7 @@ describe.skip('trufstuf', () => {
 
         const files = await trufstuf.getTruffleBuildJsonFiles('/test/build/contracts');
         assert.deepEqual(files, [
+            '/test/build/contracts/Contract.json',
             '/test/build/contracts/OtherContract.json',
         ]);
     });
