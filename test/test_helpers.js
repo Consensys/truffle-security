@@ -91,10 +91,12 @@ describe('helpers.js', function() {
         let doAnalysisStub;
         let ghettoReportStub;
         let getIssues;
+        let loginStub;
 
 
         beforeEach(() => {
             getTruffleBuildJsonFilesStub = sinon.stub(trufstuf, 'getTruffleBuildJsonFiles');
+            parseBuildJsonStub = sinon.stub(trufstuf, 'parseBuildJson');
             contractsCompileStub = sinon.stub();
             doReportStub = sinon.stub();
             getNotAnalyzedContractsStub = sinon.stub();
@@ -105,10 +107,11 @@ describe('helpers.js', function() {
             errorStub = sinon.stub();
             ghettoReportStub = sinon.stub();
             getIssues = sinon.stub(armlet.Client.prototype, 'getIssues');
+            loginStub = sinon.stub(armlet.Client.prototype, 'login');
 
             config = {
-                contracts_build_directory: '/build/contracts',
                 contracts_directory: '/contracts',
+                build_directory: '/build/contracts',
                 _: [],
                 logger: {
                     log: loggerStub,
@@ -131,6 +134,8 @@ describe('helpers.js', function() {
         afterEach(() => {
             getTruffleBuildJsonFilesStub.restore();
             getIssues.restore();
+            parseBuildJsonStub.restore();
+            loginStub.restore();
         });
 
         it('should return error when passed value for limit is not a number', async () => {
@@ -145,15 +150,44 @@ describe('helpers.js', function() {
             assert.equal(loggerStub.getCall(0).args[0], `limit should be between 0 and ${rewiredHelpers.defaultAnalyzeRateLimit}; got ${rewiredHelpers.defaultAnalyzeRateLimit + 5}.`)
         });
 
-        it.skip('should call doAnalyze and report issues', async () => {
+        it('should call doAnalyze and report issues', async () => {
+            const fakeJson = {
+                "compiler": { "name": "", "version": "" },
+                "updatedAt": "",
+                "sources": {
+                    "contract.sol": {
+                        "contracts": [
+                            {
+                                "contractName": "Contract1",
+                                "bytecode": "0x",
+                                "deployedBytecode": "0x",
+                                "sourceMap": "",
+                                "deployedSourceMap": ""
+                            },
+                            {
+                                "contractName": "Contract2",
+                                "bytecode": "0x",
+                                "deployedBytecode": "0x",
+                                "sourceMap": "",
+                                "deployedSourceMap": ""
+                            }
+                        ],
+                        "ast": {},
+                        "legacyAST": {},
+                        "id": 0,
+                        "source": ""
+                    }
+                }
+            }            
             doAnalysisStub.resolves({ objects: 1, errors: 3 });
             getTruffleBuildJsonFilesStub.resolves(['test.json']);
+            parseBuildJsonStub.resolves(fakeJson);
             getNotAnalyzedContractsStub.returns(['Contract1']);
             getFoundContractNamesStub.returns(['Contract2']);
             getNotFoundContractsStub.returns(['Contract3']);
 
             await helpers.analyze(config);
-            assert.ok(getTruffleBuildJsonFilesStub.calledWith(config.contracts_build_directory));
+            assert.ok(getTruffleBuildJsonFilesStub.calledWith('/build/contracts/mythx/contracts'));
             assert.ok(config.logger.error.called);
             assert.ok(doAnalysisStub.called);
             assert.ok(getNotAnalyzedContractsStub.calledWith(1, ['Contract2']));
@@ -298,7 +332,7 @@ describe('helpers.js', function() {
         });
     });
 
-    describe.skip('doAnalysis', () => {
+    describe('doAnalysis', () => {
         let armletClient, stubAnalyze, debuggerStub;
 
         beforeEach(() => {
@@ -324,17 +358,15 @@ describe('helpers.js', function() {
                 style: 'test-style',
                 progress: false,
             }
-            const jsonFiles = [
-                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
-            ];
-
-            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFiles[0], 'utf8');
-            const mythXInput = mythx.truffle2MythXJSON(JSON.parse(simpleDaoJSON));
+            const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
+            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
+            const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
+            const mythXInput = mythx.truffle2MythXJSON(contracts[0]);
             stubAnalyze.resolves({
                 issues: [{
                     'sourceFormat': 'evm-byzantium-bytecode',
                     'sourceList': [
-                        `${__dirname}/sample-truffle/simple_dao/contracts/SimpleDAO.sol`
+                        `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`
                     ],
                     'sourceType': 'raw-bytecode',
                     'issues': [{
@@ -357,7 +389,7 @@ describe('helpers.js', function() {
                 }],
                 status: { status: 'Finished' },
             });
-            const results = await doAnalysis(armletClient, config, jsonFiles);
+            const results = await doAnalysis(armletClient, config, contracts);
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 clientToolName: 'truffle',
@@ -378,16 +410,15 @@ describe('helpers.js', function() {
                 style: 'test-style',
                 progress: false,
             }
-            const jsonFiles = [
-                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
-            ];
+            const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
+            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
+            const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
+            const mythXInput = mythx.truffle2MythXJSON(contracts[0]);
             stubAnalyze.resolves({
                 issues: [],
                 status: { status: 'Error'},
             });
-            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFiles[0], 'utf8');
-            const mythXInput = mythx.truffle2MythXJSON(JSON.parse(simpleDaoJSON));
-            const results = await doAnalysis(armletClient, config, jsonFiles);
+            const results = await doAnalysis(armletClient, config, contracts);
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 clientToolName: 'truffle',
@@ -408,13 +439,10 @@ describe('helpers.js', function() {
                 style: 'test-style',
                 progress: false,
             }
-            const jsonFiles = [
-                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
-                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
-            ];
-
-            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFiles[0], 'utf8');
-            const mythXInput = mythx.truffle2MythXJSON(JSON.parse(simpleDaoJSON));
+            const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
+            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
+            const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
+            const mythXInput = mythx.truffle2MythXJSON(contracts[0]);
             stubAnalyze.onFirstCall().resolves({
                 issues: {},
                 status: { status: 'Error' },
@@ -423,7 +451,7 @@ describe('helpers.js', function() {
                 issues: [{
                     'sourceFormat': 'evm-byzantium-bytecode',
                     'sourceList': [
-                        `${__dirname}/sample-truffle/simple_dao/contracts/simple_dao.sol`
+                        `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`
                     ],
                     'sourceType': 'raw-bytecode',
                     'issues': [{
@@ -446,7 +474,7 @@ describe('helpers.js', function() {
                 }],
                 status: {status: 'Pending' },
             });
-            const results = await doAnalysis(armletClient, config, jsonFiles);
+            const results = await doAnalysis(armletClient, config, contracts.concat(contracts));
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 clientToolName: 'truffle',
@@ -634,4 +662,5 @@ describe('helpers.js', function() {
             });
         });
     });
+
 });
