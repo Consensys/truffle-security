@@ -118,6 +118,7 @@ SourceMappingDecoder.prototype.convertOffsetToLineColumn = function (sourceLocat
  * @param {Object} ast - ast given by the compilation result
  */
 SourceMappingDecoder.prototype.findNodeAtInstructionIndex = findNodeAtInstructionIndex;
+SourceMappingDecoder.prototype.findNodeAtSourceLocation = findNodeAtSourceLocation;
 
 function convertFromCharPosition (pos, lineBreakPositions) {
     var line = util.findLowerBound(pos, lineBreakPositions);

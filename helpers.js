@@ -345,7 +345,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     } else {
         const spaceLimited = ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
         const eslintIssues = objects
-              .map(obj => obj.getEslintIssues(spaceLimited))
+              .map(obj => obj.getEslintIssues(config, spaceLimited))
               .reduce((acc, curr) => acc.concat(curr), []);
 
         // FIXME: temporary solution until backend will return correct filepath and output.
