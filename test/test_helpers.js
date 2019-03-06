@@ -178,7 +178,7 @@ describe('helpers.js', function() {
                         "source": ""
                     }
                 }
-            }            
+            }
             doAnalysisStub.resolves({ objects: 1, errors: 3 });
             getTruffleBuildJsonFilesStub.resolves(['test.json']);
             parseBuildJsonStub.resolves(fakeJson);

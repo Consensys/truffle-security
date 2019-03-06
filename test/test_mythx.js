@@ -100,4 +100,65 @@ describe('mythx.js', () => {
         }]
         );
     });
+
+    it('should convert compile artifact json into contracts array', () => {
+        const jsonData = {
+            "compiler": { "name": "", "version": "" },
+            "updatedAt": "",
+            "sources": {
+                "contract.sol": {
+                    "contracts": [
+                        {
+                            "contractName": "Contract1",
+                            "bytecode": "0x",
+                            "deployedBytecode": "0x",
+                            "sourceMap": "",
+                            "deployedSourceMap": ""
+                        },
+                        {
+                            "contractName": "Contract2",
+                            "bytecode": "0x",
+                            "deployedBytecode": "0x",
+                            "sourceMap": "",
+                            "deployedSourceMap": ""
+                        }
+                    ],
+                    "ast": {},
+                    "legacyAST": {},
+                    "id": 0,
+                    "source": ""
+                }
+            }
+        };
+
+        const expectedResult = [
+            {
+                "contractName": "Contract1",
+                "bytecode": "0x",
+                "deployedBytecode": "0x",
+                "sourceMap": "",
+                "deployedSourceMap": "",
+                "ast": {},
+                "legacyAST": {},
+                "source": "",
+                "compiler": { "name": "", "version": "" },
+                "sourcePath": "contract.sol",
+            },
+            {
+                "contractName": "Contract2",
+                "bytecode": "0x",
+                "deployedBytecode": "0x",
+                "sourceMap": "",
+                "deployedSourceMap": "",
+                "ast": {},
+                "legacyAST": {},
+                "source": "",
+                "compiler": { "name": "", "version": "" },
+                "sourcePath": "contract.sol",
+            }
+        ];
+
+        const result = mythx.newTruffleObjToOldTruffleByContracts(jsonData);
+        assert.deepEqual(result, expectedResult);
+    });
 });
