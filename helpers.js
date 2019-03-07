@@ -226,7 +226,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
             return [null, null];
         }
 
-        const obj = new MythXIssues(buildObj);
+        const obj = new MythXIssues(buildObj, config);
 
         let analyzeOpts = {
             clientToolName: 'truffle',
