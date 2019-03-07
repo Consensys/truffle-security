@@ -401,7 +401,7 @@ describe('helpers.js', function() {
             assert.equal(results.objects.length, 1);
         });
 
-        it.skip('should return 0 mythXIssues objects and 1 error', async () => {
+        it('should return 0 mythXIssues objects and 1 error', async () => {
             const doAnalysis = rewiredHelpers.__get__('doAnalysis');
             const config = {
                 _: [],
@@ -425,6 +425,7 @@ describe('helpers.js', function() {
                 data: mythXInput,
                 noCacheLookup: false,
                 timeout: 300000,
+                initialDelay: undefined,
             }));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 0);
