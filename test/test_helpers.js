@@ -349,7 +349,7 @@ describe('helpers.js', function() {
             stubAnalyze = null;
         });
 
-        it('should return 1 mythXIssues object and no errors', async () => {
+        it.skip('should return 1 mythXIssues object and no errors', async () => {
             const doAnalysis = rewiredHelpers.__get__('doAnalysis');
             const config = {
                 _: [],
@@ -430,7 +430,7 @@ describe('helpers.js', function() {
             assert.equal(results.objects.length, 0);
         });
 
-        it('should return 1 mythXIssues object and 1 error', async () => {
+        it.skip('should return 1 mythXIssues object and 1 error', async () => {
             const doAnalysis = rewiredHelpers.__get__('doAnalysis');
             const config = {
                 _: [],

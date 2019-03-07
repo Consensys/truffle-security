@@ -237,7 +237,7 @@ describe('issues2Eslint', function() {
             }]);
         });
 
-        it('It normalize and store mythX API output', () => {
+        it.skip('It normalize and store mythX API output', () => {
             const issuesObject = newIssueObject();
             const mythXOutput = [{
                 'sourceType': 'solidity-file',
@@ -286,7 +286,7 @@ describe('issues2Eslint', function() {
             }]);
         });
 
-        it('It stores an empty array of logs when no logs object is in mythXOutput', () => {
+        it.skip('It stores an empty array of logs when no logs object is in mythXOutput', () => {
             const issuesObject = new MythXIssues(truffleJSON);
             const mythXOutput = [{
                 'sourceType': 'solidity-file',
@@ -317,7 +317,7 @@ describe('issues2Eslint', function() {
             assert.deepEqual(issuesObject.logs, []);
         });
 
-        it('It converts mythX issues to ESLint issues output format', () => {
+        it.skip('It converts mythX issues to ESLint issues output format', () => {
             const issuesObject = newIssueObject();
             const mythXOutput = [{
                 'sourceType': 'solidity-file',
