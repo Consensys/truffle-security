@@ -105,9 +105,6 @@ Options:
              As results come back, remaining contracts are submitted.
              The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
-  --cache-lookup
-             enable/disable cache lookup. The default is enable.
-             If a request has been cached in MythX, then results come back immediately.
   --version  Show package and MythX version information.
   --progress, --no-progress
              enable/disable progress bars during analysis. The default is enabled.
