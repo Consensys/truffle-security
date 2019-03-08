@@ -10,7 +10,7 @@ describe('issues2Eslint', function() {
     describe('MythXIssues class', () => {
         let truffleJSON;
         const MythXIssues = rewired.__get__('MythXIssues');
-        const contractJSON = `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`;
+        const contractJSON = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
         const sourceName = 'simple_dao.sol';
 
 	const config = {
@@ -19,14 +19,15 @@ describe('issues2Eslint', function() {
 	}
 
 	function newIssueObject(options) {
-	    if (!options) options = config;
+        if (!options) options = config;
 	    return new MythXIssues(truffleJSON, options);
 	}
 
         beforeEach(done => {
             fs.readFile(contractJSON, 'utf8', (err, data) => {
                 if (err) return done(err);
-                truffleJSON = JSON.parse(data);
+                const parsed = JSON.parse(data);
+                truffleJSON = mythx.newTruffleObjToOldTruffleByContracts(parsed)[0];
                 done();
             });
         });
@@ -141,11 +142,11 @@ describe('issues2Eslint', function() {
         });
 
 
-        it.skip('should call isIgnorable correctly', () => {
+        it('should call isIgnorable correctly', () => {
             const spyIsVariableDeclaration = sinon.spy(srcmap, 'isVariableDeclaration');
             const spyIsDynamicArray = sinon.spy(srcmap, 'isDynamicArray');
             const issuesObject = newIssueObject();
-            const res = issuesObject.isIgnorable('444:5:0');
+            const res = issuesObject.isIgnorable('218:39:0');
             assert.ok(spyIsVariableDeclaration.called);
             assert.ok(spyIsDynamicArray.called);
             assert.ok(spyIsDynamicArray.returned(false));
@@ -155,12 +156,12 @@ describe('issues2Eslint', function() {
             spyIsDynamicArray.restore();
         });
 
-        it.skip('should call isIgnorable correctly when issue is ignored', () => {
+        it('should call isIgnorable correctly when issue is ignored', () => {
             const spyIsVariableDeclaration = sinon.spy(srcmap, 'isVariableDeclaration');
             const spyIsDynamicArray = sinon.stub(srcmap, 'isDynamicArray');
             spyIsDynamicArray.returns(true);
             const issuesObject = newIssueObject();
-            const res = issuesObject.isIgnorable('444:5:0');
+            const res = issuesObject.isIgnorable('218:39:0');
             assert.ok(spyIsVariableDeclaration.called);
             assert.ok(spyIsDynamicArray.called);
             assert.ok(res);
@@ -168,17 +169,17 @@ describe('issues2Eslint', function() {
             spyIsDynamicArray.restore();
         });
 
-        it.skip('should call isIgnorable correctly when issue is ignored in debug mode', () => {
+        it('should call isIgnorable correctly when issue is ignored in debug mode', () => {
             const spyIsVariableDeclaration = sinon.spy(srcmap, 'isVariableDeclaration');
             const spyIsDynamicArray = sinon.stub(srcmap, 'isDynamicArray');
             const loggerStub = sinon.stub();
             spyIsDynamicArray.returns(true);
-	    const debugConfig = {
-		debug: true,
-		logger: { log: loggerStub }
-	    }
+            const debugConfig = {
+                debug: true,
+                logger: { log: loggerStub }
+            }
             const issuesObject = newIssueObject(debugConfig);
-            const res = issuesObject.isIgnorable('444:5:0');
+            const res = issuesObject.isIgnorable('218:39:0');
             assert.ok(spyIsVariableDeclaration.called);
             assert.ok(spyIsDynamicArray.called);
             assert.ok(loggerStub.called);
