@@ -108,6 +108,8 @@ const normalizeJsonOutput = jsonObject => {
     result.sources[sourcePath].source = getFileContent(sourcePath)
   }
 
+  // Create source list. FIXME: get index order later?
+  result.sourceList = Object.keys(result.sources);
   return result;
 };
 
