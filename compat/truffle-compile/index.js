@@ -9,6 +9,7 @@ const expect = require("truffle-expect");
 const find_contracts = require("truffle-contract-sources");
 const Config = require("truffle-config");
 const debug = require("debug")("compile"); // eslint-disable-line no-unused-vars
+const srcmap = require("../../lib/srcmap");
 
 
 function getFileContent(filepath) {
@@ -108,8 +109,20 @@ const normalizeJsonOutput = jsonObject => {
     result.sources[sourcePath].source = getFileContent(sourcePath)
   }
 
-  // Create source list. FIXME: get index order later?
   result.sourceList = Object.keys(result.sources);
+  // The above list has the right length, but the order might not be correct for
+  // the srcmap entries. Correct that below.
+  for (const sourcePath of Object.keys(result.sources)) {
+    const source = result.sources[sourcePath];
+    if (source.contracts.length > 0) {
+      const index = srcmap.firstSrcMapIndex(source.contracts[0].sourceMap);
+      if (index >= 0) {
+        result.sourceList[index] = sourcePath;
+      }
+    }
+  }
+
+
   return result;
 };
 
