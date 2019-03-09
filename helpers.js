@@ -311,7 +311,11 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 
             // Get message property of err.
             // If err is not Error object, coerce err to string to avoid possible problem in subsequent processing.
-            const errStr = (typeof err.message) === 'string' ? err.message : `${util.inspect(err)}`;
+            const errStr = (
+		(typeof err.message) === 'string'
+		    ? err.message
+		    : (conf.debug ? `${util.inspect(err)}`: `${err}`)
+	    );
 
             // Check error message from armlet to determine if a timeout occurred.
             if (errStr.includes('User or default timeout reached after')
