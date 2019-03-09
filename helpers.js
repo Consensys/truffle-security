@@ -314,7 +314,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
             const errStr = (
 		(typeof err.message) === 'string'
 		    ? err.message
-		    : (conf.debug ? `${util.inspect(err)}`: `${err}`)
+		    : (config.debug ? `${util.inspect(err)}`: `${err}`)
 	    );
 
             // Check error message from armlet to determine if a timeout occurred.
