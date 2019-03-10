@@ -357,7 +357,7 @@ compile.all = function(options, callback) {
     if (err) return callback(err);
 
     options.paths = files;
-    compile.with_dependencies(options, callback);
+      compile.with_dependencies(options, callback, true);
   });
 };
 
@@ -378,11 +378,11 @@ compile.necessary = function(options, callback) {
     }
 
     options.paths = updated;
-    compile.with_dependencies(options, callback);
+    compile.with_dependencies(options, callback, false);
   });
 };
 
-compile.with_dependencies = function(options, callback) {
+compile.with_dependencies = function(options, callback, compileAll) {
   var self = this;
 
   options.logger = options.logger || console;
@@ -412,7 +412,7 @@ compile.with_dependencies = function(options, callback) {
       const filteredRequired = [];
       for (const sourcePath of options.paths) {
         const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
-        if (staleBuildContract(sourcePath, targetJsonPath)) {
+        if (compileAll || staleBuildContract(sourcePath, targetJsonPath)) {
           // Set for compilation
           filteredRequired.push(sourcePath);
         } else {
