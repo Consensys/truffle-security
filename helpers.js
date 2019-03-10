@@ -79,11 +79,8 @@ Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
 
 Options:
-  --debug    Provide additional debug output. Use --debug=2 for more
-             verbose output
-  --uuid *UUID*
-             Print in YAML results from a prior run having *UUID*
-             Note: this is still a bit raw and will be improved.
+  --all
+             Compile all contracts instead of only the contracts changed since last compile.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
   --style { stylish | json | table | tap | unix | ... },
@@ -105,11 +102,16 @@ Options:
              As results come back, remaining contracts are submitted.
              The default is ${defaultAnalyzeRateLimit} contracts, the maximum value, but you can
              set this lower.
+  --debug    Provide additional debug output. Use --debug=2 for more
+             verbose output
+  --uuid *UUID*
+             Print in YAML results from a prior run having *UUID*
+             Note: this is still a bit raw and will be improved.
   --version  Show package and MythX version information.
   --progress, --no-progress
-             enable/disable progress bars during analysis. The default is enabled.
+             Enable/disable progress bars during analysis. The default is enabled.
   --color, --no-color
-             enabling/disabling output coloring. The default is enabled.
+             Enable/disable output coloring. The default is enabled.
 `;
         // FIXME: decide if this is okay or whether we need
         // to pass in `config` and use `config.logger.log`.
@@ -307,9 +309,19 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
                 sleep.msleep(1000); // wait for last setInterval finising
             }
 
-            // Get message property of err.
-            // If err is not Error object, coerce err to string to avoid possible problem in subsequent processing.
-            const errStr = (typeof err.message) === 'string' ? err.message : `${err}`;
+            // Get string type error massage from err.
+            let errStr;
+            if (typeof err.message === 'string') {
+                // If err is Error, get message property.
+                errStr = err.message;
+            } else if (typeof err === 'object') {
+                // If err is object, coerce err to string to avoid possible problem in subsequent processing.
+                errStr = JSON.stringify(err);
+            } else {
+                // If err is not either Error or object, coerce it to string to avoid possible problem in subsequent processing.
+                // However this might worth nothing.
+                errStr = `${err}`;
+            }
 
             // Check error message from armlet to determine if a timeout occurred.
             if (errStr.includes('User or default timeout reached after')
