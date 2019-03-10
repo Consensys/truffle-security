@@ -309,19 +309,18 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
                 sleep.msleep(1000); // wait for last setInterval finising
             }
 
-            // Get string type error massage from err.
             let errStr;
-            if (typeof err.message === 'string') {
+            if (typeof err === 'string') {
+                // It is assumed that err should be string here.
+                errStr = `${err}`;
+            } else if (typeof err.message === 'string') {
                 // If err is Error, get message property.
                 errStr = err.message;
-            } else if (typeof err === 'object') {
-                // If err is object, coerce err to string to avoid possible problem in subsequent processing.
-                errStr = JSON.stringify(err);
             } else {
-                // If err is not either Error or object, coerce it to string to avoid possible problem in subsequent processing.
-                // However this might worth nothing.
-                errStr = `${err}`;
-            }
+                // If err is unexpected type, coerce err to inspectable format.
+                // This situation itself is not assumed, but this is for robustness and investigation.
+                errStr = `${util.inspect(err)}`;
+            } 
 
             // Check error message from armlet to determine if a timeout occurred.
             if (errStr.includes('User or default timeout reached after')
