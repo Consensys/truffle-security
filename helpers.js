@@ -52,6 +52,16 @@ function getFormatter(style) {
     }
 }
 
+/**
+ * The progress bar issues cr's so wrap text in \n's so it won't
+ * get overwritten.
+ *
+ * @param {String} text
+ */
+function messageInProgressBar(text, progress, log) {
+    if (progress) text = `\n${text}\n\n`;
+    log(text);
+}
 
 /**
  *
@@ -145,7 +155,7 @@ async function printVersion() {
    source code or AST. But we want to remove the fields so we don't
    get complaints from MythX. We will manage what we want to say.
 */
-const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
+const cleanAnalyzeDataEmptyProps = (data, debug, logger, progress) => {
     const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, ...props } = data;
     const result = { ...props };
 
@@ -176,7 +186,8 @@ const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
     }
 
     if (debug && unusedFields.length > 0) {
-        logger(`${props.contractName}: Empty JSON data fields from compilation - ${unusedFields.join(', ')}`);
+        messageInProgressBar(`${props.contractName}: Empty JSON data fields from compilation - ${unusedFields.join(', ')}`,
+                             progress, logger);
     }
 
     return result;
@@ -244,7 +255,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
         };
 
         analyzeOpts.data = cleanAnalyzeDataEmptyProps(obj.buildObj, config.debug,
-                                                    config.logger.debug);
+                                                      config.logger.debug, progress);
         analyzeOpts.data.analysisMode = analyzeOpts.mode || 'quick';
         if (config.debug > 1) {
             config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`);
@@ -274,10 +285,11 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
             if (config.debug) {
-                config.logger.debug(`${analyzeOpts.data.contractName}: UUID is ${status.uuid}`);
+		const log = config.logger.debug;
+                messageInProgressBar(`${analyzeOpts.data.contractName}: UUID is ${status.uuid}`, progress, log);
                 if (config.debug > 1) {
-                    config.logger.debug(`${util.inspect(issues, {depth: null})}`);
-                    config.logger.debug(`${util.inspect(status, {depth: null})}`);
+                    messageInProgressBar(`${util.inspect(issues, {depth: null})}`, progress, log);
+                    messageInProgressBar(`${util.inspect(status, {depth: null})}`, progress, log);
                 }
             }
 
