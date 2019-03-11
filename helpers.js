@@ -79,8 +79,7 @@ Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
 
 Options:
-  --all
-             Compile all contracts instead of only the contracts changed since last compile.
+  --all      Compile all contracts instead of only the contracts changed since last compile.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
   --style { stylish | json | table | tap | unix | ... },
