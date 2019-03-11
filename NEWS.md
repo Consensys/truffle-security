@@ -1,3 +1,36 @@
+Release 1.3.0
+================
+
+MythX-specific Artifacts
+-----------------------------
+
+Split off the way we handle MythX JSON artifacts from the way truffle handles its JSON artifacts. This allows us to organize information in a way that makes more sense for MythX. Specifically, information is organized by file since that's the unit by which MythX analyzes them. It also gives us more control over compilation so we get more AST information from Solidity smart contracts which use "import".
+
+These files are saved in directory `build/mythx`. Underneath we still use truffle libraries, hooked in at a lower level.
+
+Reinstated false-positive removal in public dynamic arrays. (It was accidentally broken in the last release.)
+
+Fixed a bug in the way sourceMaps were sent. You should no longer see the error message `Analysis fails: source list index of of range`
+
+Improved Error Reporting
+------------------------------
+
+As with the last release, more errors from various interactions with armlet and MythX have come up. So we have been more aggressive in error handling and reporting, and in a more robust way.
+
+A lot of this work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment).
+
+
+Miscellaneous
+----------------
+
+Added option `--all`, which works the same as in `truffle compile`: all sources are compiled whether or not we think they need to be. The default behavior is to compile only when we think there is a need, such as when the source is newer than the corresponding JSON artifact.
+
+Added option `--initial-delay`. It specifies the minimum amount of time to wait before attempting a first status poll to MythX when a result hasn't already been cached.
+
+Right _now_ new analysis completes in less that 45 seconds. You can't set this value to less than that, however if you know from experience that the expected analysis time is longer you can adjust it upwards.
+
+This work was again kindly contributed by Teruhiro Tagomori.
+
 Release 1.2.0
 =============
 
