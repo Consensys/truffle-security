@@ -176,7 +176,7 @@ const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
     }
 
     if (debug && unusedFields.length > 0) {
-        logger(`Empty JSON data fields from compilation in contract ${props.contractName}: ${unusedFields.join(', ')}`);
+        logger(`${props.contractName}: Empty JSON data fields from compilation - ${unusedFields.join(', ')}`);
     }
 
     return result;
@@ -309,9 +309,18 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
                 sleep.msleep(1000); // wait for last setInterval finising
             }
 
-            // Get message property of err.
-            // If err is not Error object, coerce err to string to avoid possible problem in subsequent processing.
-            const errStr = (typeof err.message) === 'string' ? err.message : `${err}`;
+            let errStr;
+            if (typeof err === 'string') {
+                // It is assumed that err should be string here.
+                errStr = `${err}`;
+            } else if (typeof err.message === 'string') {
+                // If err is Error, get message property.
+                errStr = err.message;
+            } else {
+                // If err is unexpected type, coerce err to inspectable format.
+                // This situation itself is not assumed, but this is for robustness and investigation.
+                errStr = `${util.inspect(err)}`;
+            }
 
             // Check error message from armlet to determine if a timeout occurred.
             if (errStr.includes('User or default timeout reached after')

@@ -349,7 +349,7 @@ describe('helpers.js', function() {
             stubAnalyze = null;
         });
 
-        it.skip('should return 1 mythXIssues object and no errors', async () => {
+        it('should return 1 mythXIssues object and no errors', async () => {
             const doAnalysis = rewiredHelpers.__get__('doAnalysis');
             const config = {
                 _: [],
@@ -396,6 +396,7 @@ describe('helpers.js', function() {
                 data: mythXInput,
                 noCacheLookup: false,
                 timeout: 300000,
+                initialDelay: undefined,
             }));
             assert.equal(results.errors.length, 0);
             assert.equal(results.objects.length, 1);
@@ -431,7 +432,7 @@ describe('helpers.js', function() {
             assert.equal(results.objects.length, 0);
         });
 
-        it.skip('should return 1 mythXIssues object and 1 error', async () => {
+        it('should return 1 mythXIssues object and 1 error', async () => {
             const doAnalysis = rewiredHelpers.__get__('doAnalysis');
             const config = {
                 _: [],
@@ -482,6 +483,7 @@ describe('helpers.js', function() {
                 data: mythXInput,
                 noCacheLookup: false,
                 timeout: 300000,
+                initialDelay: undefined,
             }));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 1);
