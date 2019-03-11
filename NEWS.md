@@ -31,6 +31,8 @@ Right _now_ new analysis completes in less that 45 seconds. You can't set this v
 
 This work was again kindly contributed by Teruhiro Tagomori.
 
+Armlet 2.2.0 or greater required, so refresh errors on long jobs should no longer occur.
+
 Release 1.2.0
 =============
 
