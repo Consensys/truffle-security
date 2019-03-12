@@ -103,12 +103,14 @@ Options:
              set this lower.
   --debug    Provide additional debug output. Use --debug=2 for more
              verbose output
+             Note: progress is disabled if this is set.
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
              Note: this is still a bit raw and will be improved.
   --version  Show package and MythX version information.
   --progress, --no-progress
              Enable/disable progress bars during analysis. The default is enabled.
+             Note: this is disabled if debug is set.
   --color, --no-color
              Enable/disable output coloring. The default is enabled.
 `;
@@ -209,7 +211,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
     /**
      * Prepare for progress bar
      */
-    const progress = ('progress' in config) ? config.progress : true;
+    const progress = ('debug' in config) ? false : (('progress' in config) ? config.progress : true);
     let multi;
     let indent;
     if (progress) {
