@@ -6,6 +6,8 @@
   "dependencies": {
     "armlet": "^2.2.0",
     "configstore": "^4.0.0",
+    "detect-installed": "^2.0.4",
+    "get-installed-path": "^4.0.8",
     "js-yaml": "^3.12.1",
     "mocha": "^5.2.0",
     "multi-progress": "^2.0.0",

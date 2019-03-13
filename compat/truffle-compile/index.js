@@ -9,7 +9,28 @@ const expect = require("truffle-expect");
 const find_contracts = require("truffle-contract-sources");
 const Config = require("truffle-config");
 const debug = require("debug")("compile"); // eslint-disable-line no-unused-vars
+const detectInstalled = require('detect-installed')
+const { getInstalledPathSync } = require('get-installed-path')
 
+function getPkgPath(importPath) {
+  let [pkgName] = importPath.split('/', 1)
+  console.log('a',pkgName);
+  let pkgPath = ''
+
+  // check local pkg
+  if (detectInstalled.sync(pkgName, { local: true })) {
+    let localPath = getInstalledPathSync(pkgName, { local: true })
+    pkgPath = localPath.replace(pkgName, "")
+    // check global pkg
+  } else if (detectInstalled.sync(pkgName)) {
+    const globalPath = getInstalledPathSync(pkgName)
+    pkgPath = globalPath.replace(moduleName, "")
+  } else {
+    throw new Error(`${pkgName} package is not installed.`)
+  }
+
+  return pkgPath;
+}
 
 function getFileContent(filepath) {
   const stats = fs.statSync(filepath);
@@ -21,8 +42,16 @@ function getFileContent(filepath) {
 }
 
 function findImports(pathName) {
+  console.log("b", pathName)
   try {
-    return { contents: getFileContent(pathName) };
+    let importPath = pathName;
+    if(!pathName.startsWith("/")) {
+      const pkgPath = getPkgPath(pathName);
+      importPath = path.resolve(path.join(pkgPath, pathName));
+    }
+    console.log('c',importPath);
+
+    return { contents: getFileContent(importPath) };
   } catch (e) {
     return { error: e.message };
   }
@@ -197,7 +226,7 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
           content: sourceText
         }
       };
-
+      
       const result = solc.compile(JSON.stringify(solcStandardInput), findImports);
 
       var standardOutput = JSON.parse(result);
