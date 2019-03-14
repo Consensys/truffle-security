@@ -1,3 +1,14 @@
+/*
+  This code is modified from truffle-compile.
+
+  However, on solcjs.compile we allow an import callback function to get source code text
+  which is important so we populate AST information more fully.
+
+  The other change is that we gather data on a per file basis rather than on a per contract basis.
+
+  Note: the use of var vs let/const is a holdover from truffle-compile.
+*/
+
 const assert = require('assert');
 const fs = require('fs');
 const OS = require("os");
@@ -33,6 +44,30 @@ function isExplicitlyRelative(import_path) {
     return import_path.indexOf(".") === 0;
 }
 
+/**
+  * resolves a path (relative, absolute, node_module) into an a
+  * an absolute path
+  *
+  *  @param {String} p         - path to resolve
+  *  @param {String} base      - where to resolve relative paths from
+                                 usually the "contracts" directory
+  *  @param {String} nodeBase  - where to resolve nodeJS paths from
+
+  Converts
+  NOTE:  truffle-resolver.resolve may cover the below and do more.
+
+  If we switch to truffle-resolver.resolve it handles 3 kinds of classes
+  `EPMSource`, `NPMSource`, `FSSource`
+
+  The 2nd is probably with respect to npm source and the last is
+  probably with respect to file system sources that are not npm source.
+
+  I am not sure what the first is about other than it probably has to do
+  with installed contracts.
+
+  Right now, this code seems a little bit complex to use and it isn't all that
+  well documented.
+*/
 function convertToAbsolutePath(p, base, nodeBase) {
   // If it's an absolute paths, leave it alone.
   if (path.isAbsolute(p)) return p;
@@ -299,99 +334,14 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
     });
 };
 
-/** From original truffle-compile. This is not used yet.
-**/
-function replaceLinkReferences(bytecode, linkReferences, libraryName) {
-  var linkId = "__" + libraryName;
-
-  while (linkId.length < 40) {
-    linkId += "_";
-  }
-
-  linkReferences.forEach(function(ref) {
-    // ref.start is a byte offset. Convert it to character offset.
-    var start = ref.start * 2 + 2;
-
-    bytecode =
-      bytecode.substring(0, start) + linkId + bytecode.substring(start + 40);
-  });
-
-  return bytecode;
-}
-
-/** From original truffle-compile. This is not used yet.
-**/
-function orderABI(contract) {
-  var contract_definition;
-  var ordered_function_names = [];
-
-  for (var i = 0; i < contract.legacyAST.children.length; i++) {
-    var definition = contract.legacyAST.children[i];
-
-    // AST can have multiple contract definitions, make sure we have the
-    // one that matches our contract
-    if (
-      definition.name !== "ContractDefinition" ||
-      definition.attributes.name !== contract.contract_name
-    ) {
-      continue;
-    }
-
-    contract_definition = definition;
-    break;
-  }
-
-  if (!contract_definition) return contract.abi;
-  if (!contract_definition.children) return contract.abi;
-
-  contract_definition.children.forEach(function(child) {
-    if (child.name === "FunctionDefinition") {
-      ordered_function_names.push(child.attributes.name);
-    }
-  });
-
-  // Put function names in a hash with their order, lowest first, for speed.
-  var functions_to_remove = ordered_function_names.reduce(function(
-    obj,
-    value,
-    index
-  ) {
-    obj[value] = index;
-    return obj;
-  },
-  {});
-
-  // Filter out functions from the abi
-  var function_definitions = contract.abi.filter(function(item) {
-    return functions_to_remove[item.name] !== undefined;
-  });
-
-  // Sort removed function defintions
-  function_definitions = function_definitions.sort(function(item_a, item_b) {
-    var a = functions_to_remove[item_a.name];
-    var b = functions_to_remove[item_b.name];
-
-    if (a > b) return 1;
-    if (a < b) return -1;
-    return 0;
-  });
-
-  // Create a new ABI, placing ordered functions at the end.
-  var newABI = [];
-  contract.abi.forEach(function(item) {
-    if (functions_to_remove[item.name] !== undefined) return;
-    newABI.push(item);
-  });
-
-  // Now pop the ordered functions definitions on to the end of the abi..
-  Array.prototype.push.apply(newABI, function_definitions);
-
-  return newABI;
-}
-
-// contracts_directory: String. Directory where .sol files can be found.
-// quiet: Boolean. Suppress output. Defaults to false.
-// strict: Boolean. Return compiler warnings as errors. Defaults to false.
+/**
+ * Compiles all source files whether they need it or not
+ *
+ *  @param {Config} options  - truffle config option
+ *  @param {function} callback  - called on every source file found
+ *
+ * options.contracts_directory is a directory path where .sol files can be found.
+*/
 compile.all = function(options, callback) {
   find_contracts(options.contracts_directory, function(err, files) {
     if (err) return callback(err);
@@ -401,12 +351,14 @@ compile.all = function(options, callback) {
   });
 };
 
-// contracts_directory: String. Directory where .sol files can be found.
-// build_directory: String. Optional. Directory where .sol.js files can be found. Only required if `all` is false.
-// all: Boolean. Compile all sources found. Defaults to true. If false, will compare sources against built files
-//      in the build directory to see what needs to be compiled.
-// quiet: Boolean. Suppress output. Defaults to false.
-// strict: Boolean. Return compiler warnings as errors. Defaults to false.
+/**
+ * Compiles only source files that need updating. We use
+ * Make-style dependency check of timestamp + missing file
+ *
+ *  @param {Config} options  - truffle config option
+ *  @param {function} callback  - called on every source file found
+ *
+ */
 compile.necessary = function(options, callback) {
   options.logger = options.logger || console;
 
@@ -422,6 +374,16 @@ compile.necessary = function(options, callback) {
   });
 };
 
+/**
+ * Compiles a source file and all of the files that it
+ * depends on.
+ *
+ *  @param {Config} options  - truffle config option
+ *  @param {function} callback  - called on every source file found
+ *  @param {boolean} compileAll  - if true compile whether or not it
+ *                                 the file was deemed out of date.
+ *
+ */
 compile.with_dependencies = function(options, callback, compileAll) {
   var self = this;
 
@@ -432,7 +394,7 @@ compile.with_dependencies = function(options, callback, compileAll) {
     "paths",
     "working_directory",
     "contracts_directory",
-    "resolver"
+    // "resolver" // when we start using truffle-resolver
   ]);
 
   var config = Config.default().merge(options);
@@ -441,7 +403,7 @@ compile.with_dependencies = function(options, callback, compileAll) {
     config.with({
       paths: options.paths,
       base_path: options.contracts_directory,
-      resolver: options.resolver
+      // resolver: options.resolver // when we start using truffle-resolver
     }),
     (err, allSources, required) => {
       if (err) return callback(err);
@@ -478,6 +440,9 @@ compile.with_dependencies = function(options, callback, compileAll) {
     });
 };
 
+/**
+ * Show what file is being compiled.
+ */
 compile.display = function(paths, options) {
   if (options.quiet !== true) {
     if (!Array.isArray(paths)) {
@@ -486,13 +451,13 @@ compile.display = function(paths, options) {
 
     const blacklistRegex = /^truffle\/|\/Migrations.sol$/;
 
-    paths.sort().forEach(contract => {
-      if (path.isAbsolute(contract)) {
-        contract =
-          "." + path.sep + path.relative(options.working_directory, contract);
+    paths.sort().forEach(fileName => {
+      if (path.isAbsolute(fileName)) {
+        fileName =
+          "." + path.sep + path.relative(options.working_directory, fileName);
       }
-      if (contract.match(blacklistRegex)) return;
-      options.logger.log("Compiling " + contract + "...");
+      if (fileName.match(blacklistRegex)) return;
+      options.logger.log("Compiling " + fileName + "...");
     });
   }
 };
