@@ -10,22 +10,40 @@ const find_contracts = require("truffle-contract-sources");
 const Config = require("truffle-config");
 const debug = require("debug")("compile"); // eslint-disable-line no-unused-vars
 
+let nodeDirectory;
+let contractsDirectory;
 
 function getFileContent(filepath) {
-  const stats = fs.statSync(filepath);
+  let stats;
+  try {
+    stats = fs.statSync(filepath);
+  } catch (e) {
+    throw new Error(`File ${filepath} not found`);
+  }
+
   if (stats.isFile()) {
     return fs.readFileSync(filepath).toString();
   } else {
-    throw new Error `File ${filepath} not found`;
+    throw new Error(`${filepath} is not file`);
   }
 }
 
-function findImports(pathName) {
-  try {
-    return { contents: getFileContent(pathName) };
-  } catch (e) {
-    return { error: e.message };
+
+function isExplicitlyRelative(import_path) {
+    return import_path.indexOf(".") === 0;
+}
+
+function convertToAbsolutePath(p, base, nodeBase) {
+  // If it's an absolute paths, leave it alone.
+  if (path.isAbsolute(p)) return p;
+
+  // If it's not explicitly relative, must be relative to node_modules
+  if (!isExplicitlyRelative(p)) {
+    return path.resolve(path.join(nodeBase, p));
   }
+
+  // Path must be explicitly relative, therefore make it absolute.
+  return path.resolve(path.join(base, p));
 }
 
 const getSourceFileName = sourcePath => {
@@ -105,7 +123,9 @@ const normalizeJsonOutput = jsonObject => {
     result.sources[sourcePath].ast = solData.ast;
     result.sources[sourcePath].legacyAST = solData.legacyAST;
     result.sources[sourcePath].id = solData.id;
-    result.sources[sourcePath].source = getFileContent(sourcePath)
+
+    const absPathName = convertToAbsolutePath(sourcePath, contractsDirectory, nodeDirectory);
+    result.sources[sourcePath].source = getFileContent(absPathName);
   }
 
   return result;
@@ -122,6 +142,9 @@ const normalizeJsonOutput = jsonObject => {
 //   logger: console
 // }
 var compile = function(sourcePath, sourceText, options, callback, isStale) {
+  nodeDirectory = path.join(options.working_directory, 'node_modules');
+  contractsDirectory = options.contracts_directory;
+
   if (typeof options === "function") {
     callback = options;
     options = {};
@@ -185,7 +208,7 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
   };
 
   // Load solc module only when compilation is actually required.
-  var supplier = new CompilerSupplier(options.compilers.solc);
+  const supplier = new CompilerSupplier(options.compilers.solc);
 
   supplier
     .load()
@@ -197,6 +220,21 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
           content: sourceText
         }
       };
+
+      function findImports(pathName) {
+        try {
+          const absPathName = convertToAbsolutePath(pathName, contractsDirectory, nodeDirectory);
+          if (fs.existsSync(absPathName)) {
+            return { contents: getFileContent(absPathName) };
+          } else {
+            // We can't find the file, so fudge it with the empty contents, which is
+            // better than throwing an error.
+            return { contents: '' };
+          }
+        } catch (e) {
+          return { error: e.message };
+        }
+      }
 
       const result = solc.compile(JSON.stringify(solcStandardInput), findImports);
 
@@ -248,7 +286,7 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
       standardOutput.source = sourceText;
       standardOutput.updatedAt = new Date();
 
-      const normalizedOutput = normalizeJsonOutput(standardOutput)
+      const normalizedOutput = normalizeJsonOutput(standardOutput);
 
       // FIXME: the below return path is hoaky, because it is in the format that
       // the multiPromisify'd caller in workflow-compile expects.
@@ -256,7 +294,9 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
 
       callback(null, {[shortName]: normalizedOutput}, isStale);
     })
-    .catch(callback);
+    .catch(e => {
+      throw e
+    });
 };
 
 /** From original truffle-compile. This is not used yet.
