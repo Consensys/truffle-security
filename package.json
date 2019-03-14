@@ -6,6 +6,7 @@
   "dependencies": {
     "armlet": "^2.2.0",
     "configstore": "^4.0.0",
+    "find-cache-dir": "^2.1.0",
     "js-yaml": "^3.12.1",
     "mocha": "^5.2.0",
     "multi-progress": "^2.0.0",
