@@ -14,13 +14,20 @@ let nodeDirectory;
 let contractsDirectory;
 
 function getFileContent(filepath) {
-  const stats = fs.statSync(filepath);
+  let stats;
+  try {
+    stats = fs.statSync(filepath);
+  } catch (e) {
+    throw new Error(`File ${filepath} not found`);
+  }
+
   if (stats.isFile()) {
     return fs.readFileSync(filepath).toString();
   } else {
-    throw new Error `File ${filepath} not found`;
+    throw new Error(`${filepath} is not file`);
   }
 }
+
 
 function isExplicitlyRelative(import_path) {
     return import_path.indexOf(".") === 0;
@@ -287,7 +294,9 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
 
       callback(null, {[shortName]: normalizedOutput}, isStale);
     })
-    .catch(callback);
+    .catch(e => {
+      throw e
+    });
 };
 
 /** From original truffle-compile. This is not used yet.
