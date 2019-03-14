@@ -10,6 +10,9 @@ const find_contracts = require("truffle-contract-sources");
 const Config = require("truffle-config");
 const debug = require("debug")("compile"); // eslint-disable-line no-unused-vars
 
+let nodeDirectory;
+let contractsDirectory;
+
 function getFileContent(filepath) {
   const stats = fs.statSync(filepath);
   if (stats.isFile()) {
@@ -113,7 +116,9 @@ const normalizeJsonOutput = jsonObject => {
     result.sources[sourcePath].ast = solData.ast;
     result.sources[sourcePath].legacyAST = solData.legacyAST;
     result.sources[sourcePath].id = solData.id;
-    result.sources[sourcePath].source = getFileContent(sourcePath)
+
+    const absPathName = convertToAbsolutePath(sourcePath, contractsDirectory, nodeDirectory);
+    result.sources[sourcePath].source = getFileContent(absPathName);
   }
 
   return result;
@@ -130,6 +135,9 @@ const normalizeJsonOutput = jsonObject => {
 //   logger: console
 // }
 var compile = function(sourcePath, sourceText, options, callback, isStale) {
+  nodeDirectory = path.join(options.working_directory, 'node_modules');
+  contractsDirectory = options.contracts_directory;
+
   if (typeof options === "function") {
     callback = options;
     options = {};
@@ -194,8 +202,6 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
 
   // Load solc module only when compilation is actually required.
   const supplier = new CompilerSupplier(options.compilers.solc);
-  const nodeDirectory = path.join(options.working_directory, 'node_modules');
-  const contractsDirectory = options.contracts_directory;
 
   supplier
     .load()
@@ -210,7 +216,7 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
 
       function findImports(pathName) {
         try {
-          const absPathName = convertToAbsolutePath(pathName, contractsDirectory, nodeDirectory)
+          const absPathName = convertToAbsolutePath(pathName, contractsDirectory, nodeDirectory);
           if (fs.existsSync(absPathName)) {
             return { contents: getFileContent(absPathName) };
           } else {
@@ -273,7 +279,7 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
       standardOutput.source = sourceText;
       standardOutput.updatedAt = new Date();
 
-      const normalizedOutput = normalizeJsonOutput(standardOutput)
+      const normalizedOutput = normalizeJsonOutput(standardOutput);
 
       // FIXME: the below return path is hoaky, because it is in the format that
       // the multiPromisify'd caller in workflow-compile expects.
