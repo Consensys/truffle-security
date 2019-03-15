@@ -381,11 +381,24 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     }
 
     const logs = objects.map(obj => obj.logs)
-        .reduce((acc, curr) => acc.concat(curr), []);
-    if (logs.length > 0) {
+          .reduce((acc, curr) => acc.concat(curr), []);
+
+    // Ignore logs with log.level "info" unless the "debug" flag
+    // has been set.
+    let haveLogs = false;
+    for(const log of logs) {
+        if (!config.debug && log.level !== 'info') {
+            haveLog = true;
+            break;
+        }
+    }
+
+    if (haveLogs) {
         config.logger.log('MythX Logs:'.yellow);
         logs.forEach(log => {
-            config.logger.log(`${log.level}: ${log.msg}`);
+            if (!config.debug && log.level !== 'info') {
+		            config.logger.log(`${log.level}: ${log.msg}`);
+            }
         });
     }
 
