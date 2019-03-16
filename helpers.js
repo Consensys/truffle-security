@@ -358,7 +358,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 
 function doReport(config, objects, errors, notAnalyzedContracts) {
 
-    function showLog(level) {
+    function showLog(log) {
         return config.log || log.level !== 'info'
     }
 
@@ -392,7 +392,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     // has been set.
     let haveLogs = false;
     for(const log of logs) {
-        if (showLog(level)) {
+        if (showLog(log)) {
             haveLog = true;
             break;
         }
@@ -401,7 +401,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     if (haveLogs) {
         config.logger.log('MythX Logs:'.yellow);
         logs.forEach(log => {
-            if (showLog(level)) {
+            if (showLog(log)) {
                 config.logger.log(`${log.level}: ${log.msg}`);
             }
         });
