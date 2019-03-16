@@ -387,7 +387,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     // has been set.
     let haveLogs = false;
     for(const log of logs) {
-        if (!config.debug && log.level !== 'info') {
+        if (config.debug || log.level !== 'info') {
             haveLog = true;
             break;
         }
@@ -396,7 +396,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     if (haveLogs) {
         config.logger.log('MythX Logs:'.yellow);
         logs.forEach(log => {
-            if (!config.debug && log.level !== 'info') {
+            if (config.debug || log.level !== 'info') {
 		            config.logger.log(`${log.level}: ${log.msg}`);
             }
         });
