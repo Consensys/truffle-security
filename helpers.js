@@ -357,6 +357,14 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 };
 
 function doReport(config, objects, errors, notAnalyzedContracts) {
+
+    // Return true if we shold show log.
+    // Ignore logs with log.level "info" unless the "debug" flag
+    // has been set.
+    function showLog(log) {
+        return config.debug || (log.level !== 'info');
+    }
+
     if (config.yaml) {
         config.logger.log(yaml.safeDump(objects));
     } else if (config.json) {
@@ -383,12 +391,10 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     const logs = objects.map(obj => obj.logs)
           .reduce((acc, curr) => acc.concat(curr), []);
 
-    // Ignore logs with log.level "info" unless the "debug" flag
-    // has been set.
     let haveLogs = false;
     for(const log of logs) {
-        if (!config.debug && log.level !== 'info') {
-            haveLog = true;
+        if (showLog(log)) {
+            haveLogs = true;
             break;
         }
     }
@@ -396,8 +402,8 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     if (haveLogs) {
         config.logger.log('MythX Logs:'.yellow);
         logs.forEach(log => {
-            if (!config.debug && log.level !== 'info') {
-		            config.logger.log(`${log.level}: ${log.msg}`);
+            if (showLog(log)) {
+                config.logger.log(`${log.level}: ${log.msg}`);
             }
         });
     }
