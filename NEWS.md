@@ -1,3 +1,19 @@
+Release 1.3.1
+================
+
+We now handle imports from locally-installed NPM packages, such as is how openzepplin is usually installed.
+
+In future releases we start handling:
+* EthPM packages
+* globally installed NPM packages
+* EIP 82
+
+The `--debug` flag now turns off the progress bar. The two, debug information and the progress bar, are incompatible.
+
+MythX log "info" log-level messages are now ignored unless `--debug` is set.
+
+Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment) contributed on every aspect of this release.
+
 Release 1.3.0
 ================
 
