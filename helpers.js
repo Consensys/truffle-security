@@ -358,8 +358,11 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 
 function doReport(config, objects, errors, notAnalyzedContracts) {
 
+    // Return true if we shold show log.
+    // Ignore logs with log.level "info" unless the "debug" flag
+    // has been set.
     function showLog(log) {
-        return config.log || log.level !== 'info'
+        return config.debug || (log.level !== 'info');
     }
 
     if (config.yaml) {
@@ -388,12 +391,10 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     const logs = objects.map(obj => obj.logs)
           .reduce((acc, curr) => acc.concat(curr), []);
 
-    // Ignore logs with log.level "info" unless the "debug" flag
-    // has been set.
     let haveLogs = false;
     for(const log of logs) {
         if (showLog(log)) {
-            haveLog = true;
+            haveLogs = true;
             break;
         }
     }
