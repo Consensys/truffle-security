@@ -20,5 +20,15 @@ module.exports = async (config) => {
     if (config.help) return helpers.printHelpMessage();
     if (config.version) return helpers.printVersion();
 
-    return await helpers.analyze(config);
+    try {
+        const returnCode = await helpers.analyze(config);
+        if (returnCode === 0 || returnCode === undefined) {
+            return 0;
+        } else {
+            process.exit(1);
+        }
+    } catch (e) {
+        config.logger.error(e);
+        process.exit(1);
+    }
 };

@@ -357,13 +357,17 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 };
 
 function doReport(config, objects, errors, notAnalyzedContracts) {
-
+    let ret = 0;
+    
     // Return true if we shold show log.
     // Ignore logs with log.level "info" unless the "debug" flag
     // has been set.
     function showLog(log) {
         return config.debug || (log.level !== 'info');
     }
+
+    // Return 1 if some vulenrabilities were found.
+    ret = objects.length > 0 ? 1 : 0;
 
     if (config.yaml) {
         config.logger.log(yaml.safeDump(objects));
@@ -386,6 +390,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
 
     if (notAnalyzedContracts.length > 0) {
         config.logger.error(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`);
+        ret = 1;
     }
 
     const logs = objects.map(obj => obj.logs)
@@ -400,6 +405,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     }
 
     if (haveLogs) {
+        ret = 1;
         config.logger.log('MythX Logs:'.yellow);
         logs.forEach(log => {
             if (showLog(log)) {
@@ -409,6 +415,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     }
 
     if (errors.length > 0) {
+        ret = 1;
         config.logger.error('Internal MythX errors encountered:'.red);
         errors.forEach(err => {
             config.logger.error(err.error || err);
@@ -417,6 +424,8 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
             }
         });
     }
+
+    return ret;
 }
 
 // A stripped-down listing for issues.
@@ -424,7 +433,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
 function ghettoReport(logger, results) {
     if (results.length === 0) {
         logger('No issues found');
-        return;
+        return 0;
     }
     for (const group of results) {
         logger(group.sourceList.join(', '));
@@ -432,6 +441,7 @@ function ghettoReport(logger, results) {
             logger(yaml.safeDump(issue));
         }
     }
+    return 1;
 }
 
 function getFoundContractNames(contracts, contractNames) {
@@ -483,11 +493,11 @@ async function analyze(config) {
 
     if (isNaN(limit)) {
         log(`limit parameter should be a number; got ${limit}.`);
-        return;
+        return 1;
     }
     if (limit < 0 || limit > defaultAnalyzeRateLimit) {
         log(`limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`);
-        return;
+        return 1;
     }
 
     const client = getArmletClient(
@@ -498,11 +508,11 @@ async function analyze(config) {
     if (config.uuid) {
         try {
             const results = await client.getIssues(config.uuid);
-            ghettoReport(log, results);
+            return ghettoReport(log, results);
         } catch (err) {
             log(err);
+            return 1;
         }
-        return ;
     }
 
     config.build_mythx_contracts = path.join(config.build_directory,
@@ -542,7 +552,7 @@ async function analyze(config) {
 
     const { objects, errors } = await doAnalysis(client, config, noDuplicateContracts, foundContractNames, limit);
     const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
-    doReport(config, objects, errors, notAnalyzedContracts);
+    return doReport(config, objects, errors, notAnalyzedContracts);
 }
 
 
