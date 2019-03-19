@@ -358,7 +358,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 
 function doReport(config, objects, errors, notAnalyzedContracts) {
     let ret = 0;
-    
+
     // Return true if we shold show log.
     // Ignore logs with log.level "info" unless the "debug" flag
     // has been set.
@@ -367,7 +367,11 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     }
 
     // Return 1 if some vulenrabilities were found.
-    ret = objects.length > 0 ? 1 : 0;
+    objects.forEach(ele => {
+        ele.issues.forEach(ele => {
+            ret = ele.issues.length > 0 ? 1 : ret;
+        })
+    })
 
     if (config.yaml) {
         config.logger.log(yaml.safeDump(objects));

@@ -21,14 +21,21 @@ module.exports = async (config) => {
     if (config.version) return helpers.printVersion();
 
     try {
-        const returnCode = await helpers.analyze(config);
-        if (returnCode === 0 || returnCode === undefined) {
-            return 0;
+        const returnCode = await helpers.analyze(config)
+
+        if (returnCode === 0) {
+            return;
+        } else if (returnCode === 1) {
+            exit(1);
         } else {
-            process.exit(1);
+            throw 'Unexpected Error occured. return value of analyze should be either 0 or 1'
         }
     } catch (e) {
         config.logger.error(e);
-        process.exit(1);
+        exit(1);
     }
 };
+
+const exit = (returnCode => {
+    process.exit(returnCode);
+});
