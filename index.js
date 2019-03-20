@@ -20,5 +20,22 @@ module.exports = async (config) => {
     if (config.help) return helpers.printHelpMessage();
     if (config.version) return helpers.printVersion();
 
-    return await helpers.analyze(config);
+    try {
+        const returnCode = await helpers.analyze(config)
+
+        if (returnCode === 0) {
+            return;
+        } else if (returnCode === 1) {
+            exit(1);
+        } else {
+            throw 'Unexpected Error occured. return value of analyze should be either 0 or 1'
+        }
+    } catch (e) {
+        config.logger.error(e);
+        exit(1);
+    }
 };
+
+const exit = (returnCode => {
+    process.exit(returnCode);
+});

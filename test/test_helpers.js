@@ -8,6 +8,7 @@ const trufstuf = require('../lib/trufstuf');
 const mythx = require('../lib/mythx');
 const rewiredHelpers = rewire('../helpers');
 const util = require('util');
+const yaml = require('js-yaml');
 
 
 async function assertThrowsAsync(fn, message) {
@@ -595,6 +596,243 @@ describe('helpers.js', function() {
             delete truffleJSON.deployedBytecode;
             assert.ok(!stub.called);
             assert.deepEqual(result, truffleJSON);
+        });
+    });
+
+    describe('doReport', () => {
+        let loggerStub;
+        let errorStub;
+        let config;
+
+        beforeEach(() => {
+            loggerStub = sinon.stub();
+            errorStub = sinon.stub();
+
+            config = {
+                logger: {
+                    log: loggerStub,
+                    error: errorStub,
+                },
+                json: true,
+            };
+        });
+
+        it('should return 0 when no errors, no issues, and no logs', async () => {
+            const results = {
+                "errors": [],
+                "objects": [
+                    {
+                        issues: [
+                            {
+                                "issues": [],
+                            }
+                        ],
+                        logs: []
+                    },
+                    {
+                        issues: [
+                            {
+                                "issues": []
+                            }
+                        ],
+                        logs: []
+                    }
+                ]
+            };
+            const notAnalyzedContracts = [];
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
+            assert.ok(!errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(!errorStub.calledWith('Internal MythX errors encountered:'.red));
+            assert.equal(ret, 0);
+        });
+
+        it('should return 1 when errors is 1 or more', async () => {
+            const results = {
+                "errors": [
+                    {
+                      "status": "Error"
+                    }
+                ],
+                "objects": [
+                    {
+                        issues: [
+                            {
+                                "issues": [],
+                            }
+                        ],
+                        logs: []
+                    },
+                    {
+                        issues: [
+                            {
+                                "issues": []
+                            }
+                        ],
+                        logs: []
+                    }
+                ]
+            };
+            const notAnalyzedContracts = [];
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
+            assert.ok(!errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(errorStub.calledWith('Internal MythX errors encountered:'.red));
+            assert.equal(ret, 1);
+        });
+
+        it('should return 1 when issues is 1 or more', () => {
+            const results = {
+                "errors": [],
+                "objects": [
+                    {
+                        issues: [
+                            {
+                                "issues": [{
+                                    'description': {
+                                        'head': 'Head message',
+                                        'tail': 'Tail message'
+                                    },
+                                    'locations': [{
+                                        'sourceMap': '444:1:0'
+                                    }],
+                                    'severity': 'High',
+                                    'swcID': 'SWC-000',
+                                    'swcTitle': 'Test Title'
+                                }],
+                            }
+                        ],
+                        logs: []
+                    },
+                    {
+                        issues: [
+                            {
+                                "issues": []
+                            }
+                        ],
+                        logs: []
+                    }
+                ]
+            };
+            const notAnalyzedContracts = [];
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
+            assert.ok(!errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(!errorStub.calledWith('Internal MythX errors encountered:'.red));
+            assert.equal(ret, 1);
+        });
+
+        it('should return 1 when notAnalyzedContracts is 1 or more', async () => {
+            const results = {
+                "errors": [],
+                "objects": [
+                    {
+                        issues: [
+                            {
+                                "issues": [],
+                            }
+                        ],
+                        logs: []
+                    },
+                    {
+                        issues: [
+                            {
+                                "issues": []
+                            }
+                        ],
+                        logs: []
+                    }
+                ]
+            };
+            const notAnalyzedContracts = ['Contract1', 'Contract2'];
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
+            assert.ok(errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(!errorStub.calledWith('Internal MythX errors encountered:'.red));
+            assert.equal(ret, 1);
+        });
+
+        it('should return 0 when logs is 1 or more with debug', async () => {
+            config.debug = true;
+            const results = {
+                errors: [],
+                objects: [
+                    {
+                        issues: [
+                            {
+                                "issues": [],
+                            }
+                        ],
+                        logs: [
+                            {
+                                level : 'info',
+                                msg: 'message1',
+                            }
+                        ]
+                    },
+                    {
+                        issues: [
+                            {
+                                "issues": [],
+                            }
+                        ],
+                        logs: []
+                    }
+                ]
+            };
+            const notAnalyzedContracts = [];
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
+            assert.ok(!errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            assert.ok(loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(!errorStub.calledWith('Internal MythX errors encountered:'.red));
+            assert.equal(ret, 1);
+        });
+    });
+
+    describe('ghettoReport', () => {
+        let loggerStub = sinon.stub();
+        beforeEach(() => {
+            loggerStub = sinon.stub();
+        });
+
+        it('should return 0 when results.length is 0', () => {
+            const results = [];
+            const ret = rewiredHelpers.__get__('ghettoReport')(loggerStub, results);
+            assert.ok(loggerStub.calledWith('No issues found'));
+            assert.equal(ret, 0);
+        });
+
+        it('should return 1 when results.length is 1', () => {
+            const results = [{
+                'sourceFormat': 'evm-byzantium-bytecode',
+                'sourceList': [
+                    'list1', 'list2'
+                ],
+                'sourceType': 'raw-bytecode',
+                'issues': [{
+                    'description': {
+                        'head': 'Head message',
+                        'tail': 'Tail message'
+                    },
+                    'locations': [{
+                        'sourceMap': '444:1:0'
+                    }],
+                    'severity': 'High',
+                    'swcID': 'SWC-000',
+                    'swcTitle': 'Test Title'
+                }],
+                'meta': {
+                    'selected_compiler': '0.5.0',
+                    'error': [],
+                    'warning': []
+                }
+            }];
+
+            const ret = rewiredHelpers.__get__('ghettoReport')(loggerStub, results);
+            assert.ok(!loggerStub.calledWith('No issues found'));
+            assert.ok(loggerStub.calledWith('list1, list2'));
+            assert.ok(loggerStub.calledWith(yaml.safeDump(results[0].issues[0])));
+            assert.equal(ret, 1);
         });
     });
 

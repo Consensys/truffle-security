@@ -63,7 +63,7 @@ jobs:
             truffle compile
             CONTRACT_NAME=$(pwgen 16)
             sed -i "s/\"contractName\": \"FunctionTypes\"/\"contractName\": \"${CONTRACT_NAME}\"/" build/contracts/FunctionTypes.json
-            truffle run verify --style json | tee result.json
+            echo $(truffle run verify --style json --no-progress) | tee result.json
             sed -i '/^\[/! s/.*//' result.json
             ordered_messages=$(cat result.json | jq .[0].messages | jq 'sort_by(.ruleId)')
 
