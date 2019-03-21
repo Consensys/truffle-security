@@ -3,9 +3,6 @@
 
 const armlet = require('armlet');
 const path = require('path');
-// TODO really this is about the location
-// in the consumer of this plugin, not the plugin itself
-const projectConfig = require('./config.json');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
 const eslintHelpers = require('./lib/eslint');
@@ -496,8 +493,13 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
  */
 async function analyze(config) {
 
-    // include options from project configuration file
-    config = Object.assign(config, projectConfig);
+    try {
+	const projectConfig = require([config.working_directory,
+				       'truffle-security-config.json'].join ('/'));
+	config = Object.assign(config, projectConfig);
+    } catch (ex) {
+	console.log("No truffle security configuration file found");
+    }
 
     const limit = config.limit || defaultAnalyzeRateLimit;
     const log = config.logger.log;

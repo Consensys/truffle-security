@@ -1,5 +1,0 @@
-{
-    "style": "stylish",
-    "minSeverity": "warning",
-    "swcBlacklist": ["SWC-101"]
-}
