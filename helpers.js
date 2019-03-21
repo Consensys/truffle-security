@@ -3,6 +3,8 @@
 
 const armlet = require('armlet');
 const path = require('path');
+// TODO really this is about the location
+// in the consumer of this plugin, not the plugin itself
 const projectConfig = require('./config.json');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
@@ -381,7 +383,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     } else {
         const spaceLimited = ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
         const eslintIssues = objects
-              .map(obj => obj.getEslintIssues(spaceLimited))
+              .map(obj => obj.getEslintIssues(config, spaceLimited))
               .reduce((acc, curr) => acc.concat(curr), []);
 
         // FIXME: temporary solution until backend will return correct filepath and output.
