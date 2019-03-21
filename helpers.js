@@ -3,6 +3,7 @@
 
 const armlet = require('armlet');
 const path = require('path');
+const projectConfig = require('./config.json');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
 const eslintHelpers = require('./lib/eslint');
@@ -492,6 +493,10 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
  * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
+
+    // include options from project configuration file
+    config = Object.assign(config, projectConfig);
+
     const limit = config.limit || defaultAnalyzeRateLimit;
     const log = config.logger.log;
 
@@ -529,10 +534,6 @@ async function analyze(config) {
 
     // Get list of smart contract build json files from truffle build folder
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.build_mythx_contracts);
-
-    if (!config.style) {
-        config.style = 'stylish';
-    }
 
     const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
     const objContracts = buildObjs.reduce((resultContracts, obj) => {
