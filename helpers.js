@@ -540,6 +540,10 @@ async function analyze(config) {
     // Get list of smart contract build json files from truffle build folder
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.build_mythx_contracts);
 
+    if (!config.style) {
+        config.style = 'stylish';
+    }
+
     const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
     const objContracts = buildObjs.reduce((resultContracts, obj) => {
         const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
