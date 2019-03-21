@@ -216,7 +216,7 @@ describe('issues2Eslint', function() {
 
             const issuesObject = newIssueObject();
             const remappedMythXOutput = mythx.remapMythXOutput(mythXOutput);
-            const result = remappedMythXOutput.map(output => issuesObject.convertMythXReport2EsIssue(output, true));
+            const result = remappedMythXOutput.map(output => issuesObject.convertMythXReport2EsIssue(output, {}, true));
 
             assert.deepEqual(result, [{
                 errorCount: 1,
@@ -345,7 +345,7 @@ describe('issues2Eslint', function() {
                 }
             }];
             issuesObject.setIssues(mythXOutput);
-            const result = issuesObject.getEslintIssues(true);
+            const result = issuesObject.getEslintIssues({}, true);
             assert.deepEqual(result, [{
                 errorCount: 1,
                 warningCount: 0,

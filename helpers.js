@@ -498,7 +498,8 @@ async function analyze(config) {
 				       'truffle-security-config.json'].join ('/'));
 	config = Object.assign(config, projectConfig);
     } catch (ex) {
-	console.log("No truffle security configuration file found");
+	// TODO how chatty should this logging be?
+	// console.log("No truffle security configuration file found");
     }
 
     const limit = config.limit || defaultAnalyzeRateLimit;
