@@ -401,19 +401,30 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
           .reduce((acc, curr) => acc.concat(curr), []);
 
     let haveLogs = false;
-    for(const log of logs) {
-        if (showLog(log)) {
-            haveLogs = true;
-            break;
+    logs.some(setOfLogs => {
+        for(const sourceList in setOfLogs) {
+            setOfLogs[sourceList].some(log => {
+                if (showLog(log)) {
+                    haveLogs = true;
+                    return;
+                }
+            });
+            if(haveLogs) break;
         }
-    }
+        if(haveLogs) return;
+    });
 
     if (haveLogs) {
         ret = 1;
         config.logger.log('MythX Logs:'.yellow);
-        logs.forEach(log => {
-            if (showLog(log)) {
-                config.logger.log(`${log.level}: ${log.msg}`);
+        logs.forEach(setOfLogs => {
+            for(const sourceList in setOfLogs) {
+                config.logger.log(`\n${sourceList.yellow}`);
+                setOfLogs[sourceList].forEach(log => {
+                    if (showLog(log)) {
+                        config.logger.log(`${log.level}: ${log.msg}`);
+                    }
+                });
             }
         });
     }
