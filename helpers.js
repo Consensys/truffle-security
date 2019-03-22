@@ -274,6 +274,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
         // request analysis to armlet.
         try {
             const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
+            obj.uuid = status.uuid;
             if (config.debug) {
                 config.logger.debug(`${analyzeOpts.data.contractName}: UUID is ${status.uuid}`);
                 if (config.debug > 1) {
@@ -397,24 +398,31 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
         ret = 1;
     }
 
-    const logs = objects.map(obj => obj.logs)
+    const logGroups = objects.map(obj => { return {'sourcePath': obj.sourcePath, 'logs': obj.logs, 'uuid': obj.uuid};})
           .reduce((acc, curr) => acc.concat(curr), []);
 
     let haveLogs = false;
-    for(const log of logs) {
-        if (showLog(log)) {
-            haveLogs = true;
-            break;
-        }
-    }
+    logGroups.some(logGroup => {
+        logGroup.logs.some(log => {
+            if (showLog(log)) {
+                haveLogs = true;
+                return;
+            }
+        });
+        if(haveLogs) return;
+    });
 
     if (haveLogs) {
         ret = 1;
         config.logger.log('MythX Logs:'.yellow);
-        logs.forEach(log => {
-            if (showLog(log)) {
-                config.logger.log(`${log.level}: ${log.msg}`);
-            }
+        logGroups.forEach(logGroup => {
+            config.logger.log(`\n${logGroup.sourcePath}`.yellow);
+            config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
+            logGroup.logs.forEach(log => {
+                if (showLog(log)) {
+                    config.logger.log(`${log.level}: ${log.msg}`);
+                }
+            });
         });
     }
 
