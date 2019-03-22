@@ -19,21 +19,41 @@ const CompilerSupplier = require("./compilerSupplier");
 const expect = require("truffle-expect");
 const find_contracts = require("truffle-contract-sources");
 const Config = require("truffle-config");
-const debug = require("debug")("compile"); // eslint-disable-line no-unused-vars
 
-let nodeDirectory;
-let contractsDirectory;
+function getFileContent(filepath, options) {
+  // if it'a neither explicitly relative nor absolute, use truffle-resolver
+  if (!isExplicitlyRelative(filepath) && !path.isAbsolute(filepath)) {
+    let contents;
+    options.resolver.resolve(
+      filepath,
+      options.working_directory,
+      (err, body) => {
+        if (err) {
+          throw err;
+        }
+        contents = body;
+      }
+    );
+    return contents;
+  }
 
-function getFileContent(filepath) {
+  let absFilePath;
+  // If it's an absolute path, use it.
+  if (path.isAbsolute(filepath)) {
+    absFilePath = filepath;
+  // If it's explicitly relative, join with base
+  } else if (isExplicitlyRelative(filepath)) {
+    absFilePath = path.resolve(path.join(options.contracts_directory, filepath));
+  }
   let stats;
   try {
-    stats = fs.statSync(filepath);
+    stats = fs.statSync(absFilePath);
   } catch (e) {
     throw new Error(`File ${filepath} not found`);
   }
 
   if (stats.isFile()) {
-    return fs.readFileSync(filepath).toString();
+    return fs.readFileSync(absFilePath).toString();
   } else {
     throw new Error(`${filepath} is not file`);
   }
@@ -42,43 +62,6 @@ function getFileContent(filepath) {
 
 function isExplicitlyRelative(import_path) {
     return import_path.indexOf(".") === 0;
-}
-
-/**
-  * resolves a path (relative, absolute, node_module) into an a
-  * an absolute path
-  *
-  *  @param {String} p         - path to resolve
-  *  @param {String} base      - where to resolve relative paths from
-                                 usually the "contracts" directory
-  *  @param {String} nodeBase  - where to resolve nodeJS paths from
-
-  Converts
-  NOTE:  truffle-resolver.resolve may cover the below and do more.
-
-  If we switch to truffle-resolver.resolve it handles 3 kinds of classes
-  `EPMSource`, `NPMSource`, `FSSource`
-
-  The 2nd is probably with respect to npm source and the last is
-  probably with respect to file system sources that are not npm source.
-
-  I am not sure what the first is about other than it probably has to do
-  with installed contracts.
-
-  Right now, this code seems a little bit complex to use and it isn't all that
-  well documented.
-*/
-function convertToAbsolutePath(p, base, nodeBase) {
-  // If it's an absolute paths, leave it alone.
-  if (path.isAbsolute(p)) return p;
-
-  // If it's not explicitly relative, must be relative to node_modules
-  if (!isExplicitlyRelative(p)) {
-    return path.resolve(path.join(nodeBase, p));
-  }
-
-  // Path must be explicitly relative, therefore make it absolute.
-  return path.resolve(path.join(base, p));
 }
 
 const getSourceFileName = sourcePath => {
@@ -123,7 +106,7 @@ const cleanBytecode = bytecode => {
 }
 
 
-const normalizeJsonOutput = jsonObject => {
+const normalizeJsonOutput = (jsonObject, options) => {
   const { contracts, sources, compiler, updatedAt } = jsonObject;
   const result = {
     compiler,
@@ -159,8 +142,7 @@ const normalizeJsonOutput = jsonObject => {
     result.sources[sourcePath].legacyAST = solData.legacyAST;
     result.sources[sourcePath].id = solData.id;
 
-    const absPathName = convertToAbsolutePath(sourcePath, contractsDirectory, nodeDirectory);
-    result.sources[sourcePath].source = getFileContent(absPathName);
+    result.sources[sourcePath].source = getFileContent(sourcePath, options);
   }
 
   return result;
@@ -177,8 +159,6 @@ const normalizeJsonOutput = jsonObject => {
 //   logger: console
 // }
 var compile = function(sourcePath, sourceText, options, callback, isStale) {
-  nodeDirectory = path.join(options.working_directory, 'node_modules');
-  contractsDirectory = options.contracts_directory;
 
   if (typeof options === "function") {
     callback = options;
@@ -258,14 +238,7 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
 
       function findImports(pathName) {
         try {
-          const absPathName = convertToAbsolutePath(pathName, contractsDirectory, nodeDirectory);
-          if (fs.existsSync(absPathName)) {
-            return { contents: getFileContent(absPathName) };
-          } else {
-            // We can't find the file, so fudge it with the empty contents, which is
-            // better than throwing an error.
-            return { contents: '' };
-          }
+          return { contents: getFileContent(pathName, options)};
         } catch (e) {
           return { error: e.message };
         }
@@ -321,7 +294,7 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
       standardOutput.source = sourceText;
       standardOutput.updatedAt = new Date();
 
-      const normalizedOutput = normalizeJsonOutput(standardOutput);
+      const normalizedOutput = normalizeJsonOutput(standardOutput, options);
 
       // FIXME: the below return path is hoaky, because it is in the format that
       // the multiPromisify'd caller in workflow-compile expects.
@@ -394,7 +367,7 @@ compile.with_dependencies = function(options, callback, compileAll) {
     "paths",
     "working_directory",
     "contracts_directory",
-    // "resolver" // when we start using truffle-resolver
+    "resolver",
   ]);
 
   var config = Config.default().merge(options);
@@ -403,7 +376,7 @@ compile.with_dependencies = function(options, callback, compileAll) {
     config.with({
       paths: options.paths,
       base_path: options.contracts_directory,
-      // resolver: options.resolver // when we start using truffle-resolver
+      resolver: options.resolver,
     }),
     (err, allSources, required) => {
       if (err) return callback(err);
