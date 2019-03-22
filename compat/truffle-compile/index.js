@@ -159,8 +159,6 @@ const normalizeJsonOutput = (jsonObject, options) => {
 //   logger: console
 // }
 var compile = function(sourcePath, sourceText, options, callback, isStale) {
-  //nodeDirectory = path.join(options.working_directory, 'node_modules');
-  //contractsDirectory = options.contracts_directory;
 
   if (typeof options === "function") {
     callback = options;
