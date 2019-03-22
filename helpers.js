@@ -495,11 +495,13 @@ async function analyze(config) {
 
     try {
       const projectConfig = require([config.working_directory,
-				       'truffle-security.json'].join ('/'));
-      config = Object.assign(config, projectConfig);
+				     'truffle-security.json'].join ('/'));
+	// command line options should overwrite project-level config
+	config = Object.assign(projectConfig, config);
     } catch (ex) {
-      // TODO how chatty should this logging be?
-      // console.log("No truffle security configuration file found");
+	if (config.debug >1) {
+	    console.log("No truffle security configuration file found");
+	}
     }
 
     const limit = config.limit || defaultAnalyzeRateLimit;
