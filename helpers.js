@@ -498,7 +498,7 @@ async function analyze(config) {
         // command line options should overwrite project-level config
         config = Object.assign(projectConfig, config);
     } catch (ex) {
-        if (config.debug >1) {
+        if (config.debug > 1) {
             console.log("No truffle security configuration file found");
         }
     }
