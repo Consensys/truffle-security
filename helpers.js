@@ -500,7 +500,7 @@ async function analyze(config) {
         config = Object.assign(projectConfig, config);
     } catch (ex) {
         if (config.debug >1) {
-	    console.log("No truffle security configuration file found");
+           console.log("No truffle security configuration file found");
         }
     }
 
