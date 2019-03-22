@@ -244,7 +244,7 @@ describe('issues2Eslint', function() {
             const issues = [issuesObject];
             const filteredIssues = issues.filter(issue => issues2eslint.displayCriteria(issue, {}));
             assert.deepEqual(issues, filteredIssues);
-	});
+        });
 
         it('It normalize and store mythX API output', () => {
             const issuesObject = newIssueObject();

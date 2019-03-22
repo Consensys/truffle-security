@@ -494,13 +494,12 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
 async function analyze(config) {
 
     try {
-        const projectConfig = require([config.working_directory,
-				     'truffle-security.json'].join ('/'));
+        const projectConfig = require([config.working_directory, 'truffle-security.json'].join ('/'));
         // command line options should overwrite project-level config
         config = Object.assign(projectConfig, config);
     } catch (ex) {
         if (config.debug >1) {
-           console.log("No truffle security configuration file found");
+            console.log("No truffle security configuration file found");
         }
     }
 
