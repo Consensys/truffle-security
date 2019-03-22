@@ -268,7 +268,7 @@ describe('issues2Eslint', function() {
 
             issuesObject.setIssues(mythXOutput);
 
-            assert.deepEqual(issuesObject.logs, {'/tmp/contracts/simple_dao.sol': [{'level': 'info', 'msg': 'log message one'}, {'level': 'debug', 'msg': 'log message two'}]});
+            assert.deepEqual(issuesObject.logs, [{'level': 'info', 'msg': 'log message one'}, {'level': 'debug', 'msg': 'log message two'}]);
             assert.deepEqual(issuesObject.issues, [{
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
@@ -315,9 +315,7 @@ describe('issues2Eslint', function() {
             }];
 
             issuesObject.setIssues(mythXOutput);
-            expected_logs = {};
-            expected_logs[`/tmp/contracts/${sourceName}`] = [];
-            assert.deepEqual(issuesObject.logs, expected_logs);
+            assert.deepEqual(issuesObject.logs, []);
         });
 
         it('It converts mythX issues to ESLint issues output format', () => {
