@@ -495,7 +495,7 @@ async function analyze(config) {
 
     try {
       const projectConfig = require([config.working_directory,
-				       'truffle-security-config.json'].join ('/'));
+				       'truffle-security.json'].join ('/'));
       config = Object.assign(config, projectConfig);
     } catch (ex) {
       // TODO how chatty should this logging be?
