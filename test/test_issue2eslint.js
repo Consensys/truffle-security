@@ -239,7 +239,7 @@ describe('issues2Eslint', function() {
             }]);
         });
 
-	it('should not filter my issue if the project config is left empty', () => {
+	      it('should not filter my issue if the project config is left empty', () => {
             const issuesObject = newIssueObject();
             const issues = [issuesObject];
             const filteredIssues = issues.filter(issue => issues2eslint.displayCriteria(issue, {}));
