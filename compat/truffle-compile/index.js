@@ -384,6 +384,8 @@ compile.with_dependencies = function(options, callback, compileAll) {
 
       // Filter out of the list of files to be compiled those for which we have a JSON that
       // is newer than the last modified time of the source file.
+
+      const staleSolFiles = [];
       const filteredRequired = [];
       for (const sourcePath of options.paths) {
         const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
@@ -391,12 +393,7 @@ compile.with_dependencies = function(options, callback, compileAll) {
           // Set for compilation
           filteredRequired.push(sourcePath);
         } else {
-          // Pick up from existing JSON
-          const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
-          const buildObj = JSON.parse(buildJson);
-          const shortName = getSourceFileName(sourcePath);
-          callback(null, {[shortName]: buildObj}, false);
-          return
+          staleSolFiles.push(sourcePath);
         }
       }
       var hasTargets = filteredRequired.length;
@@ -410,6 +407,15 @@ compile.with_dependencies = function(options, callback, compileAll) {
           compile(sourcePath, allSources[sourcePath], options, callback, true);
         }
       }
+
+      staleSolFiles.forEach(sourcePath => {
+        const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
+        // Pick up from existing JSON
+        const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
+        const buildObj = JSON.parse(buildJson);
+        const shortName = getSourceFileName(sourcePath);
+        callback(null, {[shortName]: buildObj}, false);
+      })
     });
 };
 
