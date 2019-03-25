@@ -375,7 +375,7 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     })
 
     if (config.yaml) {
-        config.logger.log(yaml.safeDump(objects));
+        config.logger.log(yaml.safeDump(objects, {'skipInvalid': true}));
     } else if (config.json) {
         config.logger.log(JSON.stringify(objects, null, 4));
     } else {
