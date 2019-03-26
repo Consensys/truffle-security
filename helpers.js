@@ -443,14 +443,19 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
 // A stripped-down listing for issues.
 // We will need this until we can beef up information in UUID retrieval
 function ghettoReport(logger, results) {
-    if (results.length === 0) {
+    let issuesCount = 0;
+    results.forEach(ele => {
+        issuesCount += ele.issues.length;
+    });
+    
+    if (issuesCount === 0) {
         logger('No issues found');
         return 0;
     }
     for (const group of results) {
-        logger(group.sourceList.join(', '));
+        logger(group.sourceList.join(', ').underline);
         for (const issue of group.issues) {
-            logger(yaml.safeDump(issue));
+            logger(yaml.safeDump(issue, {'skipInvalid': true}));
         }
     }
     return 1;
