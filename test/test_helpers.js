@@ -795,14 +795,16 @@ describe('helpers.js', function() {
             loggerStub = sinon.stub();
         });
 
-        it('should return 0 when results.length is 0', () => {
-            const results = [];
+        it('should return 0 when issues count is 0', () => {
+            const results = [{
+                "issues": [],
+            }];
             const ret = rewiredHelpers.__get__('ghettoReport')(loggerStub, results);
             assert.ok(loggerStub.calledWith('No issues found'));
             assert.equal(ret, 0);
         });
 
-        it('should return 1 when results.length is 1', () => {
+        it('should return 1 when issues count is 1 or more', () => {
             const results = [{
                 'sourceFormat': 'evm-byzantium-bytecode',
                 'sourceList': [
@@ -830,8 +832,8 @@ describe('helpers.js', function() {
 
             const ret = rewiredHelpers.__get__('ghettoReport')(loggerStub, results);
             assert.ok(!loggerStub.calledWith('No issues found'));
-            assert.ok(loggerStub.calledWith('list1, list2'));
-            assert.ok(loggerStub.calledWith(yaml.safeDump(results[0].issues[0])));
+            assert.ok(loggerStub.calledWith('list1, list2'.underline));
+            assert.ok(loggerStub.calledWith(yaml.safeDump(results[0].issues[0], {'skipInvalid': true})));
             assert.equal(ret, 1);
         });
     });
