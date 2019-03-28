@@ -28,7 +28,8 @@
   },
   "scripts": {
     "test": "nyc mocha",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "postinstall": "node ./scripts/install-to-truffle.js"
   },
   "repository": {
     "type": "git",
