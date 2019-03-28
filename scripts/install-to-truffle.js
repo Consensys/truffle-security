@@ -52,7 +52,6 @@ try {
     let moduleExportsRe = /module\.exports[^\{]*\s*=\s*\{/g
     let m = moduleExportsRe.exec(configString);
     if(!m) {
-      console.log("NONONO");
       process.exit();
     }
 
