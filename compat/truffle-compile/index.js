@@ -20,50 +20,6 @@ const expect = require("truffle-expect");
 const find_contracts = require("truffle-contract-sources");
 const Config = require("truffle-config");
 
-function getFileContent(filepath, options) {
-  // if it'a neither explicitly relative nor absolute, use truffle-resolver
-  if (!isExplicitlyRelative(filepath) && !path.isAbsolute(filepath)) {
-    let contents;
-    options.resolver.resolve(
-      filepath,
-      options.working_directory,
-      (err, body) => {
-        if (err) {
-          throw err;
-        }
-        contents = body;
-      }
-    );
-    return contents;
-  }
-
-  let absFilePath;
-  // If it's an absolute path, use it.
-  if (path.isAbsolute(filepath)) {
-    absFilePath = filepath;
-  // If it's explicitly relative, join with base
-  } else if (isExplicitlyRelative(filepath)) {
-    absFilePath = path.resolve(path.join(options.contracts_directory, filepath));
-  }
-  let stats;
-  try {
-    stats = fs.statSync(absFilePath);
-  } catch (e) {
-    throw new Error(`File ${filepath} not found`);
-  }
-
-  if (stats.isFile()) {
-    return fs.readFileSync(absFilePath).toString();
-  } else {
-    throw new Error(`${filepath} is not file`);
-  }
-}
-
-
-function isExplicitlyRelative(import_path) {
-    return import_path.indexOf(".") === 0;
-}
-
 const getSourceFileName = sourcePath => {
   let shortName = path.basename(sourcePath);
   if (shortName.endsWith('.sol')) {
@@ -106,7 +62,7 @@ const cleanBytecode = bytecode => {
 }
 
 
-const normalizeJsonOutput = (jsonObject, options) => {
+const normalizeJsonOutput = (jsonObject, allSources, options) => {
   const { contracts, sources, compiler, updatedAt } = jsonObject;
   const result = {
     compiler,
@@ -142,7 +98,7 @@ const normalizeJsonOutput = (jsonObject, options) => {
     result.sources[sourcePath].legacyAST = solData.legacyAST;
     result.sources[sourcePath].id = solData.id;
 
-    result.sources[sourcePath].source = getFileContent(sourcePath, options);
+    result.sources[sourcePath].source = allSources[sourcePath];
   }
 
   return result;
@@ -158,7 +114,7 @@ const normalizeJsonOutput = (jsonObject, options) => {
 //   quiet: false,
 //   logger: console
 // }
-var compile = function(sourcePath, sourceText, options, callback, isStale) {
+var compile = function(sourcePath, allSources, options, callback, isStale) {
 
   if (typeof options === "function") {
     callback = options;
@@ -230,21 +186,15 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
     .then(solc => {
 
       const solcVersion = solc.version();
-      solcStandardInput.sources = {
-        [sourcePath]: {
-          content: sourceText
-        }
-      };
 
-      function findImports(pathName) {
-        try {
-          return { contents: getFileContent(pathName, options)};
-        } catch (e) {
-          return { error: e.message };
+      solcStandardInput.sources = {};      
+      Object.keys(allSources).forEach(p => {
+        solcStandardInput.sources[p] = {
+          content: allSources[p],
         }
-      }
+      });
 
-      const result = solc.compile(JSON.stringify(solcStandardInput), findImports);
+      const result = solc.compile(JSON.stringify(solcStandardInput));
 
       var standardOutput = JSON.parse(result);
 
@@ -291,10 +241,10 @@ var compile = function(sourcePath, sourceText, options, callback, isStale) {
         name: "solc",
         version: solcVersion
       };
-      standardOutput.source = sourceText;
+      standardOutput.source = allSources[sourcePath];
       standardOutput.updatedAt = new Date();
 
-      const normalizedOutput = normalizeJsonOutput(standardOutput, options);
+      const normalizedOutput = normalizeJsonOutput(standardOutput, allSources, options);
 
       // FIXME: the below return path is hoaky, because it is in the format that
       // the multiPromisify'd caller in workflow-compile expects.
@@ -371,53 +321,51 @@ compile.with_dependencies = function(options, callback, compileAll) {
   ]);
 
   var config = Config.default().merge(options);
+  
+  // Filter out of the list of files to be compiled those for which we have a JSON that
+  // is newer than the last modified time of the source file.
 
-  Profiler.required_sources(
-    config.with({
-      paths: options.paths,
-      base_path: options.contracts_directory,
-      resolver: options.resolver,
-    }),
-    (err, allSources, required) => {
-      if (err) return callback(err);
+  const staleSolFiles = [];
+  const filteredRequired = [];
+  for (const sourcePath of options.paths) {
+    const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
+    if (compileAll || staleBuildContract(sourcePath, targetJsonPath)) {
+      // Set for compilation
+      filteredRequired.push(sourcePath);
+    } else {
+      staleSolFiles.push(sourcePath);
+    }
+  }
+  var hasTargets = filteredRequired.length;
 
+  hasTargets
+    ? self.display(filteredRequired, options)
+    : self.display(allSources, options);
 
-      // Filter out of the list of files to be compiled those for which we have a JSON that
-      // is newer than the last modified time of the source file.
+  for (const sourcePath of filteredRequired) {
+    if (!sourcePath.endsWith('/Migrations.sol')) {
+      Profiler.required_sources(
+        config.with({
+          paths: [sourcePath],
+          base_path: options.contracts_directory,
+          resolver: options.resolver,
+        }),
+        (err, allSources, required) => {
+          if (err) return callback(err);
+          compile(sourcePath, allSources, options, callback, true);
+      });
+    }
+  }
 
-      const staleSolFiles = [];
-      const filteredRequired = [];
-      for (const sourcePath of options.paths) {
-        const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
-        if (compileAll || staleBuildContract(sourcePath, targetJsonPath)) {
-          // Set for compilation
-          filteredRequired.push(sourcePath);
-        } else {
-          staleSolFiles.push(sourcePath);
-        }
-      }
-      var hasTargets = filteredRequired.length;
-
-      hasTargets
-        ? self.display(filteredRequired, options)
-        : self.display(allSources, options);
-
-      for (const sourcePath of filteredRequired) {
-        if (!sourcePath.endsWith('/Migrations.sol')) {
-          compile(sourcePath, allSources[sourcePath], options, callback, true);
-        }
-      }
-
-      staleSolFiles.forEach(sourcePath => {
-        const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
-        // Pick up from existing JSON
-        const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
-        const buildObj = JSON.parse(buildJson);
-        const shortName = getSourceFileName(sourcePath);
-        callback(null, {[shortName]: buildObj}, false);
-      })
-    });
-};
+  staleSolFiles.forEach(sourcePath => {
+    const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
+    // Pick up from existing JSON
+    const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
+    const buildObj = JSON.parse(buildJson);
+    const shortName = getSourceFileName(sourcePath);
+    callback(null, {[shortName]: buildObj}, false);
+  })
+}
 
 /**
  * Show what file is being compiled.
