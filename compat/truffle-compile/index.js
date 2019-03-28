@@ -344,7 +344,7 @@ compile.with_dependencies = function(options, callback, compileAll) {
 
   for (const sourcePath of filteredRequired) {
     if (!sourcePath.endsWith('/Migrations.sol')) {
-      Profiler.required_sources(
+      Profiler.imported_sources(
         config.with({
           paths: [sourcePath],
           base_path: options.contracts_directory,
