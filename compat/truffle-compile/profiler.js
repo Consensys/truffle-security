@@ -292,6 +292,122 @@ module.exports = {
     });
   },
 
+  // return requied dependencies(imported) sources
+  // TODO: This is almost copy of required_sources for Hot Fix, so this should be optimized.
+  imported_sources: function(options, callback) {
+    var self = this;
+
+    expect.options(options, ["paths", "base_path", "resolver"]);
+
+    var resolver = options.resolver;
+
+    // Fetch the whole contract set
+    find_contracts(options.contracts_directory, (err, allPaths) => {
+      if (err) return callback(err);
+
+      // Solidity test files might have been injected. Include them in the known set.
+      /*
+      options.paths.forEach(_path => {
+        if (!allPaths.includes(_path)) {
+          allPaths.push(_path);
+        }
+      });
+      */
+      // Force replacement with options.paths
+      allPaths = options.paths;
+
+      var updates = self
+        .convert_to_absolute_paths(options.paths, options.base_path)
+        .sort();
+      allPaths = self
+        .convert_to_absolute_paths(allPaths, options.base_path)
+        .sort();
+
+      var allSources = {};
+      var compilationTargets = [];
+
+      // Load compiler
+      var supplier = new CompilerSupplier(options.compilers.solc);
+      supplier
+        .load()
+        .then(solc => {
+          // Get all the source code
+          self.resolveAllSources(resolver, allPaths, solc, (err, resolved) => {
+            if (err) return callback(err);
+
+            // Generate hash of all sources including external packages - passed to solc inputs.
+            var resolvedPaths = Object.keys(resolved);
+            resolvedPaths.forEach(
+              file => (allSources[file] = resolved[file].body)
+            );
+
+            // Exit w/out minimizing if we've been asked to compile everything, or nothing.
+            if (self.listsEqual(options.paths, allPaths)) {
+              return callback(null, allSources, {});
+            } else if (!options.paths.length) {
+              return callback(null, {}, {});
+            }
+
+            // Seed compilationTargets with known updates
+            updates.forEach(update => compilationTargets.push(update));
+
+            // While there are updated files in the queue, we take each one
+            // and search the entire file corpus to find any sources that import it.
+            // Those sources are added to list of compilation targets as well as
+            // the update queue because their own ancestors need to be discovered.
+            async.whilst(
+              () => updates.length > 0,
+              updateFinished => {
+                var currentUpdate = updates.shift();
+                var files = allPaths.slice();
+
+                // While files: dequeue and inspect their imports
+                async.whilst(
+                  () => files.length > 0,
+                  fileFinished => {
+                    var currentFile = files.shift();
+
+                    // Ignore targets already selected.
+                    if (compilationTargets.includes(currentFile)) {
+                      return fileFinished();
+                    }
+
+                    var imports;
+                    try {
+                      imports = self.getImports(
+                        currentFile,
+                        resolved[currentFile],
+                        solc
+                      );
+                    } catch (err) {
+                      err.message =
+                        "Error parsing " + currentFile + ": " + e.message;
+                      return fileFinished(err);
+                    }
+
+                    // If file imports a compilation target, add it
+                    // to list of updates and compilation targets
+                    if (imports.includes(currentUpdate)) {
+                      updates.push(currentFile);
+                      compilationTargets.push(currentFile);
+                    }
+
+                    fileFinished();
+                  },
+                  err => updateFinished(err)
+                );
+              },
+              err =>
+                err
+                  ? callback(err)
+                  : callback(null, allSources, compilationTargets)
+            );
+          });
+        })
+        .catch(callback);
+    });
+  },
+
   // Resolves sources in several async passes. For each resolved set it detects unknown
   // imports from external packages and adds them to the set of files to resolve.
   resolveAllSources: function(resolver, initialPaths, solc, callback) {
