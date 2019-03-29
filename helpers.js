@@ -474,7 +474,6 @@ function prepareConfig (config) {
             }
         });
 
-
     } catch (ex) {
         if (config.debug > 1) {
             config.logger.error("truffle-security.json either not found or improperly formatted.");
@@ -494,7 +493,7 @@ function prepareConfig (config) {
     // converting to severity to a number makes it easier to deal with in `issues2eslint.js`
     // default to `warning`
     config.severityThreshold = severity2Number[config.minSeverity] || 1;
-    console.log(config.minSeverity);
+
     return config;
 }
 
