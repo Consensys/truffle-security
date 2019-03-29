@@ -104,6 +104,10 @@ Options:
   --debug    Provide additional debug output. Use --debug=2 for more
              verbose output
              Note: progress is disabled if this is set.
+  --min-severity { warning | error }
+             Ignore SWCs below the designated level
+  --swc-blacklist { ["SWC-103"] | ["SWC-101", "SWC-111"] | ...}
+             Ignore a specific SWC or list of SWCs.
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
              Note: this is still a bit raw and will be improved.

@@ -116,9 +116,9 @@ Options:
              set this lower.
   --debug    Provide additional debug output. Use --debug=2 for more
              verbose output
-  --minSeverity { warning | error }
+  --min-severity { warning | error }
              Ignore SWCs below the designated level
-  --swcBlacklist { ["SWC-103"] | ["SWC-101", "SWC-111"] | ...}
+  --swc-blacklist { ["SWC-103"] | ["SWC-101", "SWC-111"] | ...}
              Ignore a specific SWC or list of SWCs.
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
@@ -136,7 +136,7 @@ Configuration options can also be stored as json in `truffle-security.json` at t
 {
     "style": "table",
     "mode": "quick",
-    "minSeverity": "warning",
-    "swcBlacklist": ["SWC-103"]
+    "min-severity": "warning",
+    "swc-blacklist": ["SWC-103"]
 }
 ```
