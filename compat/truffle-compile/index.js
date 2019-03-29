@@ -336,11 +336,6 @@ compile.with_dependencies = function(options, callback, compileAll) {
       staleSolFiles.push(sourcePath);
     }
   }
-  var hasTargets = filteredRequired.length;
-
-  hasTargets
-    ? self.display(filteredRequired, options)
-    : self.display(allSources, options);
 
   for (const sourcePath of filteredRequired) {
     if (!sourcePath.endsWith('/Migrations.sol')) {
@@ -352,6 +347,7 @@ compile.with_dependencies = function(options, callback, compileAll) {
         }),
         (err, allSources, required) => {
           if (err) return callback(err);
+          self.display(allSources, options)
           compile(sourcePath, allSources, options, callback, true);
       });
     }
