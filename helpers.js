@@ -452,6 +452,52 @@ function ghettoReport(logger, results) {
     return 1;
 }
 
+/**
+ * Modifies attributes of the Truffle configuration object
+ * in order to use project-defined options
+ *
+ * @param {Object} config - Truffle configuration object.
+ * @returns {Oject} config - Extended Truffle configuration object.
+ */
+
+function prepareConfig (config) {
+
+    // merge project level configuration if present
+    try {
+        let projectConfig = require([config.working_directory, 'truffle-security'].join ('/'));
+
+        var projectLevelKeys = Object.keys(projectConfig);
+
+        projectLevelKeys.forEach(function (property) {
+            if (!config.hasOwnProperty(property)) {
+                config[property] = projectConfig[property];
+            }
+        });
+
+
+    } catch (ex) {
+        if (config.debug > 1) {
+            config.logger.error("truffle-security.json either not found or improperly formatted.");
+            config.logger.error("expected to find truffle-security.json in: " + config.working_directory);
+        }
+    }
+
+    // convert kebab-case to camelCase
+    config.swcBlacklist = config['swc-blacklist'];
+    config.minSeverity = config['min-severity'];
+
+    const severity2Number = {
+        'error': 2,
+        'warning': 1
+    };
+
+    // converting to severity to a number makes it easier to deal with in `issues2eslint.js`
+    // default to `warning`
+    config.severityThreshold = severity2Number[config.minSeverity] || 1;
+    console.log(config.minSeverity);
+    return config;
+}
+
 function getFoundContractNames(contracts, contractNames) {
     let foundContractNames = [];
     contracts.forEach(({ contractName }) => {
@@ -497,15 +543,7 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
  */
 async function analyze(config) {
 
-    try {
-        const projectConfig = require([config.working_directory, 'truffle-security.json'].join ('/'));
-        // command line options should overwrite project-level config
-        config = Object.assign(projectConfig, config);
-    } catch (ex) {
-        if (config.debug > 1) {
-            console.log("No truffle security configuration file found");
-        }
-    }
+    config = prepareConfig(config);
 
     const limit = config.limit || defaultAnalyzeRateLimit;
     const log = config.logger.log;
