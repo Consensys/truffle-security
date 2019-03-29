@@ -336,11 +336,6 @@ compile.with_dependencies = function(options, callback, compileAll) {
       staleSolFiles.push(sourcePath);
     }
   }
-  var hasTargets = filteredRequired.length;
-
-  hasTargets
-    ? self.display(filteredRequired, options)
-    : self.display(allSources, options);
 
   for (const sourcePath of filteredRequired) {
     if (!sourcePath.endsWith('/Migrations.sol')) {
@@ -352,6 +347,7 @@ compile.with_dependencies = function(options, callback, compileAll) {
         }),
         (err, allSources, required) => {
           if (err) return callback(err);
+          self.display(sourcePath, Object.keys(allSources), options)
           compile(sourcePath, allSources, options, callback, true);
       });
     }
@@ -370,21 +366,32 @@ compile.with_dependencies = function(options, callback, compileAll) {
 /**
  * Show what file is being compiled.
  */
-compile.display = function(paths, options) {
+compile.display = function(targetPath, paths, options) {
   if (options.quiet !== true) {
-    if (!Array.isArray(paths)) {
-      paths = Object.keys(paths);
+    if (path.isAbsolute(targetPath)) {
+      const absTargetPath =
+        "." + path.sep + path.relative(options.working_directory, targetPath);
+      options.logger.log("Compiling " + absTargetPath + "...");
+    } else {
+      options.logger.log("Compiling " + targetPath + "...");
+    }
+
+    if (paths.length > 1) {
+      options.logger.log("  with dependencies:")
+    } else {
+      return;
     }
 
     const blacklistRegex = /^truffle\/|\/Migrations.sol$/;
 
     paths.sort().forEach(fileName => {
+      if (fileName === targetPath) return;
       if (path.isAbsolute(fileName)) {
         fileName =
           "." + path.sep + path.relative(options.working_directory, fileName);
       }
       if (fileName.match(blacklistRegex)) return;
-      options.logger.log("Compiling " + fileName + "...");
+      options.logger.log("    - " + fileName);
     });
   }
 };
