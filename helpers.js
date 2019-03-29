@@ -106,7 +106,7 @@ Options:
              Note: progress is disabled if this is set.
   --min-severity { warning | error }
              Ignore SWCs below the designated level
-  --swc-blacklist { ["SWC-103"] | ["SWC-101", "SWC-111"] | ...}
+  --swc-blacklist { 101 | 103,111,115 | ... }
              Ignore a specific SWC or list of SWCs.
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
@@ -462,7 +462,7 @@ function ghettoReport(logger, results) {
 
 function prepareConfig (config) {
 
-    // merge project level configuration if present
+    // merge project level configuration
     try {
         let projectConfig = require([config.working_directory, 'truffle-security'].join ('/'));
 
@@ -481,10 +481,7 @@ function prepareConfig (config) {
         }
     }
 
-    // convert kebab-case to camelCase
-    config.swcBlacklist = config['swc-blacklist'];
-    config.minSeverity = config['min-severity'];
-
+    // modify and extend initial config params
     const severity2Number = {
         'error': 2,
         'warning': 1
@@ -492,7 +489,16 @@ function prepareConfig (config) {
 
     // converting to severity to a number makes it easier to deal with in `issues2eslint.js`
     // default to `warning`
-    config.severityThreshold = severity2Number[config.minSeverity] || 1;
+    if ([config['min-severity']]) {
+        config.severityThreshold = severity2Number[config['min-severity']] || 1;
+    }
+
+    if (config['swc-blacklist']) {
+        config.swcBlacklist = config['swc-blacklist']
+            .toString()
+            .split(",")
+            .map(swc => "SWC-" + swc.trim());
+    }
 
     return config;
 }
