@@ -452,6 +452,29 @@ function ghettoReport(logger, results) {
     return 1;
 }
 
+function setConfigSeverityLevel (inputSeverity) {
+
+    // converting severity to a number makes it easier to deal with in `issues2eslint.js`
+    const severity2Number = {
+        'error': 2,
+        'warning': 1
+    };
+
+    // default to `warning`
+    return severity2Number[inputSeverity] || 1;
+}
+
+function setConfigSWCBlacklist (inputBlacklist) {
+    if (!inputBlacklist) {
+        return false;
+    }
+
+    return inputBlacklist
+        .toString()
+        .split(",")
+        .map(swc => "SWC-" + swc.trim());
+}
+
 /**
  * Modifies attributes of the Truffle configuration object
  * in order to use project-defined options
@@ -482,23 +505,8 @@ function prepareConfig (config) {
     }
 
     // modify and extend initial config params
-    const severity2Number = {
-        'error': 2,
-        'warning': 1
-    };
-
-    // converting to severity to a number makes it easier to deal with in `issues2eslint.js`
-    // default to `warning`
-    if ([config['min-severity']]) {
-        config.severityThreshold = severity2Number[config['min-severity']] || 1;
-    }
-
-    if (config['swc-blacklist']) {
-        config.swcBlacklist = config['swc-blacklist']
-            .toString()
-            .split(",")
-            .map(swc => "SWC-" + swc.trim());
-    }
+    config.severityThreshold = setConfigSeverityLevel(config['min-severity']);
+    config.swcBlacklist = setConfigSWCBlacklist(config['swc-blacklist']);
 
     return config;
 }
