@@ -22,7 +22,7 @@ try {
 
 let configString = truffleConfig.toString('utf8');
 
-const re = /plugins:\s*\[[^\]]*[^,]*/g;
+const re = /plugins:\s*\[[^\]]*\]/g;
 
 let matches = [];
 while (m = re.exec(configString)) {
@@ -32,7 +32,7 @@ while (m = re.exec(configString)) {
 try {
   // Make sure truffle-config.js meets expectations
   if(matches.length == 1) {
-    let m = /\[.*$/.exec(matches[0][0])
+    let m = /\[[^]*$/.exec(matches[0][0])
     if(!m) {
       process.exit();
     }
@@ -62,6 +62,13 @@ try {
 } catch(e) {
   // Do nothing and fail silently
   process.exit()
+}
+
+// Make sure code is still valid, just in case something happened.
+try {
+  new Function(configString);
+} catch (e) {
+  process.exit();
 }
 
 fs.writeFileSync(truffleConfigPath, configString);
