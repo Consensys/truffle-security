@@ -137,6 +137,6 @@ Configuration options can also be stored as json in `truffle-security.json` at t
     "style": "table",
     "mode": "quick",
     "min-severity": "warning",
-    "swc-blacklist": ["SWC-103"]
+    "swc-blacklist": "103,111"
 }
 ```
