@@ -715,6 +715,8 @@ module.exports = {
     printHelpMessage,
     contractsCompile,
     doAnalysis,
+    setConfigSeverityLevel,
+    setConfigSWCBlacklist,
     cleanAnalyzeDataEmptyProps,
     getArmletClient,
     trialEthAddress,

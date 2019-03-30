@@ -836,6 +836,38 @@ describe('helpers.js', function() {
         });
     });
 
+    describe('prepareConfig', () => {
+        it('should return a numeric severityThreshold', () => {
+            const inputSeverity = 'error';
+            const result = helpers.setConfigSeverityLevel(inputSeverity);
+            assert.equal(result, 2);
+        });
+        it('should default to warning if no severity is supplied', () => {
+            const result = helpers.setConfigSeverityLevel();
+            assert.equal(result, 1);
+        });
+        it('should correctly format a comma separated string of swc codes', () => {
+            const commaBlacklist = '103,111';
+            const result = helpers.setConfigSWCBlacklist(commaBlacklist);
+            assert.deepEqual(result, [ 'SWC-103', 'SWC-111' ]);
+        });
+        it('should correctly format a single swc code', () => {
+            const commaBlacklist = '103';
+            const result = helpers.setConfigSWCBlacklist(commaBlacklist);
+            assert.deepEqual(result, [ 'SWC-103' ]);
+        });
+        it('should accept whitespace in the list of swc codes', () => {
+            const commaBlacklist = '103, 111';
+            const result = helpers.setConfigSWCBlacklist(commaBlacklist);
+            assert.deepEqual(result, [ 'SWC-103', 'SWC-111' ]);
+        });
+        it('should accept an arbitrary string as an SWC code without breaking', () => {
+            const commaBlacklist = 'cat';
+            const result = helpers.setConfigSWCBlacklist(commaBlacklist);
+            assert.deepEqual(result, [ 'SWC-cat' ]);
+        });
+    });
+
     describe('getNotFoundContracts', () => {
         it('should return a list containing the not found contracts', () => {
             const allContractNames = ['Contract1', 'Contract2', 'Contract3', 'Contract4'];
