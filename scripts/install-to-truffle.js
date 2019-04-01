@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs')
 let truffleConfig;
 let truffleConfigPath;
@@ -25,6 +27,7 @@ let configString = truffleConfig.toString('utf8');
 const re = /plugins:\s*\[[^\]]*\]/g;
 
 let matches = [];
+let m;
 while (m = re.exec(configString)) {
   matches.push(m);
 }
@@ -43,9 +46,9 @@ try {
       process.exit();
     }
 
-    plugins.push("truffle-security")
+    plugins.push("truffle-security");
 
-    pluginString = JSON.stringify(plugins).split(',').join(', ');
+    const pluginString = JSON.stringify(plugins).split(',').join(', ');
     configString = configString.replace(re, `plugins: ${pluginString}`)
   } else if(matches.length == 0) {
     // No plugins yet, add a line
@@ -57,11 +60,11 @@ try {
 
     configString = configString.replace(moduleExportsRe, 'module.exports = {\n\n  plugins: ["truffle-security"],\n');
   } else {
-    process.exit()
+    process.exit();
   }
 } catch(e) {
   // Do nothing and fail silently
-  process.exit()
+  process.exit();
 }
 
 // Make sure code is still valid, just in case something happened.
