@@ -27,6 +27,7 @@
     "node": ">=8.10.0"
   },
   "scripts": {
+    "esdoc": "esdoc",
     "test": "nyc mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
@@ -60,6 +61,10 @@
   "devDependencies": {
     "babel-eslint": "^10.0.1",
     "coveralls": "^3.0.2",
+    "esdoc": "^1.1.0",
+    "esdoc-ecmascript-proposal-plugin": "^1.0.0",
+    "esdoc-node": "^1.0.4",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint": ">=5.9.0",
     "ipfsd-ctl": "^0.21.0",
     "nyc": "^13.1.0",
