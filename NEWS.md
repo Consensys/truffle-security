@@ -1,13 +1,13 @@
 Release 1.3.2
 ================
 
-We now automatically install truffle-security to the truffle project if truffle security.
-
-The `--yaml` output format is no longer as buggy as it was.
-
-Minor logging improvements.
+We now automatically install truffle-security to the truffle project it is being installed to.
 
 Support for EthPM packages was added.
+
+Bugs in the `--yaml` output format have been fixed.
+
+Minor logging improvements.
 
 Fixed a bug with a "No issues found" response.
 
