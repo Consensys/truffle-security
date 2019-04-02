@@ -11,6 +11,8 @@ Minor logging improvements.
 
 Fixed a bug with a "No issues found" response.
 
+A lot of this work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment).
+
 Release 1.3.1
 ================
 
