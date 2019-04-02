@@ -118,7 +118,7 @@ Options:
              verbose output
   --min-severity { warning | error }
              Ignore SWCs below the designated level
-  --swc-blacklist { 101 | 103,111,115 | ... }
+  --swc-blacklist { 101 | [103,111,115] | ... }
              Ignore a specific SWC or list of SWCs.
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
@@ -137,6 +137,6 @@ Configuration options can also be stored as json in `truffle-security.json` at t
     "style": "table",
     "mode": "quick",
     "min-severity": "warning",
-    "swc-blacklist": "103,111"
+    "swc-blacklist": [103,111]
 }
 ```
