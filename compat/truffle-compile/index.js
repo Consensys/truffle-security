@@ -337,30 +337,41 @@ compile.with_dependencies = function(options, callback, compileAll) {
     }
   }
 
+  const compiledSources = [];
+
   for (const sourcePath of filteredRequired) {
     if (!sourcePath.endsWith('/Migrations.sol')) {
-      Profiler.imported_sources(
-        config.with({
-          paths: [sourcePath],
-          base_path: options.contracts_directory,
-          resolver: options.resolver,
-        }),
-        (err, allSources, required) => {
-          if (err) return callback(err);
-          self.display(sourcePath, Object.keys(allSources), options)
-          compile(sourcePath, allSources, options, callback, true);
+      const promise = new Promise((reject, resolve) => {
+        Profiler.imported_sources(
+          config.with({
+            paths: [sourcePath],
+            base_path: options.contracts_directory,
+            resolver: options.resolver,
+          }),
+          (err, allSources, required) => {
+            if (err) return reject(err);
+            self.display(sourcePath, Object.keys(allSources), options)
+            compile(sourcePath, allSources, options, callback, true);
+            resolve(sourcePath);
+        });
       });
+      compiledSources.push(promise);
     }
   }
 
-  staleSolFiles.forEach(sourcePath => {
-    const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
-    // Pick up from existing JSON
-    const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
-    const buildObj = JSON.parse(buildJson);
-    const shortName = getSourceFileName(sourcePath);
-    callback(null, {[shortName]: buildObj}, false);
-  })
+  Promise.all(compiledSources)
+    .then(() => {
+      staleSolFiles.forEach(sourcePath => {
+        const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
+        // Pick up from existing JSON
+        const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
+        const buildObj = JSON.parse(buildJson);
+        const shortName = getSourceFileName(sourcePath);
+        callback(null, {[shortName]: buildObj}, false);
+      })
+    })
+    .catch(err => callback(err))
+  ;
 }
 
 /**
