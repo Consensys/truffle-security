@@ -882,15 +882,17 @@ describe('helpers.js', function() {
 
     describe('getArmletClient', () => {
         it('should instantiate as trial user if nothing is passed', () => {
-            const client = rewiredHelpers.getArmletClient();
+            const { isTrial, client } = rewiredHelpers.getArmletClient();
             assert.equal(client.ethAddress, rewiredHelpers.trialEthAddress);
             assert.equal(client.password, rewiredHelpers.trialPassword);
+            assert.equal(isTrial, true);
         });
 
         it('should create client instance with ethAddress and password', () => {
-            const client = rewiredHelpers.getArmletClient('0x123456789012345678901234', 'password');
+            const { isTrial, client } = rewiredHelpers.getArmletClient('0x123456789012345678901234', 'password');
             assert.equal(client.ethAddress, '0x123456789012345678901234');
             assert.equal(client.password, 'password');
+            assert.equal(isTrial, false);
         });
 
         it('should throw error if password is missing', () => {

@@ -357,7 +357,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
     }, { errors: [], objects: [] });
 };
 
-function doReport(config, objects, errors, notAnalyzedContracts) {
+function doReport(config, objects, errors, notAnalyzedContracts, isTrial = false) {
     let ret = 0;
 
     // Return true if we shold show log.
@@ -441,6 +441,9 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
         });
     }
 
+    if (isTrial) {
+        config.logger.warn('You are using trial account. Analysis report may be incomplete, please register an account at https://mythx.io to get complete analysis.');
+    }
     return ret;
 }
 
@@ -492,6 +495,7 @@ const getNotAnalyzedContracts = (mythXIssuesObjects, contracts) => {
 }
 
 const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
+    let isTrial = false;
     const options = { clientToolName };
     if (password && ethAddress) {
         options.ethAddress = ethAddress;
@@ -499,9 +503,13 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     } else if (!password && !ethAddress) {
         options.ethAddress = trialEthAddress;
         options.password = trialPassword;
+        isTrial = true;
     }
 
-    return new armlet.Client(options);
+    return {
+        isTrial,
+        client: new armlet.Client(options),
+    };
 }
 
 /**
@@ -521,7 +529,7 @@ async function analyze(config) {
         return 1;
     }
 
-    const client = getArmletClient(
+    const { client, isTrial } = getArmletClient(
         process.env.MYTHX_ETH_ADDRESS,
         process.env.MYTHX_PASSWORD
     )
@@ -573,7 +581,7 @@ async function analyze(config) {
 
     const { objects, errors } = await doAnalysis(client, config, noDuplicateContracts, foundContractNames, limit);
     const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
-    return doReport(config, objects, errors, notAnalyzedContracts);
+    return doReport(config, objects, errors, notAnalyzedContracts, isTrial);
 }
 
 
