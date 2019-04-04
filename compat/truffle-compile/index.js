@@ -307,7 +307,7 @@ compile.necessary = function(options, callback) {
  *                                 the file was deemed out of date.
  *
  */
-compile.with_dependencies = function(options, callback, compileAll) {
+compile.with_dependencies = async function(options, callback, compileAll) {
   var self = this;
 
   options.logger = options.logger || console;
@@ -337,8 +337,24 @@ compile.with_dependencies = function(options, callback, compileAll) {
     }
   }
 
+  let isSolcLoaded = false;
   for (const sourcePath of filteredRequired) {
     if (!sourcePath.endsWith('/Migrations.sol')) {
+      
+      // if solc is not loaded yet, load for cache.
+      if (!isSolcLoaded) {
+        const supplier = new CompilerSupplier(options.compilers.solc);
+        await supplier
+                .load()
+                .then(solc => {
+                  // do nothing
+                })
+                .catch(e => {
+                  throw e;
+                })
+        isSolcLoaded = true;
+      }
+
       Profiler.imported_sources(
         config.with({
           paths: [sourcePath],
