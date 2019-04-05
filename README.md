@@ -1,5 +1,6 @@
 [![CircleCI](https://circleci.com/gh/ConsenSys/truffle-security.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-security)
 [![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-security/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-security?branch=master)
+![ESDoc](https://doc.esdoc.org/github.com/ConsenSys/truffle-security/badge.svg)
 
 
 # MythX Security Analysis Plugin for Truffle Framework

@@ -29,7 +29,8 @@
   "scripts": {
     "esdoc": "esdoc",
     "test": "nyc mocha",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "esdoc-create": "node ./commands/update-docs.js"
   },
   "repository": {
     "type": "git",
@@ -67,6 +68,7 @@
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": ">=5.9.0",
     "ipfsd-ctl": "^0.21.0",
+    "node-fetch": "^2.3.0",
     "nyc": "^13.1.0",
     "rewire": "^4.0.1",
     "sinon": "^7.2.2",
