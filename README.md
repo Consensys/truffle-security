@@ -118,7 +118,7 @@ Options:
              verbose output
   --min-severity { warning | error }
              Ignore SWCs below the designated level
-  --swc-blacklist { 101 | [103,111,115] | ... }
+  --swc-blacklist { 101 | 103,111,115 | ... }
              Ignore a specific SWC or list of SWCs.
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
