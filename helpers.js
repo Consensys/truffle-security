@@ -104,6 +104,10 @@ Options:
   --debug    Provide additional debug output. Use --debug=2 for more
              verbose output
              Note: progress is disabled if this is set.
+  --min-severity { warning | error }
+             Ignore SWCs below the designated level
+  --swc-blacklist { 101 | 103,111,115 | ... }
+             Ignore a specific SWC or list of SWCs.
   --uuid *UUID*
              Print in YAML results from a prior run having *UUID*
              Note: this is still a bit raw and will be improved.
@@ -385,8 +389,8 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     } else {
         const spaceLimited = ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
         const eslintIssues = objects
-              .map(obj => obj.getEslintIssues(spaceLimited))
-              .reduce((acc, curr) => acc.concat(curr), []);
+            .map(obj => obj.getEslintIssues(config, spaceLimited))
+            .reduce((acc, curr) => acc.concat(curr), []);
 
         // FIXME: temporary solution until backend will return correct filepath and output.
         const eslintIssuesByBaseName = groupEslintIssuesByBasename(eslintIssues);
@@ -465,6 +469,65 @@ function ghettoReport(logger, results) {
     return 1;
 }
 
+function setConfigSeverityLevel (inputSeverity) {
+
+    // converting severity to a number makes it easier to deal with in `issues2eslint.js`
+    const severity2Number = {
+        'error': 2,
+        'warning': 1
+    };
+
+    // default to `warning`
+    return severity2Number[inputSeverity] || 1;
+}
+
+function setConfigSWCBlacklist (inputBlacklist) {
+    if (!inputBlacklist) {
+        return false;
+    }
+
+    return inputBlacklist
+        .toString()
+        .split(",")
+        .map(swc => "SWC-" + swc.trim());
+}
+
+/**
+ * Modifies attributes of the Truffle configuration object
+ * in order to use project-defined options
+ *
+ * @param {Object} config - Truffle configuration object.
+ * @returns {Oject} config - Extended Truffle configuration object.
+ */
+
+function prepareConfig (config) {
+
+    // merge project level configuration
+    try {
+        let projectConfig = require([config.working_directory, 'truffle-security'].join ('/'));
+
+        var projectLevelKeys = Object.keys(projectConfig);
+
+        projectLevelKeys.forEach(function (property) {
+            if (!config.hasOwnProperty(property)) {
+                config[property] = projectConfig[property];
+            }
+        });
+
+    } catch (ex) {
+        if (config.debug > 1) {
+            config.logger.error("truffle-security.json either not found or improperly formatted.");
+            config.logger.error("expected to find truffle-security.json in: " + config.working_directory);
+        }
+    }
+
+    // modify and extend initial config params
+    config.severityThreshold = setConfigSeverityLevel(config['min-severity']);
+    config.swcBlacklist = setConfigSWCBlacklist(config['swc-blacklist']);
+
+    return config;
+}
+
 function getFoundContractNames(contracts, contractNames) {
     let foundContractNames = [];
     contracts.forEach(({ contractName }) => {
@@ -509,6 +572,9 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
  * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
+
+    config = prepareConfig(config);
+
     const limit = config.limit || defaultAnalyzeRateLimit;
     const log = config.logger.log;
 
@@ -666,6 +732,8 @@ module.exports = {
     printHelpMessage,
     contractsCompile,
     doAnalysis,
+    setConfigSeverityLevel,
+    setConfigSWCBlacklist,
     cleanAnalyzeDataEmptyProps,
     getArmletClient,
     trialEthAddress,
