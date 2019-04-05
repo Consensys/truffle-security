@@ -1,3 +1,18 @@
+Release 1.3.2
+================
+
+We now automatically install truffle-security to the truffle project it is being installed to.
+
+Support for EthPM packages was added.
+
+Bugs in the `--yaml` output format have been fixed.
+
+Minor logging improvements.
+
+Fixed a bug with a "No issues found" response.
+
+A lot of this work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment).
+
 Release 1.3.1
 ================
 

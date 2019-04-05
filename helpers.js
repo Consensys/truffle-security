@@ -375,7 +375,11 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
     })
 
     if (config.yaml) {
-        config.logger.log(yaml.safeDump(objects, {'skipInvalid': true}));
+        const yamlDumpObjects = objects;
+        for(let i = 0; i < yamlDumpObjects.length; i++) {
+          delete yamlDumpObjects[i].logger;
+        }
+        config.logger.log(yaml.safeDump(yamlDumpObjects, {'skipInvalid': true}));
     } else if (config.json) {
         config.logger.log(JSON.stringify(objects, null, 4));
     } else {
