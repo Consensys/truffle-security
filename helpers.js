@@ -190,8 +190,8 @@ const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
 const removeDuplicateContracts = (contracts) => {
     const uniqContracts = {};
     contracts.forEach(contract => {
-        if (!uniqContracts[contract.contractName]) {
-            uniqContracts[contract.contractName] = contract
+        if (!uniqContracts[contract.sourcePath + ":" + contract.contractName]) {
+            uniqContracts[contract.sourcePath + ":" + contract.contractName] = contract
         }
     });
     return Object.values(uniqContracts);
