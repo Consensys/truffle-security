@@ -5,6 +5,7 @@ const fs = require('fs');
 const srcmap = require('../lib/srcmap');
 const mythx = require('../lib/mythx');
 const rewired = rewire('../lib/issues2eslint');
+const issues2eslint = require('../lib/issues2eslint');
 
 describe('issues2Eslint', function() {
     describe('MythXIssues class', () => {
@@ -216,7 +217,7 @@ describe('issues2Eslint', function() {
 
             const issuesObject = newIssueObject();
             const remappedMythXOutput = mythx.remapMythXOutput(mythXOutput);
-            const result = remappedMythXOutput.map(output => issuesObject.convertMythXReport2EsIssue(output, true));
+            const result = remappedMythXOutput.map(output => issuesObject.convertMythXReport2EsIssue(output, {}, true));
 
             assert.deepEqual(result, [{
                 errorCount: 1,
@@ -236,6 +237,13 @@ describe('issues2Eslint', function() {
                     severity: 2,
                 }],
             }]);
+        });
+
+	      it('should not filter my issue if the project config is left empty', () => {
+            const issuesObject = newIssueObject();
+            const issues = [issuesObject];
+            const filteredIssues = issues.filter(issue => issues2eslint.keepIssueInResults(issue, {}));
+            assert.deepEqual(issues, filteredIssues);
         });
 
         it('It normalize and store mythX API output', () => {
@@ -345,7 +353,7 @@ describe('issues2Eslint', function() {
                 }
             }];
             issuesObject.setIssues(mythXOutput);
-            const result = issuesObject.getEslintIssues(true);
+            const result = issuesObject.getEslintIssues({}, true);
             assert.deepEqual(result, [{
                 errorCount: 1,
                 warningCount: 0,
