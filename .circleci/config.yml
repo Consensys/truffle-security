@@ -34,8 +34,11 @@ jobs:
   generate-docs:
     docker:
       - image: circleci/node:10.14.2
+    working_directory: ~/repo
 
     steps:
+      - checkout
+  
       - run:
           name: Install dependencies
           command: npm install node-fetch
