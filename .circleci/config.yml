@@ -31,6 +31,19 @@ jobs:
           name: Run Coveralls.io
           command: npm run coverage
 
+  generate-docs:
+    docker:
+      - image: circleci/node:10.14.2
+
+    steps:
+      - run:
+          name: Install dependencies
+          command: npm install node-fetch
+
+      - run:
+          name: Generate docs
+          command: npm run esdoc-create
+
   publishImage:
     docker:
       - image: mythril/api-k8s-ci:v0.1.3
@@ -110,6 +123,10 @@ workflows:
   build-deploy:
     jobs:
       - build
+      - generate-docs:
+          filters:
+            branches:
+              only: master
       - publishImage:
           requires:
             - build
