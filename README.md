@@ -23,7 +23,7 @@ $ npm install -g git+https://git@github.com/ConsenSys/truffle-security.git
 
 ## Configuration
 
-Currently, the plugin must be activated on a per-project basis. Add the following to `truffle-config.js` in the root directory of your Truffle project:
+Currently, the plugin must be activated on a per-project basis. If `truffle-security` was installed to the Truffle project root, it will try to automatically install itself to `truffle-config.js`. If you installed `truffle-security` globally, add the following to `truffle-config.js` in the root directory of your Truffle project to enable the plugin:
 
 ```javascript
 module.exports = {
