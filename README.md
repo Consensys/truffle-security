@@ -1,5 +1,6 @@
 [![CircleCI](https://circleci.com/gh/ConsenSys/truffle-security.svg?style=svg)](https://circleci.com/gh/ConsenSys/truffle-security)
 [![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-security/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-security?branch=master)
+[![ESDoc](https://doc.esdoc.org/github.com/ConsenSys/truffle-security/badge.svg)](https://doc.esdoc.org/github.com/ConsenSys/truffle-security)
 
 
 # MythX Security Analysis Plugin for Truffle Framework
@@ -22,13 +23,15 @@ $ npm install -g git+https://git@github.com/ConsenSys/truffle-security.git
 
 ## Configuration
 
-Currently, the plugin must be activated on a per-project basis. Add the following to `truffle.js` in the root directory of your Truffle project:
+Currently, the plugin must be activated on a per-project basis. If `truffle-security` was installed to the Truffle project root, it will try to automatically install itself to `truffle-config.js`. If you installed `truffle-security` globally, add the following to `truffle-config.js` in the root directory of your Truffle project to enable the plugin:
 
 ```javascript
 module.exports = {
     plugins: [ "truffle-security" ]
 };
 ```
+
+### MythX Account
 
 By default, the plugin is configured with a MythX trial account that allows a limited number of requests. You can set up a free account on the [MythX website](https://mythx.io) to get full access.
 
@@ -38,6 +41,25 @@ After setting up an account, set the following enviromment variables to your ETH
 export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
 export MYTHX_PASSWORD='Put your password in here!'
 ```
+
+### Solc Version
+
+You can specify which version of solc to use in `truffle-config.js` as explained in [truffle's documentation](https://truffleframework.com/docs/truffle/reference/configuration#solc). MythX for Truffle will use the same version of solc that Truffle uses to compile and analyze your contracts.
+
+```
+module.exports = {
+  plugins: [ "truffle-security" ],
+  networks: {
+    ... etc ...
+  },
+  compilers: {
+     solc: {
+       version: <string>  // ex:  "0.4.20". (Default: Truffle's installed solc)
+     }
+  }
+};
+```
+
 
 ## Running Security Analyses
 
