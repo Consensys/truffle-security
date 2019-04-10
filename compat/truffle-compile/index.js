@@ -353,7 +353,7 @@ compile.with_dependencies = async function(options, callback, compileAll) {
               })
       isSolcLoaded = true;
     }
-    await new Promise((reject, resolve) => {
+    await new Promise((resolve, reject) => {
       Profiler.imported_sources(
         config.with({
           paths: [sourcePath],
