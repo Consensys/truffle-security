@@ -1,3 +1,8 @@
+Release 1.3.4
+================
+
+Fix a serious bug involving resolve/reject params being swapped.
+
 Release 1.3.3
 ================
 
