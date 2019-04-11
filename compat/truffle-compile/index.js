@@ -339,20 +339,16 @@ compile.with_dependencies = async function(options, callback, compileAll) {
 
   filteredRequired = filteredRequired.filter(sourcePath => !sourcePath.endsWith('/Migrations.sol'))
 
-  let isSolcLoaded = false;
+  if (filteredRequired.length > 0) {
+    // Download solc compiler
+    const supplier = new CompilerSupplier(options.compilers.solc);
+      await supplier.load()
+        .catch(e => {
+          throw e;
+        })
+
+  }
   Promise.all(filteredRequired.map(async (sourcePath) => {
-    if (!isSolcLoaded) {
-      const supplier = new CompilerSupplier(options.compilers.solc);
-      await supplier
-              .load()
-              .then(solc => {
-                // do nothing
-              })
-              .catch(e => {
-                throw e;
-              })
-      isSolcLoaded = true;
-    }
     await new Promise((resolve, reject) => {
       Profiler.imported_sources(
         config.with({
