@@ -503,23 +503,23 @@ function setConfigSWCBlacklist (inputBlacklist) {
 function prepareConfig (config) {
 
     // merge project level configuration
+    let projectConfig
     try {
-        let projectConfig = require([config.working_directory, 'truffle-security'].join ('/'));
-
-        var projectLevelKeys = Object.keys(projectConfig);
-
-        projectLevelKeys.forEach(function (property) {
-            if (!config.hasOwnProperty(property)) {
-                config[property] = projectConfig[property];
-            }
-        });
-
+        projectConfig = require([config.working_directory, 'truffle-security'].join ('/'));
     } catch (ex) {
+        projectConfig = {}
         if (config.debug > 1) {
-            config.logger.error("truffle-security.json either not found or improperly formatted.");
-            config.logger.error("expected to find truffle-security.json in: " + config.working_directory);
+            config.logger.log("truffle-security.json not found. Default options will be applied.");
         }
     }
+
+    const projectLevelKeys = Object.keys(projectConfig);
+
+    projectLevelKeys.forEach(function (property) {
+        if (!config.hasOwnProperty(property)) {
+            config[property] = projectConfig[property];
+        }
+    });
 
     // modify and extend initial config params
     config.severityThreshold = setConfigSeverityLevel(config['min-severity']);
