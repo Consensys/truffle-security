@@ -21,11 +21,11 @@ If you're feeling adventurous, you can also install the from the master branch:
 $ npm install -g git+https://git@github.com/ConsenSys/truffle-security.git
 ```
 ### Windows only
-Before installing plugin make sure to install `windows-build-tools`
+On Windows `node-gyp` dependency requires `windows-build-tools` to be installed from an elevated PowerShell or CMD.exe (run as Administrator).
 ```console
 npm install --global --production windows-build-tool
 ```
-
+For more details refer to [node-gyp installation guide](https://github.com/nodejs/node-gyp#option-1).
 
 ## Configuration
 
