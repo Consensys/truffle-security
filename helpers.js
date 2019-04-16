@@ -593,7 +593,15 @@ async function analyze(config) {
         process.env.MYTHX_PASSWORD
     )
 
-    if(client.ethAddress === trialEthAddress) {
+    const users = (await client.getUserInfo()).users;
+    let roles;
+    let id;
+    if(users) {
+      roles = users[0].roles;
+      id = users[0].id
+    }
+
+    if(id === "123456789012345678901234") { // Trial user id
         const prefix = "You are currently running MythX in Trial mode. This mode reports only a partial analysis of your smart contracts, limited to three vulnerabilities. To get a complete analysis, sign up for a free MythX account at https://mythx.io.\n";
         config.logger.log(prefix);
 
@@ -608,6 +616,10 @@ async function analyze(config) {
             process.exit(0);
         }
         config.logger.log("\nContinuing with MythX Trial mode...\n");
+    } else if(roles.includes('privileged_user')) {
+        config.logger.log("Welcome to MythX! You are currently running in Premium mode.\n");
+    } else if(roles.includes('regular_user')) {
+        config.logger.log("Welcome to MythX! You are currently running in Free mode.\n");
     }
 
 
