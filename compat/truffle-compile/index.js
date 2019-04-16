@@ -270,7 +270,9 @@ compile.all = function(options, callback) {
     if (err) return callback(err);
 
     options.paths = files;
-      compile.with_dependencies(options, callback, true);
+    compile.with_dependencies(options, callback, true).catch(e => {
+      return callback(e);
+    });
   });
 };
 
@@ -293,7 +295,9 @@ compile.necessary = function(options, callback) {
     }
 
     options.paths = updated;
-    compile.with_dependencies(options, callback, false);
+    compile.with_dependencies(options, callback, false).catch(e => {
+      return callback(e);
+    });
   });
 };
 
