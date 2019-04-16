@@ -20,6 +20,12 @@ If you're feeling adventurous, you can also install the from the master branch:
 ```
 $ npm install -g git+https://git@github.com/ConsenSys/truffle-security.git
 ```
+### Windows only
+On Windows `node-gyp` dependency requires `windows-build-tools` to be installed from an elevated PowerShell or CMD.exe (run as Administrator).
+```console
+npm install --global --production windows-build-tool
+```
+For more details refer to [node-gyp installation guide](https://github.com/nodejs/node-gyp#option-1).
 
 ## Configuration
 
@@ -40,6 +46,12 @@ After setting up an account, set the following enviromment variables to your ETH
 ```bash
 export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
 export MYTHX_PASSWORD='Put your password in here!'
+```
+
+And if you're using Windows OS with PowerShell:
+```bash
+$env:MYTHX_ETH_ADDRESS="0x1234567891235678900000000000000000000000"
+$env:MYTHX_PASSWORD="Put your password in here!"
 ```
 
 ### Solc Version
