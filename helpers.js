@@ -568,6 +568,17 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     return new armlet.Client(options);
 }
 
+const filterDeletedContracts = async contracts => {
+    const filtered = []
+    await Promise.all(contracts.map(async contract => {
+        const isDeleted = await trufstuf.isContractDeleted(contract)
+        if (!isDeleted) {
+            filtered.push(contract)
+        }
+    }))
+    return filtered
+}
+
 /**
  *
  * @param {Object} config - truffle configuration object.
@@ -649,10 +660,12 @@ async function analyze(config) {
     }
 
     const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
-    const objContracts = buildObjs.reduce((resultContracts, obj) => {
+    let objContracts = buildObjs.reduce((resultContracts, obj) => {
         const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
         return resultContracts.concat(contracts);
     }, []);
+
+    objContracts = await filterDeletedContracts(objContracts)
     const noDuplicateContracts = removeDuplicateContracts(objContracts);
     const foundContractNames = await getFoundContractNames(noDuplicateContracts, contractNames);
     const notFoundContracts = getNotFoundContracts(contractNames, foundContractNames);

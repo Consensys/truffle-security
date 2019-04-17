@@ -1,3 +1,19 @@
+Release 1.3.4
+================
+
+Fix a serious bug involving resolve/reject params being swapped.
+
+Release 1.3.3
+================
+
+Display the issue warning that the Trial version is being used.
+
+Fixed a bug that prevented analysis of multiple contracts with the same name.
+
+Fixed a bug that downloaded the compiler for every contract analyzed.
+
+Much of this work was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment).
+
 Release 1.3.2
 ================
 

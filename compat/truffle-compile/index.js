@@ -270,7 +270,9 @@ compile.all = function(options, callback) {
     if (err) return callback(err);
 
     options.paths = files;
-      compile.with_dependencies(options, callback, true);
+    compile.with_dependencies(options, callback, true).catch(e => {
+      return callback(e);
+    });
   });
 };
 
@@ -293,7 +295,9 @@ compile.necessary = function(options, callback) {
     }
 
     options.paths = updated;
-    compile.with_dependencies(options, callback, false);
+    compile.with_dependencies(options, callback, false).catch(e => {
+      return callback(e);
+    });
   });
 };
 
@@ -326,7 +330,7 @@ compile.with_dependencies = async function(options, callback, compileAll) {
   // is newer than the last modified time of the source file.
 
   const staleSolFiles = [];
-  const filteredRequired = [];
+  let filteredRequired = [];
   for (const sourcePath of options.paths) {
     const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
     if (compileAll || staleBuildContract(sourcePath, targetJsonPath)) {
@@ -337,24 +341,19 @@ compile.with_dependencies = async function(options, callback, compileAll) {
     }
   }
 
-  let isSolcLoaded = false;
-  for (const sourcePath of filteredRequired) {
-    if (!sourcePath.endsWith('/Migrations.sol')) {
-      
-      // if solc is not loaded yet, load for cache.
-      if (!isSolcLoaded) {
-        const supplier = new CompilerSupplier(options.compilers.solc);
-        await supplier
-                .load()
-                .then(solc => {
-                  // do nothing
-                })
-                .catch(e => {
-                  throw e;
-                })
-        isSolcLoaded = true;
-      }
+  filteredRequired = filteredRequired.filter(sourcePath => !sourcePath.endsWith('/Migrations.sol'))
 
+  if (filteredRequired.length > 0) {
+    // Download solc compiler
+    const supplier = new CompilerSupplier(options.compilers.solc);
+      await supplier.load()
+        .catch(e => {
+          throw e;
+        })
+
+  }
+  Promise.all(filteredRequired.map(async (sourcePath) => {
+    await new Promise((resolve, reject) => {
       Profiler.imported_sources(
         config.with({
           paths: [sourcePath],
@@ -362,21 +361,24 @@ compile.with_dependencies = async function(options, callback, compileAll) {
           resolver: options.resolver,
         }),
         (err, allSources, required) => {
-          if (err) return callback(err);
+          if (err) return reject(err);
           self.display(sourcePath, Object.keys(allSources), options)
           compile(sourcePath, allSources, options, callback, true);
+          resolve(sourcePath);
       });
-    }
-  }
-
-  staleSolFiles.forEach(sourcePath => {
-    const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
-    // Pick up from existing JSON
-    const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
-    const buildObj = JSON.parse(buildJson);
-    const shortName = getSourceFileName(sourcePath);
-    callback(null, {[shortName]: buildObj}, false);
+    });
+  }))
+  .then(() => {
+    staleSolFiles.forEach(sourcePath => {
+      const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
+      // Pick up from existing JSON
+      const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
+      const buildObj = JSON.parse(buildJson);
+      const shortName = getSourceFileName(sourcePath);
+      callback(null, {[shortName]: buildObj}, false);
+    })
   })
+  .catch(err => callback(err));
 }
 
 /**
