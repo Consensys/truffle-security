@@ -685,7 +685,7 @@ async function analyze(config) {
     const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
     const result = doReport(config, objects, errors, notAnalyzedContracts);
     if(client.ethAddress === trialEthAddress) {
-        config.logger.log("You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities. Sign up for a free account at https://mythx.io to run a complete report.");
+        config.logger.log("You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete report.");
     }
     return result;
 }
