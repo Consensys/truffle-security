@@ -477,7 +477,6 @@ module.exports = {
                   );
                 }
               }
-              console.log('>>>', result.file)
               return finished(err);
             }
 
