@@ -23,7 +23,7 @@ $ npm install -g git+https://git@github.com/ConsenSys/truffle-security.git
 ### Windows only
 On Windows `node-gyp` dependency requires `windows-build-tools` to be installed from an elevated PowerShell or CMD.exe (run as Administrator).
 ```console
-npm install --global --production windows-build-tool
+npm install --global --production windows-build-tools
 ```
 For more details refer to [node-gyp installation guide](https://github.com/nodejs/node-gyp#option-1).
 
