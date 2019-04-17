@@ -114,7 +114,7 @@ const normalizeJsonOutput = (jsonObject, allSources, options) => {
 //   quiet: false,
 //   logger: console
 // }
-var compile = function(sourcePath, allSources, options, callback, isStale) {
+const compile = function(sourcePath, allSources, options, callback, isStale) {
 
   if (typeof options === "function") {
     callback = options;
@@ -123,7 +123,7 @@ var compile = function(sourcePath, allSources, options, callback, isStale) {
 
   if (options.logger === undefined) options.logger = console;
 
-  var hasTargets =
+  const hasTargets =
     options.compilationTargets && options.compilationTargets.length;
 
   expect.options(options, ["contracts_directory", "compilers"]);
@@ -141,11 +141,11 @@ var compile = function(sourcePath, allSources, options, callback, isStale) {
 
   // Ensure sources have operating system independent paths
   // i.e., convert backslashes to forward slashes; things like C: are left intact.
-  var operatingSystemIndependentSources = {};
-  var operatingSystemIndependentTargets = {};
-  var originalPathMappings = {};
+  const operatingSystemIndependentSources = {};
+  const operatingSystemIndependentTargets = {};
+  const originalPathMappings = {};
 
-  var defaultSelectors = {
+  const defaultSelectors = {
     "": ["legacyAST", "ast"],
     "*": [
       "abi",
@@ -160,15 +160,15 @@ var compile = function(sourcePath, allSources, options, callback, isStale) {
 
   // Specify compilation targets
   // Each target uses defaultSelectors, defaulting to single target `*` if targets are unspecified
-  var outputSelection = {};
-  var targets = operatingSystemIndependentTargets;
-  var targetPaths = Object.keys(targets);
+  const outputSelection = {};
+  const targets = operatingSystemIndependentTargets;
+  const targetPaths = Object.keys(targets);
 
   targetPaths.length
     ? targetPaths.forEach(key => (outputSelection[key] = defaultSelectors))
     : (outputSelection["*"] = defaultSelectors);
 
-  var solcStandardInput = {
+  const solcStandardInput = {
     language: "Solidity",
     sources: {},
     settings: {
@@ -177,6 +177,11 @@ var compile = function(sourcePath, allSources, options, callback, isStale) {
       outputSelection
     }
   };
+
+  // Nothing to compile? Bail.
+  if (Object.keys(allSources).length === 0) {
+    return callback(null, [], []);
+  }
 
   // Load solc module only when compilation is actually required.
   const supplier = new CompilerSupplier(options.compilers.solc);
@@ -196,19 +201,15 @@ var compile = function(sourcePath, allSources, options, callback, isStale) {
 
       const result = solc.compile(JSON.stringify(solcStandardInput));
 
-      var standardOutput = JSON.parse(result);
+      const standardOutput = JSON.parse(result);
 
-      var errors = standardOutput.errors || [];
-      var warnings = [];
+      let errors = standardOutput.errors || [];
+      let warnings = [];
 
       if (options.strict !== true) {
-        warnings = errors.filter(function(error) {
-          return error.severity === "warning";
-        });
+        warnings = errors.filter(error => error.severity === "warning");
 
-        errors = errors.filter(function(error) {
-          return error.severity !== "warning";
-        });
+        errors = errors.filter(error => error.severity !== "warning");
 
         if (options.quiet !== true && warnings.length > 0) {
           options.logger.log(
@@ -252,9 +253,7 @@ var compile = function(sourcePath, allSources, options, callback, isStale) {
 
       callback(null, {[shortName]: normalizedOutput}, isStale);
     })
-    .catch(e => {
-      throw e
-    });
+    .catch(callback);
 };
 
 /**
@@ -270,9 +269,7 @@ compile.all = function(options, callback) {
     if (err) return callback(err);
 
     options.paths = files;
-    compile.with_dependencies(options, callback, true).catch(e => {
-      return callback(e);
-    });
+    compile.with_dependencies(options, callback, true);
   });
 };
 
@@ -295,9 +292,7 @@ compile.necessary = function(options, callback) {
     }
 
     options.paths = updated;
-    compile.with_dependencies(options, callback, false).catch(e => {
-      return callback(e);
-    });
+    compile.with_dependencies(options, callback, false);
   });
 };
 
@@ -346,39 +341,42 @@ compile.with_dependencies = async function(options, callback, compileAll) {
   if (filteredRequired.length > 0) {
     // Download solc compiler
     const supplier = new CompilerSupplier(options.compilers.solc);
-      await supplier.load()
-        .catch(e => {
-          throw e;
-        })
-
+      try {
+        await supplier.load()
+      } catch(e) {
+        return callback(e);
+      }
   }
-  Promise.all(filteredRequired.map(async (sourcePath) => {
-    await new Promise((resolve, reject) => {
-      Profiler.imported_sources(
-        config.with({
-          paths: [sourcePath],
-          base_path: options.contracts_directory,
-          resolver: options.resolver,
-        }),
-        (err, allSources, required) => {
-          if (err) return reject(err);
-          self.display(sourcePath, Object.keys(allSources), options)
-          compile(sourcePath, allSources, options, callback, true);
-          resolve(sourcePath);
+
+  try {
+    await Promise.all(filteredRequired.map(async (sourcePath) => {
+      return await new Promise((resolve, reject) => {
+        Profiler.imported_sources(
+          config.with({
+            paths: [sourcePath],
+            base_path: options.contracts_directory,
+            resolver: options.resolver,
+          }),
+          (err, allSources, required) => {
+            if (err) return reject(err);
+            self.display(sourcePath, Object.keys(allSources), options)
+            compile(sourcePath, allSources, options, callback, true);
+            resolve(sourcePath);
+        });
       });
-    });
-  }))
-  .then(() => {
-    staleSolFiles.forEach(sourcePath => {
-      const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
-      // Pick up from existing JSON
-      const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
-      const buildObj = JSON.parse(buildJson);
-      const shortName = getSourceFileName(sourcePath);
-      callback(null, {[shortName]: buildObj}, false);
-    })
+    }))
+  } catch (e) {
+    callback(e);
+  }
+
+  staleSolFiles.forEach(sourcePath => {
+    const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
+    // Pick up from existing JSON
+    const buildJson = fs.readFileSync(targetJsonPath, 'utf8');
+    const buildObj = JSON.parse(buildJson);
+    const shortName = getSourceFileName(sourcePath);
+    callback(null, {[shortName]: buildObj}, false);
   })
-  .catch(err => callback(err));
 }
 
 /**
