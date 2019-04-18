@@ -1,3 +1,18 @@
+Release 1.3.5
+================
+
+We now prompt users to sign up when they are using the trial account, and provide warnings that not all issues are reported. In addition, we identify whether an account is a Free or Premium account.
+
+We added the `mainSource` field to the data sent to the api, allowing Maru to return better analysis and fewer errors.
+
+Documentation improvements, especially for Windows installation.
+
+Merged in some fixes from the `truffle-compile` repository.
+
+Fixed a regression that caused the compiler to download once for every contract analyzed again.
+
+Fixed an issue that prevented tracebacks from being printed when there are bugs during compilation.
+
 Release 1.3.4
 ================
 
