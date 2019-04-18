@@ -107,6 +107,7 @@ describe('helpers.js', function() {
             loggerStub = sinon.stub();
             errorStub = sinon.stub();
             ghettoReportStub = sinon.stub();
+            getUserInfoStub = sinon.stub(armlet.Client.prototype, 'getUserInfo');
             getIssues = sinon.stub(armlet.Client.prototype, 'getIssues');
             loginStub = sinon.stub(armlet.Client.prototype, 'login');
 
@@ -135,6 +136,7 @@ describe('helpers.js', function() {
         afterEach(() => {
             getTruffleBuildJsonFilesStub.restore();
             getIssues.restore();
+            getUserInfoStub.restore();
             parseBuildJsonStub.restore();
             loginStub.restore();
         });
@@ -181,6 +183,14 @@ describe('helpers.js', function() {
                 }
             }
             doAnalysisStub.resolves({ objects: 1, errors: 3 });
+            getUserInfoStub.resolves({
+              total: 1,
+              users: [
+                { id: '000000000000000000000001',
+                  roles: ['regular_user'],
+                }
+              ]
+            });
             getTruffleBuildJsonFilesStub.resolves(['test.json']);
             parseBuildJsonStub.resolves(fakeJson);
             getNotAnalyzedContractsStub.returns(['Contract1']);
@@ -196,6 +206,14 @@ describe('helpers.js', function() {
         });
 
         it('should call getIssues when uuid is provided', async () => {
+            getUserInfoStub.resolves({
+              total: 1,
+              users: [
+                { id: '000000000000000000000002',
+                  roles: ['regular_user', 'privlidged_user'],
+                }
+              ]
+            });
             config.uuid = 'test';
             await helpers.analyze(config);
             assert.ok(getIssues.called);
@@ -205,6 +223,14 @@ describe('helpers.js', function() {
         it('should show error when getIssues break', async () => {
             config.uuid = 'test';
             getIssues.throws('Error')
+            getUserInfoStub.resolves({
+              total: 1,
+              users: [
+                { id: '000000000000000000000001',
+                  roles: ['regular_user'],
+                }
+              ]
+            });
             await helpers.analyze(config);
             assert.ok(getIssues.called);
             assert.ok(loggerStub.getCall(0).args[0], 'Error');

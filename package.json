@@ -4,9 +4,10 @@
   "version": "1.3.4",
   "description": "MythX security analysis plugin for the Truffle Framework",
   "dependencies": {
-    "armlet": "^2.4.0",
+    "armlet": "^2.5.0",
     "configstore": "^4.0.0",
     "find-cache-dir": "^2.1.0",
+    "inquirer": "^6.2.2",
     "js-yaml": "^3.12.1",
     "mocha": "^5.2.0",
     "multi-progress": "^2.0.0",

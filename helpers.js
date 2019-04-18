@@ -13,6 +13,7 @@ const yaml = require('js-yaml');
 const asyncPool = require('tiny-async-pool');
 const multiProgress = require('multi-progress');
 const sleep = require('sleep');
+const inquirer = require('inquirer');
 
 
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
@@ -603,6 +604,39 @@ async function analyze(config) {
         process.env.MYTHX_PASSWORD
     )
 
+    const progress = ('debug' in config) ? false : (('progress' in config) ? config.progress : true);
+
+    let id;
+    if (progress) {
+      const users = (await client.getUserInfo()).users;
+      let roles;
+      if(users) {
+        roles = users[0].roles;
+        id = users[0].id
+      }
+
+      if(id === "123456789012345678901234") { // Trial user id
+          const prefix = "You are currently running MythX in Trial mode. This mode reports only a partial analysis of your smart contracts, limited to three vulnerabilities. To get a complete analysis, sign up for a free MythX account at https://mythx.io.\n";
+          config.logger.log(prefix);
+
+          const question = "Would you like to continue with a partial analysis [Y/n]?";
+          const r = (await inquirer.prompt([{
+              "name": "cont",
+              "message": question,
+          }])).cont;
+
+          const re = /(n|no)/i
+          if(re.exec(r)) {
+              process.exit(0);
+          }
+          config.logger.log("\nContinuing with MythX Trial mode...\n");
+      } else if(roles.includes('privileged_user')) {
+          config.logger.log("Welcome to MythX! You are currently running in Premium mode.\n");
+      } else if(roles.includes('regular_user')) {
+          config.logger.log("Welcome to MythX! You are currently running in Free mode.\n");
+      }
+    }
+
     if (config.uuid) {
         try {
             const results = await client.getIssues(config.uuid);
@@ -652,7 +686,11 @@ async function analyze(config) {
 
     const { objects, errors } = await doAnalysis(client, config, noDuplicateContracts, foundContractNames, limit);
     const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
-    return doReport(config, objects, errors, notAnalyzedContracts);
+    const result = doReport(config, objects, errors, notAnalyzedContracts);
+    if(progress && id === "123456789012345678901234") {
+        config.logger.log("You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete report.");
+    }
+    return result;
 }
 
 
