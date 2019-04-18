@@ -16,7 +16,7 @@ describe('mythx.js', () => {
                 deployedBytecode: truffleJSON.deployedBytecode,
                 sourceMap: srcmap.zeroedSourceMap(truffleJSON.sourceMap),
                 deployedSourceMap: srcmap.zeroedSourceMap(truffleJSON.deployedSourceMap),
-                mainSource: truffleJSON.sourcePath,
+                mainSource: 'simple_dao.sol',
                 sourceList: [ truffleJSON.sourcePath ],
                 sources: {
                     'simple_dao.sol': {
