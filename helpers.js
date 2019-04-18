@@ -508,8 +508,8 @@ function prepareConfig (config) {
         projectConfig = require([config.working_directory, 'truffle-security'].join ('/'));
     } catch (ex) {
         projectConfig = {}
-        if (config.debug > 1) {
-            config.logger.log("truffle-security.json not found. Default options will be applied.");
+        if (config.debug) {
+            config.logger.log("truffle-security.json either not found or improperly formatted. Default options will be applied.");
         }
     }
 
