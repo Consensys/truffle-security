@@ -348,8 +348,10 @@ compile.with_dependencies = async function(options, callback, compileAll) {
       }
   }
 
+  let compiledResults;
+
   try {
-    await Promise.all(filteredRequired.map(async (sourcePath) => {
+    compiledResults = await Promise.all(filteredRequired.map(async (sourcePath) => {
       return await new Promise((resolve, reject) => {
         Profiler.imported_sources(
           config.with({
@@ -360,14 +362,23 @@ compile.with_dependencies = async function(options, callback, compileAll) {
           (err, allSources, required) => {
             if (err) return reject(err);
             self.display(sourcePath, Object.keys(allSources), options)
-            compile(sourcePath, allSources, options, callback, true);
-            resolve(sourcePath);
+            compile(sourcePath, allSources, options, (err, compileData, isStale) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve({ compileData, isStale });
+            }, true);
+          });
         });
-      });
-    }))
+      })
+    )
   } catch (e) {
-    callback(e);
+    return callback(e);
   }
+
+  compiledResults.forEach(({ compileData, isStale}) => {
+    callback(null, compileData, isStale);
+  });
 
   staleSolFiles.forEach(sourcePath => {
     const targetJsonPath = sourcePath2BuildPath(sourcePath, options.build_mythx_contracts);
