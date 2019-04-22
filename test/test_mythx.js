@@ -5,24 +5,26 @@ const srcmap = require('../lib/srcmap');
 
 describe('mythx.js', () => {
     it('should turn truffle contract json to mythx compatible object', done => {
-        fs.readFile( `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`, 'utf8', (err, data) => {
+        const solFilePath = `/test/simple_dao/contracts/simple_dao.sol`
+        fs.readFile( `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`, 'utf8', (err, data) => {
             if (err) return done(err);
             const truffleJSON = JSON.parse(data);
-            const mythXJSON = mythx.truffle2MythXJSON(truffleJSON, 'test-truffle-analyze');
+            const contracts = mythx.newTruffleObjToOldTruffleByContracts(truffleJSON);
+            const mythXJSON = mythx.truffle2MythXJSON(contracts[0], 'test-truffle-analyze');
 
             assert.deepEqual(mythXJSON,  {
-                contractName: truffleJSON.contractName,
-                bytecode: truffleJSON.bytecode,
-                deployedBytecode: truffleJSON.deployedBytecode,
-                sourceMap: srcmap.zeroedSourceMap(truffleJSON.sourceMap),
-                deployedSourceMap: srcmap.zeroedSourceMap(truffleJSON.deployedSourceMap),
+                contractName: truffleJSON.sources[solFilePath].contracts[0].contractName,
+                bytecode: truffleJSON.sources[solFilePath].contracts[0].bytecode,
+                deployedBytecode: truffleJSON.sources[solFilePath].contracts[0].deployedBytecode,
+                sourceMap: srcmap.zeroedSourceMap(truffleJSON.sources[solFilePath].contracts[0].sourceMap),
+                deployedSourceMap: srcmap.zeroedSourceMap(truffleJSON.sources[solFilePath].contracts[0].deployedSourceMap),
                 mainSource: 'simple_dao.sol',
-                sourceList: [ truffleJSON.sourcePath ],
+                sourceList: [ solFilePath ],
                 sources: {
                     'simple_dao.sol': {
-                        source: truffleJSON.source,
-                        ast: truffleJSON.ast,
-                        legacyAST: truffleJSON.legacyAST,
+                        source: truffleJSON.sources[solFilePath].source,
+                        ast: truffleJSON.sources[solFilePath].ast,
+                        legacyAST: truffleJSON.sources[solFilePath].legacyAST,
                     },
                 },
                 toolId: 'test-truffle-analyze',
@@ -139,9 +141,13 @@ describe('mythx.js', () => {
                 "deployedBytecode": "0x",
                 "sourceMap": "",
                 "deployedSourceMap": "",
-                "ast": {},
-                "legacyAST": {},
-                "source": "",
+                "sources": {
+                    "contract.sol": {
+                        "ast": {},
+                        "legacyAST": {},
+                        "source": "",
+                    }
+                },
                 "compiler": { "name": "", "version": "" },
                 "sourcePath": "contract.sol",
             },
@@ -151,11 +157,15 @@ describe('mythx.js', () => {
                 "deployedBytecode": "0x",
                 "sourceMap": "",
                 "deployedSourceMap": "",
-                "ast": {},
-                "legacyAST": {},
-                "source": "",
                 "compiler": { "name": "", "version": "" },
                 "sourcePath": "contract.sol",
+                "sources": {
+                    "contract.sol": {
+                        "ast": {},
+                        "legacyAST": {},
+                        "source": "",
+                    }
+                },
             }
         ];
 

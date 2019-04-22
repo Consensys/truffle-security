@@ -5,7 +5,7 @@
     },
     "updatedAt": "2019-03-06T05:53:44.707Z",
     "sources": {
-        "/home/daniyar/tmp/truffle-next-20/simple_dao/contracts/simple_dao.sol": {
+        "/test/simple_dao/contracts/simple_dao.sol": {
             "contracts": [
                 {
                     "contractName": "SimpleDAO",
@@ -16,7 +16,7 @@
                 }
             ],
             "ast": {
-                "absolutePath": "/home/daniyar/tmp/truffle-next-20/simple_dao/contracts/simple_dao.sol",
+                "absolutePath": "/test/simple_dao/contracts/simple_dao.sol",
                 "exportedSymbols": {
                     "SimpleDAO": [
                         62
@@ -798,7 +798,7 @@
             },
             "legacyAST": {
                 "attributes": {
-                    "absolutePath": "/home/daniyar/tmp/truffle-next-20/simple_dao/contracts/simple_dao.sol",
+                    "absolutePath": "/test/simple_dao/contracts/simple_dao.sol",
                     "exportedSymbols": {
                         "SimpleDAO": [
                             62
