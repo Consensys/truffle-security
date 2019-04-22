@@ -42,9 +42,4 @@ describe('srcmap', function() {
         assert.deepEqual(SrcMap.makeOffset2InstNum('60806040526020604051'),
             { '1': 0, '3': 1, '4': 2, '6': 3, '8': 4, '9': 5 });
     });
-
-    it('should change indexes in sourceMap to zero', () => {
-        const sourceMap = '254:2506:16:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;254:2506:16;;;;;;;';
-        assert.equal(SrcMap.zeroedSourceMap(sourceMap), '254:2506:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;254:2506:0;;;;;;;')
-    });
 });
