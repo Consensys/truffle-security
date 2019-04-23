@@ -9,6 +9,8 @@ var CompilerSupplier = require("./compilerSupplier");
 var expect = require("truffle-expect");
 var find_contracts = require("truffle-contract-sources");
 var debug = require("debug")("compile:profiler"); // eslint-disable-line no-unused-vars
+const semver = require("semver");
+
 
 module.exports = {
   updated: function(options, callback) {
