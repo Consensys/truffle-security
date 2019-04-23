@@ -16,8 +16,8 @@ describe('mythx.js', () => {
                 contractName: truffleJSON.sources[solFilePath].contracts[0].contractName,
                 bytecode: truffleJSON.sources[solFilePath].contracts[0].bytecode,
                 deployedBytecode: truffleJSON.sources[solFilePath].contracts[0].deployedBytecode,
-                sourceMap: srcmap.zeroedSourceMap(truffleJSON.sources[solFilePath].contracts[0].sourceMap),
-                deployedSourceMap: srcmap.zeroedSourceMap(truffleJSON.sources[solFilePath].contracts[0].deployedSourceMap),
+                sourceMap: truffleJSON.sources[solFilePath].contracts[0].sourceMap,
+                deployedSourceMap: truffleJSON.sources[solFilePath].contracts[0].deployedSourceMap,
                 mainSource: 'simple_dao.sol',
                 sourceList: [ solFilePath ],
                 sources: {
