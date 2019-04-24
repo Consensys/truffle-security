@@ -1,3 +1,16 @@
+Release 1.3.6
+================
+
+We now send the complete AST and sources, including imports to the api, resulting in fewer errors and providing more meaningful output.
+
+Fixed a bug that caused incorrect line numbers to be reported when contracts imported a vulnerable contract.
+
+Fixed an issue that caused the compiler to fail silently or with a confusing error message.
+
+Improved the messaging regarding a missing config file.
+
+Other minor bugfixes.
+
 Release 1.3.5
 ================
 
