@@ -278,7 +278,8 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 
         // request analysis to armlet.
         try {
-            const {issues, status} = await client.analyzeWithStatus(analyzeOpts);
+            let {issues, status} = await client.analyzeWithStatus(analyzeOpts);
+            issues = issues.filter(({ sourceFormat }) => sourceFormat !== 'evm-byzantium-bytecode')
             obj.uuid = status.uuid;
             if (config.debug) {
                 config.logger.debug(`${analyzeOpts.data.contractName}: UUID is ${status.uuid}`);
