@@ -192,10 +192,17 @@ const compile = function(sourcePath, allSources, options, callback, isStale) {
 
       const solcVersion = solc.version();
 
+      const regex = new RegExp('\\\\', 'g');
+      const forwardSlashSources = Object.keys(allSources).reduce((accum, currentKey) => {
+        const forwardSlashKey = currentKey.replace(regex, '/');
+        accum[forwardSlashKey] = allSources[currentKey];
+        return accum;
+      }, {})
+
       solcStandardInput.sources = {};      
-      Object.keys(allSources).forEach(p => {
+      Object.keys(forwardSlashSources).forEach(p => {
         solcStandardInput.sources[p] = {
-          content: allSources[p],
+          content: forwardSlashSources[p],
         }
       });
 
