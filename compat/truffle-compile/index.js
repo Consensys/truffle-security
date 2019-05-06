@@ -62,6 +62,19 @@ const cleanBytecode = bytecode => {
 }
 
 
+// NOTE: Turn `\` to `/` on Windows OS
+// Issue: https://github.com/ethereum/solidity/issues/6608
+const pathsToForwardSlashes = sources => {
+  if (path.sep === '/') return sources;
+    const regex = new RegExp('\\\\', 'g');
+    return Object.keys(sources).reduce((accum, currentKey) => {
+      const forwardSlashKey = currentKey.replace(regex, '/');
+      accum[forwardSlashKey] = sources[currentKey];
+      return accum;
+    }, {});
+}
+
+
 const normalizeJsonOutput = (jsonObject, allSources, options) => {
   const { contracts, sources, compiler, updatedAt } = jsonObject;
   const result = {
@@ -192,12 +205,7 @@ const compile = function(sourcePath, allSources, options, callback, isStale) {
 
       const solcVersion = solc.version();
 
-      const regex = new RegExp('\\\\', 'g');
-      const forwardSlashSources = Object.keys(allSources).reduce((accum, currentKey) => {
-        const forwardSlashKey = currentKey.replace(regex, '/');
-        accum[forwardSlashKey] = allSources[currentKey];
-        return accum;
-      }, {})
+      const forwardSlashSources = pathsToForwardSlashes(allSources);
 
       solcStandardInput.sources = {};      
       Object.keys(forwardSlashSources).forEach(p => {
