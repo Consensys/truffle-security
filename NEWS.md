@@ -1,3 +1,12 @@
+Release 1.3.7
+================
+
+Fixed a Windows compatibility issue caused by forward slashes in file paths.
+
+Made minor improvements to error messaging for compilation errors.
+
+Fixed support for running MythX for Truffle with a globally installed npm. This improvement was kindly contributed by Teruhiro Tagomori at [NRI Secure Technologies](https://www.nri-secure.com/security-consulting/blockchain-assessment).
+
 Release 1.3.6
 ================
 
