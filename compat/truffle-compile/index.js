@@ -80,6 +80,9 @@ const normalizeJsonOutput = (jsonObject, allSources, options) => {
     updatedAt,
     sources: {},
   };
+  if(!contracts) {
+    return result;
+  }
 
   for (const [ sourcePath, solData ] of Object.entries(contracts)) {
       if (!result.sources[sourcePath]) {
