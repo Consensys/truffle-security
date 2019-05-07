@@ -53,12 +53,10 @@ function staleBuildContract (sourcePath, buildPath) {
     return sourceMtime > buildMtime;
 };
 
-
-// Recent versions of truffle seem to add __ to the end of the bytecode
-const cleanBytecode = bytecode => {
-  let cleanedBytecode = bytecode.replace(/_.+$/, '');
-  cleanedBytecode = `0x${cleanedBytecode}`;
-  return cleanedBytecode;
+// Replace link with dummy address
+const replaceLink = bytecode => {
+  const dummyAddress = '0000000000000000000000000000000000000000'
+  return '0x' + bytecode.replace(/__.{38}/g, dummyAddress)
 }
 
 
@@ -93,8 +91,8 @@ const normalizeJsonOutput = (jsonObject, allSources, options) => {
       for (const [ contractName, contractData ] of Object.entries(solData)) {
           const o = {
               contractName,
-              bytecode: cleanBytecode(contractData.evm.bytecode.object),
-              deployedBytecode: cleanBytecode(contractData.evm.deployedBytecode.object),
+              bytecode: replaceLink(contractData.evm.bytecode.object),
+              deployedBytecode: replaceLink(contractData.evm.deployedBytecode.object),
               sourceMap: contractData.evm.bytecode.sourceMap,
               deployedSourceMap: contractData.evm.deployedBytecode.sourceMap,
           };
