@@ -56,7 +56,7 @@ function staleBuildContract (sourcePath, buildPath) {
 // Replace link with dummy address
 const replaceLink = bytecode => {
   const dummyAddress = '0000000000000000000000000000000000000000'
-  return bytecode.replace(/__.{38}/g, dummyAddress)
+  return '0x' + bytecode.replace(/__.{38}/g, dummyAddress)
 }
 
 
