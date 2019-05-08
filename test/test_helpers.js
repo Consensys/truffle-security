@@ -422,9 +422,7 @@ describe('helpers.js', function() {
                 clientToolName: 'truffle',
                 data: mythXInput,
                 noCacheLookup: false,
-                timeout: 300000,
-                initialDelay: undefined,
-            }));
+            }, 300000, undefined));
             assert.equal(results.errors.length, 0);
             assert.equal(results.objects.length, 1);
         });
@@ -452,9 +450,7 @@ describe('helpers.js', function() {
                 clientToolName: 'truffle',
                 data: mythXInput,
                 noCacheLookup: false,
-                timeout: 300000,
-                initialDelay: undefined,
-            }));
+            }, 300000, undefined));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 0);
         });
@@ -509,9 +505,7 @@ describe('helpers.js', function() {
                 clientToolName: 'truffle',
                 data: mythXInput,
                 noCacheLookup: false,
-                timeout: 300000,
-                initialDelay: undefined,
-            }));
+            }, 300000, undefined));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 1);
         });
