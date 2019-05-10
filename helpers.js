@@ -245,8 +245,6 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
         let analyzeOpts = {
             clientToolName: 'truffle',
             noCacheLookup: !cacheLookup,
-            timeout,
-            initialDelay
         };
 
         analyzeOpts.data = cleanAnalyzeDataEmptyProps(obj.buildObj, config.debug,
@@ -278,7 +276,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
 
         // request analysis to armlet.
         try {
-            let {issues, status} = await client.analyzeWithStatus(analyzeOpts);
+            let {issues, status} = await client.analyzeWithStatus(analyzeOpts, timeout, initialDelay);
             issues = issues.filter(({ sourceFormat }) => sourceFormat !== 'evm-byzantium-bytecode')
             obj.uuid = status.uuid;
             if (config.debug) {
