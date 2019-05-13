@@ -1,3 +1,10 @@
+Release 1.4.0
+================
+
+Fixed an issue sending bad data to the API.
+
+Fixed a bug compiling solidity files without contracts.
+
 Release 1.3.7
 ================
 
