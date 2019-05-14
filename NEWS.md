@@ -1,3 +1,8 @@
+Release 1.4.1
+================
+
+Added a missing dependency.
+
 Release 1.4.0
 ================
 
