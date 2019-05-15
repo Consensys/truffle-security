@@ -188,16 +188,6 @@ const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
     return result;
 }
 
-const removeDuplicateContracts = (contracts) => {
-    const uniqContracts = {};
-    contracts.forEach(contract => {
-        if (!uniqContracts[contract.sourcePath + ":" + contract.contractName]) {
-            uniqContracts[contract.sourcePath + ":" + contract.contractName] = contract
-        }
-    });
-    return Object.values(uniqContracts);
-}
-
 /**
  * Runs MythX security analyses on smart contract files found
  * in truffle build folder
@@ -208,7 +198,7 @@ const removeDuplicateContracts = (contracts) => {
  * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
-const doAnalysis = async (client, config, contracts, contractNames = null, limit = defaultAnalyzeRateLimit) => {
+const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateLimit) => {
     const timeout = (config.timeout || 300) * 1000;
     const initialDelay = ('initial-delay' in config) ? config['initial-delay'] * 1000 : undefined;
     const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
@@ -221,27 +211,16 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
     let indent;
     if (progress) {
         multi = new multiProgress();
-        const contractNameLengths = [];
-        const allContractNames = contracts.map(({ contractName }) => contractName);
-        allContractNames.forEach(contractName => {
-            if (contractNames && contractNames.indexOf(contractName) < 0) {
-                return;
-            }
-            contractNameLengths.push(contractName.length);
-        })
-        indent = Math.max(...contractNameLengths);
+        const contractNames = contracts.map(({ contractName }) => contractName);
+        indent = contractNames.reduce((max, next) => max > next.length ? max : next.length);
     }
 
     const results = await asyncPool(limit, contracts, async buildObj => {
         /**
          * If contractNames have been passed then skip analyze for unwanted ones.
          */
-        if (contractNames && contractNames.indexOf(buildObj.contractName) < 0) {
-            return [null, null];
-        }
 
-        const obj = new MythXIssues(buildObj, config);
-
+        const obj = new MythXIssues(buildObj.contract, config);
         let analyzeOpts = {
             clientToolName: 'truffle',
             noCacheLookup: !cacheLookup,
@@ -361,7 +340,7 @@ const doAnalysis = async (client, config, contracts, contractNames = null, limit
     }, { errors: [], objects: [] });
 };
 
-function doReport(config, objects, errors, notAnalyzedContracts) {
+function doReport(config, objects, errors) {
     let ret = 0;
 
     // Return true if we shold show log.
@@ -399,11 +378,6 @@ function doReport(config, objects, errors, notAnalyzedContracts) {
 
         const formatter = getFormatter(config.style);
         config.logger.log(formatter(uniqueIssues));
-    }
-
-    if (notAnalyzedContracts.length > 0) {
-        config.logger.error(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`);
-        ret = 1;
     }
 
     const logGroups = objects.map(obj => { return {'sourcePath': obj.sourcePath, 'logs': obj.logs, 'uuid': obj.uuid};})
@@ -528,17 +502,6 @@ function prepareConfig (config) {
     return config;
 }
 
-function getFoundContractNames(contracts, contractNames) {
-    let foundContractNames = [];
-    contracts.forEach(({ contractName }) => {
-        if (contractNames && contractNames.indexOf(contractName) < 0) {
-            return;
-        }
-        foundContractNames.push(contractName);
-    });
-    return foundContractNames;
-}
-
 const getNotFoundContracts = (allContractNames, foundContracts) => {
     if (allContractNames) {
       return allContractNames.filter(function(i) {return foundContracts.indexOf(i) < 0;});
@@ -567,15 +530,31 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     return new armlet.Client(options);
 }
 
-const filterDeletedContracts = async contracts => {
-    const filtered = []
-    await Promise.all(contracts.map(async contract => {
-        const isDeleted = await trufstuf.isContractDeleted(contract)
-        if (!isDeleted) {
-            filtered.push(contract)
-        }
-    }))
-    return filtered
+const buildObjForSourcePath = (allBuildObjs, sourcePath) => {
+    // From all lists of contracts that include ContractX, the shortest list is gaurenteed to be the
+    // one it was compiled in because only it and its imports are needed, and contracts that import it
+    // will not be included.
+    // Note - When an imported contract is changed, currently the parent isn't recompiled, meaning that if contracts are added to
+    // an imported contract and the parent isn't modified, it is possible that an incorrect build object will be chosen.
+    // The parent's build object would need to be updated with the extra contracts that were imported.
+
+    const buildObjsThatContainFile = allBuildObjs.filter(buildObj =>
+        Object.keys(buildObj.sources).includes(sourcePath)
+    )
+    if(buildObjsThatContainFile.length == 0) return null;
+    return buildObjsThatContainFile.reduce((prev, curr) => Object.keys(prev.sources).length < Object.keys(curr.sources).length ? prev : curr)
+}
+
+const buildObjIsCorrect = (allBuildObjs, contract, buildObj) => {
+    // Whether or not the given build object is the one where the given contract was compiled to.
+    // false if the contract is not in the build object or if it was an import
+
+    const correctBuildObj = buildObjForSourcePath(allBuildObjs, contract.sourcePath)
+    // If the length is the same and the contract is in it, they are the same object and it is not an import.
+    if(correctBuildObj && Object.keys(correctBuildObj.sources).length == Object.keys(buildObj.sources).length) {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -646,13 +625,12 @@ async function analyze(config) {
         }
     }
 
+    // Extract list of contracts passed in cli to verify
+    const selectedContracts = config._.length > 1 ? config._.slice(1, config._.length) : null;
+
     config.build_mythx_contracts = path.join(config.build_directory,
                                              "mythx", "contracts");
     await contractsCompile(config);
-
-
-    // Extract list of contracts passed in cli to verify
-    const contractNames = config._.length > 1 ? config._.slice(1, config._.length) : null;
 
     // Get list of smart contract build json files from truffle build folder
     const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.build_mythx_contracts);
@@ -661,19 +639,79 @@ async function analyze(config) {
         config.style = 'stylish';
     }
 
-    const buildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
-    let objContracts = buildObjs.reduce((resultContracts, obj) => {
-        const contracts = mythx.newTruffleObjToOldTruffleByContracts(obj);
-        return resultContracts.concat(contracts);
-    }, []);
+    const allBuildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
 
-    objContracts = await filterDeletedContracts(objContracts)
-    const noDuplicateContracts = removeDuplicateContracts(objContracts);
-    const foundContractNames = await getFoundContractNames(noDuplicateContracts, contractNames);
-    const notFoundContracts = getNotFoundContracts(contractNames, foundContractNames);
+    let objContracts = [];
+    if (selectedContracts) {
+        // User specified contracts; only analyze those
+        await Promise.all(selectedContracts.map(async selectedContract => {
+            const [contractFile, contractName] = selectedContract.split(':');
+            const fullPath = path.resolve(contractFile);
 
-    if (notFoundContracts.length > 0) {
-        config.logger.error(`These smart contracts were not found: ${notFoundContracts.join(', ')}`);
+            const buildObj = buildObjForSourcePath(allBuildObjs, fullPath)
+            if(!buildObj) {
+                config.logger.log(`Cound not find file: ${contractFile}.`.red)
+                return;
+            }
+
+            const contracts = mythx.newTruffleObjToOldTruffleByContracts(buildObj);
+
+            if (contractName) {
+                // All non-imported contracts from file with same name.
+                const foundContracts = contracts.filter(contract =>
+                    contract.contractName == contractName &&
+                    buildObjIsCorrect(allBuildObjs, contract, buildObj)
+                )
+                
+                foundContracts.forEach(contract => {
+                    objContracts.push({
+                        contractName: contractName,
+                        contract: contract
+                    });
+                })
+
+                if(foundContracts.length == 0) {
+                    config.logger.error(`Contract ${contractName} not found in ${contractFile}.`.red)
+                }
+            } else {
+                // No contractName; add all non-imported contracts from the file.
+                contracts.filter(contract =>
+                    buildObjIsCorrect(allBuildObjs, contract, buildObj)
+                ).forEach(contract => {
+                    objContracts.push({
+                        contractName: contract.contractName,
+                        contract: contract
+                    });
+                })
+            }
+        }));
+    } else {
+        // User did not specify contracts; analyze everything
+        // How to avoid duplicates: From all lists of contracts that include ContractX, the shortest list is gaurenteed
+        // to be the one where it was compiled in because only it and its imports are needed, and contracts that import it
+        // will not be included.
+        allBuildObjs.map(async buildObj => {
+            const contracts = mythx.newTruffleObjToOldTruffleByContracts(buildObj);
+
+            contracts.filter(contract => {
+                const correctBuildObj = buildObjForSourcePath(allBuildObjs, contract.sourcePath)
+                // If the length is the same and the contract is in it, they are the same object.
+                if(correctBuildObj && Object.keys(correctBuildObj.sources).length == Object.keys(buildObj.sources).length) {
+                    return true;
+                }
+                return false;
+            }).forEach(contract => {
+                objContracts.push({
+                    contractName: contract.contractName,
+                    contract: contract
+                });
+            })
+        });
+    }
+
+    if(objContracts.length == 0) {
+        config.logger.error("No contracts found, aborting analysis.".red);
+        process.exit(1);
     }
 
     // Do login before calling `analyzeWithStatus` of `armlet` which is called in `doAnalysis`.
@@ -683,9 +721,8 @@ async function analyze(config) {
     // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
     await client.login();
 
-    const { objects, errors } = await doAnalysis(client, config, noDuplicateContracts, foundContractNames, limit);
-    const notAnalyzedContracts = getNotAnalyzedContracts(objects, foundContractNames);
-    const result = doReport(config, objects, errors, notAnalyzedContracts);
+    const { objects, errors } = await doAnalysis(client, config, objContracts, limit);
+    const result = doReport(config, objects, errors);
     if(progress && id === "123456789012345678901234") {
         config.logger.log("You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete report.");
     }
