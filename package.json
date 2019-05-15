@@ -1,7 +1,7 @@
 {
   "name": "truffle-security",
   "namespace": "consensys",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "MythX security analysis plugin for the Truffle Framework",
   "dependencies": {
     "armlet": "^2.6.0",
