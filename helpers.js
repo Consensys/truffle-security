@@ -502,21 +502,6 @@ function prepareConfig (config) {
     return config;
 }
 
-const getNotFoundContracts = (allContractNames, foundContracts) => {
-    if (allContractNames) {
-      return allContractNames.filter(function(i) {return foundContracts.indexOf(i) < 0;});
-    }
-    return [];
-}
-
-const getNotAnalyzedContracts = (mythXIssuesObjects, contracts) => {
-    if (!contracts || contracts.length === 0) {
-        return [];
-    }
-    const mythxContracts = mythXIssuesObjects.map(({ contractName }) => contractName);
-    return contracts.filter(c => !mythxContracts.includes(c));
-}
-
 const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     const options = { clientToolName };
     if (password && ethAddress) {
@@ -825,6 +810,4 @@ module.exports = {
     getArmletClient,
     trialEthAddress,
     trialPassword,
-    getNotAnalyzedContracts,
-    getNotFoundContracts,
 };

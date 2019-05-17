@@ -12,7 +12,7 @@ describe('issues2Eslint', function() {
         let truffleJSON;
         const MythXIssues = rewired.__get__('MythXIssues');
         const contractJSON = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
-        const sourceName = 'simple_dao.sol';
+        const sourcePath = '/test/simple_dao/contracts/simple_dao.sol';
 
 	const config = {
 	    debug: false,
@@ -35,7 +35,7 @@ describe('issues2Eslint', function() {
 
         it('should decode a source code location correctly', (done) => {
             const issuesObject = newIssueObject();
-            assert.deepEqual(issuesObject.textSrcEntry2lineColumn('30:2:0', issuesObject.lineBreakPositions[sourceName]),
+            assert.deepEqual(issuesObject.textSrcEntry2lineColumn('30:2:0', issuesObject.lineBreakPositions[sourcePath]),
                 [ { 'line': 2, 'column': 27 }, { 'line': 2, 'column': 29 } ]);
 
             done();
@@ -43,14 +43,14 @@ describe('issues2Eslint', function() {
 
         it('should decode a bytecode offset correctly', (done) => {
             const issuesObject = newIssueObject();
-            assert.deepEqual(issuesObject.byteOffset2lineColumn('100', issuesObject.lineBreakPositions[sourceName]),
+            assert.deepEqual(issuesObject.byteOffset2lineColumn('100', issuesObject.lineBreakPositions[sourcePath]),
                              [ { 'line': 8, 'column': 0 }, { 'line': 25, 'column': 1 } ]);
             done();
         });
 
         it('should decode a bytecode offset to empty result', (done) => {
             const issuesObject = newIssueObject();
-            assert.deepEqual(issuesObject.byteOffset2lineColumn('50', issuesObject.lineBreakPositions[sourceName]),
+            assert.deepEqual(issuesObject.byteOffset2lineColumn('50', issuesObject.lineBreakPositions[sourcePath]),
                              [ { 'line': -1, 'column': 0 }, { } ]);
             done();
         });
@@ -59,7 +59,7 @@ describe('issues2Eslint', function() {
             const mythXOutput = {
                 'sourceFormat': 'evm-byzantium-bytecode',
                 'sourceList': [
-                    `/tmp/contracts/${sourceName}`
+                    sourcePath
                 ],
                 'sourceType': 'raw-bytecode',
                 'issues': [{
@@ -83,7 +83,7 @@ describe('issues2Eslint', function() {
 
             const remappedMythXOutput = mythx.remapMythXOutput(mythXOutput);
             const issuesObject = newIssueObject();
-            const res = issuesObject.issue2EsLint(remappedMythXOutput[0].issues[0], false, 'evm-byzantium-bytecode', sourceName);
+            const res = issuesObject.issue2EsLint(remappedMythXOutput[0].issues[0], false, 'evm-byzantium-bytecode', sourcePath);
 
             assert.deepEqual({
                 ruleId: 'SWC-000',
@@ -104,7 +104,7 @@ describe('issues2Eslint', function() {
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
                 'sourceList': [
-                    `/tmp/contracts/${sourceName}`,
+                    sourcePath
                 ],
                 'issues': [{
                     'description': {
@@ -127,7 +127,7 @@ describe('issues2Eslint', function() {
 
             const remappedMythXOutput = mythx.remapMythXOutput(mythXOutput);
             const issuesObject = newIssueObject();
-            const res = issuesObject.issue2EsLint(remappedMythXOutput[0].issues[0], false, 'text', sourceName);
+            const res = issuesObject.issue2EsLint(remappedMythXOutput[0].issues[0], false, 'text', sourcePath);
 
             assert.deepEqual({
                 ruleId: 'SWC-000',
@@ -194,7 +194,7 @@ describe('issues2Eslint', function() {
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
                 'sourceList': [
-                    `/tmp/contracts/${sourceName}`,
+                    sourcePath,
                 ],
                 'issues': [{
                     'description': {
@@ -224,7 +224,7 @@ describe('issues2Eslint', function() {
                 warningCount: 0,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
-                filePath: '/tmp/contracts/simple_dao.sol',
+                filePath: sourcePath,
                 messages: [{
                     column: 4,
                     endCol: 27,
@@ -252,7 +252,7 @@ describe('issues2Eslint', function() {
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
                 'sourceList': [
-                    `/tmp/contracts/${sourceName}`,
+                    sourcePath,
                 ],
                 'issues': [{
                     'description': {
@@ -280,7 +280,7 @@ describe('issues2Eslint', function() {
             assert.deepEqual(issuesObject.issues, [{
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
-                'source': '/tmp/contracts/simple_dao.sol',
+                'source': sourcePath,
                 'issues': [{
                     'description': {
                         'head': 'Head message',
@@ -301,7 +301,7 @@ describe('issues2Eslint', function() {
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
                 'sourceList': [
-                    `/tmp/contracts/${sourceName}`,
+                    sourcePath
                 ],
                 'issues': [{
                     'description': {
@@ -332,7 +332,7 @@ describe('issues2Eslint', function() {
                 'sourceType': 'solidity-file',
                 'sourceFormat': 'text',
                 'sourceList': [
-                    `/tmp/contracts/${sourceName}`,
+                    sourcePath
                 ],
                 'issues': [{
                     'description': {
@@ -359,7 +359,7 @@ describe('issues2Eslint', function() {
                 warningCount: 0,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
-                filePath: '/tmp/contracts/simple_dao.sol',
+                filePath: sourcePath,
                 messages: [{
                     ruleId: 'SWC-000',
                     line: 12,

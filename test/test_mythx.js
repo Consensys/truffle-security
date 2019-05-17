@@ -18,12 +18,13 @@ describe('mythx.js', () => {
                 deployedBytecode: truffleJSON.sources[solFilePath].contracts[0].deployedBytecode,
                 sourceMap: truffleJSON.sources[solFilePath].contracts[0].sourceMap,
                 deployedSourceMap: truffleJSON.sources[solFilePath].contracts[0].deployedSourceMap,
-                mainSource: 'simple_dao.sol',
+                mainSource: '/test/simple_dao/contracts/simple_dao.sol',
                 sourceList: [ solFilePath ],
                 sources: {
-                    'simple_dao.sol': {
+                    '/test/simple_dao/contracts/simple_dao.sol': {
                         source: truffleJSON.sources[solFilePath].source,
                         ast: truffleJSON.sources[solFilePath].ast,
+                        id: 0,
                         legacyAST: truffleJSON.sources[solFilePath].legacyAST,
                     },
                 },
@@ -144,6 +145,7 @@ describe('mythx.js', () => {
                 "sources": {
                     "contract.sol": {
                         "ast": {},
+                        "id": 0,
                         "legacyAST": {},
                         "source": "",
                     }
@@ -162,6 +164,7 @@ describe('mythx.js', () => {
                 "sources": {
                     "contract.sol": {
                         "ast": {},
+                        "id": 0,
                         "legacyAST": {},
                         "source": "",
                     }

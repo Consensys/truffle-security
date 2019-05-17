@@ -83,15 +83,11 @@ describe('helpers.js', function() {
         let errorStub;
         let config;
         let getTruffleBuildJsonFilesStub;
-
         let contractsCompileStub;
-        let doReportStub;
-        let getNotAnalyzedContractsStub;
-        let getNotFoundContractsStub;
-        let getFoundContractNamesStub;
         let doAnalysisStub;
+        let doReportStub;
         let ghettoReportStub;
-        let getIssues;
+        let getIssuesStub;
         let loginStub;
 
 
@@ -100,15 +96,12 @@ describe('helpers.js', function() {
             parseBuildJsonStub = sinon.stub(trufstuf, 'parseBuildJson');
             contractsCompileStub = sinon.stub();
             doReportStub = sinon.stub();
-            getNotAnalyzedContractsStub = sinon.stub();
-            getNotFoundContractsStub = sinon.stub();
-            getFoundContractNamesStub = sinon.stub();
             doAnalysisStub = sinon.stub();
             loggerStub = sinon.stub();
             errorStub = sinon.stub();
             ghettoReportStub = sinon.stub();
             getUserInfoStub = sinon.stub(armlet.Client.prototype, 'getUserInfo');
-            getIssues = sinon.stub(armlet.Client.prototype, 'getIssues');
+            getIssuesStub = sinon.stub(armlet.Client.prototype, 'getIssues');
             loginStub = sinon.stub(armlet.Client.prototype, 'login');
 
             config = {
@@ -124,20 +117,17 @@ describe('helpers.js', function() {
             };
 
             helpers = rewire('../helpers');
-            helpers.__set__('doAnalysis', doAnalysisStub);
-            helpers.__set__('getNotAnalyzedContracts', getNotAnalyzedContractsStub);
-            helpers.__set__('getNotFoundContracts', getNotFoundContractsStub);
-            helpers.__set__('getFoundContractNames', getFoundContractNamesStub);
             helpers.__set__('contractsCompile', contractsCompileStub);
+            helpers.__set__('doAnalysis', doAnalysisStub);
             helpers.__set__('doReport', doReportStub);
             helpers.__set__('ghettoReport', ghettoReportStub);
         });
 
         afterEach(() => {
             getTruffleBuildJsonFilesStub.restore();
-            getIssues.restore();
             getUserInfoStub.restore();
             parseBuildJsonStub.restore();
+            getIssuesStub.restore();
             loginStub.restore();
         });
 
@@ -153,8 +143,13 @@ describe('helpers.js', function() {
             assert.equal(loggerStub.getCall(0).args[0], `limit should be between 0 and ${rewiredHelpers.defaultAnalyzeRateLimit}; got ${rewiredHelpers.defaultAnalyzeRateLimit + 5}.`)
         });
 
-        it('should call doAnalyze and report issues', async () => {
-            const fakeJson = {
+        /* TODO: Logged in messaging tests */
+
+        /* TODO: Test for the different types of inputs: contract.sol:Contract,
+        contract.sol, and nothing, and ensure the correct build files are selected. */
+
+        it('should call doAnalysis and report issues', async () => {
+            const fakeBuildJson = {
                 "compiler": { "name": "", "version": "" },
                 "updatedAt": "",
                 "sources": {
@@ -192,17 +187,12 @@ describe('helpers.js', function() {
               ]
             });
             getTruffleBuildJsonFilesStub.resolves(['test.json']);
-            parseBuildJsonStub.resolves(fakeJson);
-            getNotAnalyzedContractsStub.returns(['Contract1']);
-            getFoundContractNamesStub.returns(['Contract2']);
-            getNotFoundContractsStub.returns(['Contract3']);
+            parseBuildJsonStub.resolves(fakeBuildJson);
 
             await helpers.analyze(config);
             assert.ok(getTruffleBuildJsonFilesStub.calledWith('/build/contracts/mythx/contracts'));
-            assert.ok(config.logger.error.called);
             assert.ok(doAnalysisStub.called);
-            assert.ok(getNotAnalyzedContractsStub.calledWith(1, ['Contract2']));
-            assert.ok(doReportStub.calledWith(config, 1, 3, ['Contract1']));
+            assert.ok(doReportStub.calledWith(config, 1, 3));
         });
 
         it('should call getIssues when uuid is provided', async () => {
@@ -216,13 +206,13 @@ describe('helpers.js', function() {
             });
             config.uuid = 'test';
             await helpers.analyze(config);
-            assert.ok(getIssues.called);
+            assert.ok(getIssuesStub.called);
             assert.ok(ghettoReportStub.called);
         });
 
         it('should show error when getIssues break', async () => {
             config.uuid = 'test';
-            getIssues.throws('Error')
+            getIssuesStub.throws('Error')
             getUserInfoStub.resolves({
               total: 1,
               users: [
@@ -232,7 +222,7 @@ describe('helpers.js', function() {
               ]
             });
             await helpers.analyze(config);
-            assert.ok(getIssues.called);
+            assert.ok(getIssuesStub.called);
             assert.ok(loggerStub.getCall(0).args[0], 'Error');
         });
     });
@@ -388,7 +378,8 @@ describe('helpers.js', function() {
             const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
             const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
             const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-            const mythXInput = mythx.truffle2MythXJSON(contracts[0]);
+            const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
+            const mythXInput = mythx.truffle2MythXJSON(objContracts[0].contract);
             stubAnalyze.resolves({
                 issues: [{
                     'sourceFormat': 'evm-byzantium-bytecode',
@@ -416,7 +407,7 @@ describe('helpers.js', function() {
                 }],
                 status: { status: 'Finished' },
             });
-            const results = await doAnalysis(armletClient, config, contracts);
+            const results = await doAnalysis(armletClient, config, objContracts);
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 clientToolName: 'truffle',
@@ -439,12 +430,13 @@ describe('helpers.js', function() {
             const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
             const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
             const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-            const mythXInput = mythx.truffle2MythXJSON(contracts[0]);
+            const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
+            const mythXInput = mythx.truffle2MythXJSON(objContracts[0].contract);
             stubAnalyze.resolves({
                 issues: [],
                 status: { status: 'Error'},
             });
-            const results = await doAnalysis(armletClient, config, contracts);
+            const results = await doAnalysis(armletClient, config, objContracts);
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 clientToolName: 'truffle',
@@ -467,7 +459,8 @@ describe('helpers.js', function() {
             const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
             const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
             const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-            const mythXInput = mythx.truffle2MythXJSON(contracts[0]);
+            const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] }, { contractName: "SimpleDAO", contract: contracts[0] } ];
+            const mythXInput = mythx.truffle2MythXJSON(objContracts[0].contract);
             stubAnalyze.onFirstCall().resolves({
                 issues: {},
                 status: { status: 'Error' },
@@ -499,7 +492,7 @@ describe('helpers.js', function() {
                 }],
                 status: {status: 'Pending' },
             });
-            const results = await doAnalysis(armletClient, config, contracts.concat(contracts));
+            const results = await doAnalysis(armletClient, config, objContracts);
             mythXInput.analysisMode = 'quick';
             assert.ok(stubAnalyze.calledWith({
                 clientToolName: 'truffle',
@@ -508,25 +501,6 @@ describe('helpers.js', function() {
             }, 300000, undefined));
             assert.equal(results.errors.length, 1);
             assert.equal(results.objects.length, 1);
-        });
-
-        it('should skip unwanted smart contract', async () => {
-            const doAnalysis = rewiredHelpers.__get__('doAnalysis');
-            const config = {
-                _: [],
-                debug: true,
-                logger: {},
-                style: 'test-style',
-                progress: false,
-            }
-            const jsonFiles = [
-                `${__dirname}/sample-truffle/simple_dao/build/contracts/SimpleDAO.json`,
-            ];
-
-            const results = await doAnalysis(armletClient, config, jsonFiles, ['UnkonwnContract']);
-            assert.ok(!stubAnalyze.called);
-            assert.equal(results.errors.length, 0);
-            assert.equal(results.objects.length, 0);
         });
     });
 
@@ -659,9 +633,7 @@ describe('helpers.js', function() {
                     }
                 ]
             };
-            const notAnalyzedContracts = [];
-            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
-            assert.ok(!errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors);
             assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
             assert.ok(!errorStub.calledWith('Internal MythX errors encountered:'.red));
             assert.equal(ret, 0);
@@ -693,9 +665,7 @@ describe('helpers.js', function() {
                     }
                 ]
             };
-            const notAnalyzedContracts = [];
-            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
-            assert.ok(!errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors);
             assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
             assert.ok(errorStub.calledWith('Internal MythX errors encountered:'.red));
             assert.equal(ret, 1);
@@ -734,39 +704,7 @@ describe('helpers.js', function() {
                     }
                 ]
             };
-            const notAnalyzedContracts = [];
-            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
-            assert.ok(!errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
-            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
-            assert.ok(!errorStub.calledWith('Internal MythX errors encountered:'.red));
-            assert.equal(ret, 1);
-        });
-
-        it('should return 1 when notAnalyzedContracts is 1 or more', async () => {
-            const results = {
-                "errors": [],
-                "objects": [
-                    {
-                        issues: [
-                            {
-                                "issues": [],
-                            }
-                        ],
-                        logs: []
-                    },
-                    {
-                        issues: [
-                            {
-                                "issues": []
-                            }
-                        ],
-                        logs: []
-                    }
-                ]
-            };
-            const notAnalyzedContracts = ['Contract1', 'Contract2'];
-            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
-            assert.ok(errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors);
             assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
             assert.ok(!errorStub.calledWith('Internal MythX errors encountered:'.red));
             assert.equal(ret, 1);
@@ -800,9 +738,7 @@ describe('helpers.js', function() {
                     }
                 ]
             };
-            const notAnalyzedContracts = [];
-            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors, notAnalyzedContracts);
-            assert.ok(!errorStub.calledWith(`These smart contracts were unable to be analyzed: ${notAnalyzedContracts.join(', ')}`));
+            const ret = rewiredHelpers.__get__('doReport')(config, results.objects, results.errors);
             assert.ok(loggerStub.calledWith('MythX Logs:'.yellow));
             assert.ok(!errorStub.calledWith('Internal MythX errors encountered:'.red));
             assert.equal(ret, 1);
@@ -887,48 +823,6 @@ describe('helpers.js', function() {
             const commaBlacklist = 'cat';
             const result = helpers.setConfigSWCBlacklist(commaBlacklist);
             assert.deepEqual(result, [ 'SWC-cat' ]);
-        });
-    });
-
-    describe('getNotFoundContracts', () => {
-        it('should return a list containing the not found contracts', () => {
-            const allContractNames = ['Contract1', 'Contract2', 'Contract3', 'Contract4'];
-            const foundContractNames = ['Contract1', 'Contract3'];
-
-            const result = helpers.getNotFoundContracts(allContractNames, foundContractNames);
-            assert.equal(result.length, 2);
-        });
-    });
-
-    describe('getNotAnalyzedContracts', () => {
-        it('should collect contract names which are not analyzed in truffle build contracts directory', () => {
-            const objects = [
-                { contractName: 'Contract1' },
-                { contractName: 'Contract2' },
-            ];
-
-            const result = rewiredHelpers.getNotAnalyzedContracts(objects, ['Contract2', 'NotFoundContract']);
-            assert.deepEqual(result, ['NotFoundContract']);
-        });
-
-        it('should return empty array when contracts parameter is not passed', () => {
-            const objects = [
-                { contractName: 'Contract1' },
-                { contractName: 'Contract2' },
-            ];
-
-            const result = rewiredHelpers.getNotAnalyzedContracts(objects, null);
-            assert.deepEqual(result, []);
-        });
-
-        it('should return empty array when contracts parameter is empty array', () => {
-            const objects = [
-                { contractName: 'Contract1' },
-                { contractName: 'Contract2' },
-            ];
-
-            const result = rewiredHelpers.getNotAnalyzedContracts(objects, []);
-            assert.deepEqual(result, []);
         });
     });
 
