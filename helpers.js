@@ -74,7 +74,7 @@ function versionJSON2String(jsonResponse) {
  */
 function printHelpMessage() {
     return new Promise(resolve => {
-        const helpMessage = `Usage: truffle run verify [options] [*contract-name1* [*contract-name2*] ...]
+        const helpMessage = `Usage: truffle run verify [options] [solidity-file[:contract-name] [solidity-file[:contract-name] ...]]
 
 Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
