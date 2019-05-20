@@ -75,7 +75,7 @@ module.exports = {
 
 ## Running Security Analyses
 
-Once the plugin is installed the `truffle run verify` becomes available. You can either analyze a specific contract by running `truffle run verify <contract-name>` or the entire project leaving out the contract name.
+Once the plugin is installed the `truffle run verify` becomes available. You can either analyze a specific file by running `truffle run verify <file-name>`, a contract by running `truffle run verify <file-name>:<contract-name>`, or the entire project with simply `truffle run verify`.
 
 **Your project must compile successfully for the security analysis to work.** Note that the `verify` command invokes `truffle compile` automatically if the build files are not up to date.
 
@@ -92,10 +92,10 @@ $ truffle run verify
 ✖ 4 problems (0 errors, 4 warnings)
 ```
 
-Here is an example of analyzing a single contract and using the `table` report style:
+Here is an example of analyzing the same contract passing it in directly and using the `table` report style:
 
 ```
-$ truffle run verify --style table
+$ truffle run verify contracts/Tokensale.sol:Tokensale --style table
 
 /Projects/mythx-playground/exercise2/contracts/Tokensale.sol
 
@@ -120,7 +120,7 @@ Run `truffle run verify --help` to show advanced configuration options.
 ```console
 $ truffle run verify --help
 
-Usage: truffle run verify [options] [*contract-name1* [*contract-name2*] ...]
+Usage: truffle run verify [options] [solidity-file[:contract-name] [solidity-file[:contract-name] ...]]
 
 Runs MythX analyses on given Solidity contracts. If no contracts are
 given, all are analyzed.
