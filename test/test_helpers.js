@@ -183,7 +183,7 @@ describe('helpers.js', function() {
                 }
             }
 
-            pathStub.resolve.resolves("/build/contracts/mythx/contracts/contract.sol");
+            pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
 
             doAnalysisStub.resolves({ objects: 1, errors: 3 });
             getUserInfoStub.resolves({

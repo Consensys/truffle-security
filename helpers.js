@@ -631,7 +631,7 @@ async function analyze(config) {
         // User specified contracts; only analyze those
         await Promise.all(selectedContracts.map(async selectedContract => {
             const [contractFile, contractName] = selectedContract.split(':');
-            const fullPath = await path.resolve(contractFile);
+            const fullPath = path.resolve(contractFile);
 
             const buildObj = buildObjForSourcePath(allBuildObjs, fullPath)
             if(!buildObj) {
