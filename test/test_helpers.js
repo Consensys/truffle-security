@@ -2,6 +2,7 @@ const assert = require('assert');
 const proxyquire = require('proxyquire');
 const rewire = require('rewire');
 const fs = require('fs');
+const path = require('path');
 const armlet = require('armlet');
 const sinon = require('sinon');
 const trufstuf = require('../lib/trufstuf');
@@ -89,12 +90,12 @@ describe('helpers.js', function() {
         let ghettoReportStub;
         let getIssuesStub;
         let loginStub;
+        let pathStub;
 
 
         beforeEach(() => {
             getTruffleBuildJsonFilesStub = sinon.stub(trufstuf, 'getTruffleBuildJsonFiles');
             parseBuildJsonStub = sinon.stub(trufstuf, 'parseBuildJson');
-            contractsCompileStub = sinon.stub();
             doReportStub = sinon.stub();
             doAnalysisStub = sinon.stub();
             loggerStub = sinon.stub();
@@ -103,6 +104,11 @@ describe('helpers.js', function() {
             getUserInfoStub = sinon.stub(armlet.Client.prototype, 'getUserInfo');
             getIssuesStub = sinon.stub(armlet.Client.prototype, 'getIssues');
             loginStub = sinon.stub(armlet.Client.prototype, 'login');
+            contractsCompileStub = sinon.stub();
+            pathStub = {
+                resolve: sinon.stub(),
+                join: path.join
+            }
 
             config = {
                 contracts_directory: '/contracts',
@@ -117,6 +123,7 @@ describe('helpers.js', function() {
             };
 
             helpers = rewire('../helpers');
+            helpers.__set__('path', pathStub);
             helpers.__set__('contractsCompile', contractsCompileStub);
             helpers.__set__('doAnalysis', doAnalysisStub);
             helpers.__set__('doReport', doReportStub);
@@ -145,8 +152,59 @@ describe('helpers.js', function() {
 
         /* TODO: Logged in messaging tests */
 
-        /* TODO: Test for the different types of inputs: contract.sol:Contract,
-        contract.sol, and nothing, and ensure the correct build files are selected. */
+        it('should find and analyze the correct build object', async () => {
+            config._ = ["verify", "contract.sol:Contract1"];
+            const fakeBuildJson = {
+                "compiler": { "name": "", "version": "" },
+                "updatedAt": "",
+                "sources": {
+                    "/build/contracts/mythx/contracts/contract.sol": {
+                        "contracts": [
+                            {
+                                "contractName": "Contract1",
+                                "bytecode": "0x",
+                                "deployedBytecode": "0x",
+                                "sourceMap": "",
+                                "deployedSourceMap": ""
+                            },
+                            {
+                                "contractName": "Contract2",
+                                "bytecode": "0x",
+                                "deployedBytecode": "0x",
+                                "sourceMap": "",
+                                "deployedSourceMap": ""
+                            }
+                        ],
+                        "ast": {},
+                        "legacyAST": {},
+                        "id": 0,
+                        "source": ""
+                    }
+                }
+            }
+
+            pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
+
+            doAnalysisStub.resolves({ objects: 1, errors: 3 });
+            getUserInfoStub.resolves({
+              total: 1,
+              users: [
+                { id: '000000000000000000000001',
+                  roles: ['regular_user'],
+                }
+              ]
+            });
+            getTruffleBuildJsonFilesStub.resolves(['contract.json']);
+            parseBuildJsonStub.resolves(fakeBuildJson);
+
+            await helpers.analyze(config);
+            assert.ok(pathStub.resolve.calledWith('contract.sol'));
+            assert.ok(getTruffleBuildJsonFilesStub.calledWith('/build/contracts/mythx/contracts'));
+            assert.ok(getTruffleBuildJsonFilesStub.calledWith('/build/contracts/mythx/contracts'));
+            assert.ok(doAnalysisStub.calledWith(sinon.match.any, config, [ { contractName: "Contract1", contract: sinon.match.any} ], helpers.defaultAnalyzeRateLimit));
+            assert.ok(doReportStub.calledWith(config, 1, 3));
+        });
+
 
         it('should call doAnalysis and report issues', async () => {
             const fakeBuildJson = {
@@ -299,7 +357,7 @@ describe('helpers.js', function() {
                 warningCount: 1,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
-                filePath: 'contract.sol',
+                filePath: '/tmp/test_dir/contract.sol',
                 messages: [
                     'message 1',
                     'message 2',
@@ -330,7 +388,7 @@ describe('helpers.js', function() {
                 warningCount: 2,
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
-                filePath: 'contract.sol',
+                filePath: '/tmp/test_dir/contract.sol',
                 messages: [
                     'message 1',
                     'message 2',

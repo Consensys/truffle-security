@@ -754,7 +754,6 @@ function compareMessLCRange(mess1, mess2) {
  * @returns {ESListIssue[]}
  */
 const groupEslintIssuesByBasename = issues => {
-    const path = require('path');
     const mappedIssues = issues.reduce((accum, issue) => {
         const {
             errorCount,
@@ -765,7 +764,7 @@ const groupEslintIssuesByBasename = issues => {
             messages,
         } = issue;
 
-        const basename = path.basename(filePath);
+        const basename = filePath;
         if (!accum[basename]) {
             accum[basename] = {
                 errorCount: 0,
