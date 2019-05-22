@@ -146,8 +146,8 @@ const compile = function(sourcePath, allSources, options, callback, isStale) {
 
   options.compilers.solc.settings.evmVersion =
     options.compilers.solc.settings.evmVersion ||
-    options.compilers.solc.evmVersion ||
-    {};
+    options.compilers.solc.evmVersion;
+
   options.compilers.solc.settings.optimizer =
     options.compilers.solc.settings.optimizer ||
     options.compilers.solc.optimizer ||
