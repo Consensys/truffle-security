@@ -515,6 +515,19 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     return new armlet.Client(options);
 }
 
+const buildObjForContractName = (allBuildObjs, contractName) => {
+    // Deprecated. Delete this for v2.0.0
+    const buildObjsThatContainContract = allBuildObjs.filter(buildObj =>
+        Object.keys(buildObj.sources).filter(sourceKey =>
+            buildObj.sources[sourceKey].contracts.filter(contract =>
+                contract.contractName == contractName
+            ).length > 0
+        ).length > 0
+    )
+    if(buildObjsThatContainContract.length == 0) return null;
+    return buildObjsThatContainContract.reduce((prev, curr) => Object.keys(prev.sources).length < Object.keys(curr.sources).length ? prev : curr)
+}
+
 const buildObjForSourcePath = (allBuildObjs, sourcePath) => {
     // From all lists of contracts that include ContractX, the shortest list is gaurenteed to be the
     // one it was compiled in because only it and its imports are needed, and contracts that import it
@@ -633,10 +646,18 @@ async function analyze(config) {
             const [contractFile, contractName] = selectedContract.split(':');
             const fullPath = path.resolve(contractFile);
 
-            const buildObj = buildObjForSourcePath(allBuildObjs, fullPath)
+            let buildObj = buildObjForSourcePath(allBuildObjs, fullPath)
             if(!buildObj) {
-                config.logger.log(`Cound not find file: ${contractFile}.`.red)
-                return;
+                if(!contractName) {
+                    buildObj = buildObjForContractName(allBuildObjs, contractFile)
+                }
+                if(!buildObj) {
+                    config.logger.log(`Cound not find file: ${contractFile}.`.red)
+                    return;
+                }
+                if(progress) {
+                    config.logger.log(`DEPRECATION WARNING: Found contract named "${contractFile}". Analyzing contracts by name will be removed in a later version.`.yellow)
+                }
             }
 
             const contracts = mythx.newTruffleObjToOldTruffleByContracts(buildObj);
