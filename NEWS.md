@@ -1,3 +1,26 @@
+Release 1.4.3
+================
+
+Changed interface from:
+```
+truffle run verify ContractName
+```
+To:
+```
+truffle run verify contracts/contract.sol
+```
+or
+```
+truffle run verify contracts/contract.sol:ContractName
+```
+(ContractName still works, but is deprecated)
+
+Refactored how Truffle build objects are chosen so that the correct ones are always used.
+
+Fixed a bug with sourceList ordering being unreliable, causing line numbers to be reported incorrectly.
+
+Fixed requirement for evmVersion in truffle-compile.
+
 Release 1.4.2
 ================
 
