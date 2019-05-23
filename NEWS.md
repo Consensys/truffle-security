@@ -1,3 +1,8 @@
+Release 1.4.4
+================
+
+Fix an issue causing integration tests to fail.
+
 Release 1.4.3
 ================
 
