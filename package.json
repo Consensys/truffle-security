@@ -17,6 +17,7 @@
     "remix-lib": ">=0.4.1",
     "scrypt": "^6.0.3",
     "sleep": "^6.0.0",
+    "solc": "^0.5.8",
     "tiny-async-pool": "^1.0.4",
     "truffle-artifactor": "^4.0.13",
     "truffle-compile-vyper": "^1.0.13",
