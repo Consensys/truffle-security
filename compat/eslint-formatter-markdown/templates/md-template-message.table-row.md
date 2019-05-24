@@ -1,0 +1,1 @@
+| ```<%= severityName %>``` | <%= lineNumber %>:<%= columnNumber %> | <%- message %> | [<%= ruleId %>](https://smartcontractsecurity.github.io/SWC-registry/docs/<%= ruleId %>) |

@@ -45,7 +45,7 @@ function getFormatter(style) {
     const formatterName = style || 'stylish';
     try {
         if(formatterName == "markdown") {
-            return require('eslint-formatter-markdown/markdown')
+            return require('./compat/eslint-formatter-markdown/markdown')
         }
         return require(`eslint/lib/formatters/${formatterName}`);
     } catch (ex) {
