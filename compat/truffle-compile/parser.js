@@ -7,7 +7,7 @@ var preReleaseCompilerWarning =
 
 module.exports = {
   // This needs to be fast! It is fast (as of this writing). Keep it fast!
-  parseImports: function(body, solc) {
+  parseImports: function(body, solc, file) {
     // WARNING: Kind of a hack (an expedient one).
 
     // So we don't have to maintain a separate parser, we'll get all the imports
@@ -31,13 +31,13 @@ module.exports = {
     var solcStandardInput = {
       language: "Solidity",
       sources: {
-        "ParsedContract.sol": {
+        [`${file}`]: {
           content: body
         }
       },
       settings: {
         outputSelection: {
-          "ParsedContract.sol": {
+          [`${file}`]: {
             "*": [] // We don't need any output.
           }
         }

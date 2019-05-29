@@ -508,7 +508,7 @@ module.exports = {
     // No imports in vyper!
     if (path.extname(file) === ".vy") return [];
 
-    const imports = Parser.parseImports(body, solc);
+    const imports = Parser.parseImports(body, solc, file);
 
     // Convert explicitly relative dependencies of modules back into module paths.
     return imports.map(dependencyPath => {
