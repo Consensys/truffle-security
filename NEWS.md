@@ -1,3 +1,14 @@
+Release 1.5.0
+================
+
+Added a markdown eslint formatter `truffle run verify --style markdown` for markdown reports.
+
+Fixed an error caused by windows filepaths with backslashes.
+
+Fixed a bug preventing analyses with `--mode full`.
+
+Improved error messages when imported contracts fail to compile.
+
 Release 1.4.4
 ================
 
