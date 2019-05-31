@@ -44,6 +44,9 @@ const contractsCompile = config => {
 function getFormatter(style) {
     const formatterName = style || 'stylish';
     try {
+        if(formatterName == "markdown") {
+            return require('./compat/eslint-formatter-markdown/markdown')
+        }
         return require(`eslint/lib/formatters/${formatterName}`);
     } catch (ex) {
         ex.message = `\nThere was a problem loading formatter option: ${style} \nError: ${
@@ -83,9 +86,10 @@ Options:
   --all      Compile all contracts instead of only the contracts changed since last compile.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
-  --style { stylish | json | table | tap | unix | ... },
+  --style { stylish | json | table | tap | unix | markdown | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.
+             The markdown format is also included.
   --json | --yaml
              Dump results in unprocessed JSON or YAML format as it comes back from MythX.
              Note: this disables providing any es-lint style reports, and that
