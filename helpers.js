@@ -648,7 +648,13 @@ async function analyze(config) {
         // User specified contracts; only analyze those
         await Promise.all(selectedContracts.map(async selectedContract => {
             const [contractFile, contractName] = selectedContract.split(':');
-            const fullPath = path.resolve(contractFile);
+
+            let fullPath = path.resolve(contractFile);
+            if (path.sep === '\\') {
+                const regex = new RegExp('\\\\', 'g');
+                fullPath = fullPath.replace(regex, '/');
+            }
+
 
             let buildObj = buildObjForSourcePath(allBuildObjs, fullPath)
             if(!buildObj) {
