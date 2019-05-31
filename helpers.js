@@ -228,7 +228,7 @@ const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateL
 
         analyzeOpts.data = cleanAnalyzeDataEmptyProps(obj.buildObj, config.debug,
                                                     config.logger.debug);
-        analyzeOpts.data.analysisMode = analyzeOpts.mode || 'quick';
+        analyzeOpts.data.analysisMode = config.mode || 'quick';
         if (config.debug > 1) {
             config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`);
         }
