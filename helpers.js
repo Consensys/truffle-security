@@ -2,6 +2,7 @@
 
 
 const armlet = require('armlet');
+const mythxjsClient = require('mythxjs').Client;
 const path = require('path');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
@@ -144,6 +145,7 @@ async function printVersion() {
     console.log(`${pjson.name} ${pjson.version}`);
     const versionInfo = await armlet.ApiVersion();
     console.log(versionJSON2String(versionInfo));
+
 }
 
 /*
@@ -519,6 +521,20 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     return new armlet.Client(options);
 }
 
+const getMythxJSClient = (ethAddress, password, clientToolName = 'truffle') => {
+    const options = { clientToolName };
+    if (password && ethAddress) {
+        options.ethAddress = ethAddress;
+        options.password = password;
+    } else if (!password && !ethAddress) {
+        options.ethAddress = trialEthAddress;
+        options.password = trialPassword;
+    }
+
+    return new mythxJSClient(options.ethAddress, options.password);
+
+}
+
 const buildObjForContractName = (allBuildObjs, contractName) => {
     // Deprecated. Delete this for v2.0.0
     const buildObjsThatContainContract = allBuildObjs.filter(buildObj =>
@@ -584,6 +600,11 @@ async function analyze(config) {
         process.env.MYTHX_PASSWORD
     )
 
+    const mythxclient = getMythxJSClient(
+        process.env.MYTHX_ETH_ADDRESS,
+        process.env.MYTHX_PASSWORD
+    );
+    
     const progress = ('debug' in config) ? false : (('progress' in config) ? config.progress : true);
 
     let id;
