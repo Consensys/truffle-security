@@ -1,8 +1,11 @@
 const helpers = require('../helpers');
 
 class APIClient {
-    constructor(apiClientType, config, ethAddress, password, clientToolName) {
+    constructor(apiClientType, config, clientToolName) {
 
+        let ethAddress = process.env.MYTHX_ETH_ADDRESS;
+        let password = process.env.MYTHX_PASSWORD;
+        
         const options = { clientToolName };
 
         if (password && ethAddress) {

@@ -1,16 +1,16 @@
 const helpers = require('../helpers');
 
 class Armlet extends APIClient {
-    
-    constructor(config, ethAddress, password, clientToolName) {
-        super('armlet', config, ethAddress, password, clientToolName);
+
+    constructor(config, clientToolName) {
+        super('armlet', config, clientToolName);
     }
 
     async function analyze() {
-        let { config, defaultAnalyzeRateLimit } = this;
+        let { client, config, defaultAnalyzeRateLimit } = this;
+        const { log, error } = config.logger;
 
         const limit = config.limit || defaultAnalyzeRateLimit;
-        const log = config.logger.log;
 
         if (isNaN(limit)) {
             log(`limit parameter should be a number; got ${limit}.`);
@@ -20,16 +20,6 @@ class Armlet extends APIClient {
             log(`limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`);
             return 1;
         }
-
-        const client = getArmletClient(
-            process.env.MYTHX_ETH_ADDRESS,
-            process.env.MYTHX_PASSWORD
-        )
-
-        const mythxclient = getMythxJSClient(
-            process.env.MYTHX_ETH_ADDRESS,
-            process.env.MYTHX_PASSWORD
-        );
         
         const progress = ('debug' in config) ? false : (('progress' in config) ? config.progress : true);
 
@@ -44,7 +34,7 @@ class Armlet extends APIClient {
 
         if(id === "123456789012345678901234") { // Trial user id
             const prefix = "You are currently running MythX in Trial mode. This mode reports only a partial analysis of your smart contracts, limited to three vulnerabilities. To get a complete analysis, sign up for a free MythX account at https://mythx.io.\n";
-            config.logger.log(prefix);
+            log(prefix);
 
             const question = "Would you like to continue with a partial analysis [Y/n]?";
             const r = (await inquirer.prompt([{
@@ -56,11 +46,11 @@ class Armlet extends APIClient {
             if(re.exec(r)) {
                 process.exit(0);
             }
-            config.logger.log("\nContinuing with MythX Trial mode...\n");
+            log("\nContinuing with MythX Trial mode...\n");
         } else if(roles.includes('privileged_user')) {
-            config.logger.log("Welcome to MythX! You are currently running in Premium mode.\n");
+            log("Welcome to MythX! You are currently running in Premium mode.\n");
         } else if(roles.includes('regular_user')) {
-            config.logger.log("Welcome to MythX! You are currently running in Free mode.\n");
+            log("Welcome to MythX! You are currently running in Free mode.\n");
         }
         }
 
@@ -109,11 +99,11 @@ class Armlet extends APIClient {
                         buildObj = buildObjForContractName(allBuildObjs, contractFile)
                     }
                     if(!buildObj) {
-                        config.logger.log(`Cound not find file: ${contractFile}.`.red)
+                        log(`Cound not find file: ${contractFile}.`.red)
                         return;
                     }
                     if(progress) {
-                        config.logger.log(`DEPRECATION WARNING: Found contract named "${contractFile}". Analyzing contracts by name will be removed in a later version.`.yellow)
+                        log(`DEPRECATION WARNING: Found contract named "${contractFile}". Analyzing contracts by name will be removed in a later version.`.yellow)
                     }
                 }
 
@@ -134,7 +124,7 @@ class Armlet extends APIClient {
                     })
 
                     if(foundContracts.length == 0) {
-                        config.logger.error(`Contract ${contractName} not found in ${contractFile}.`.red)
+                        error(`Contract ${contractName} not found in ${contractFile}.`.red)
                     }
                 } else {
                     // No contractName; add all non-imported contracts from the file.
@@ -173,7 +163,7 @@ class Armlet extends APIClient {
         }
 
         if(objContracts.length == 0) {
-            config.logger.error("No contracts found, aborting analysis.".red);
+            error("No contracts found, aborting analysis.".red);
             process.exit(1);
         }
 
