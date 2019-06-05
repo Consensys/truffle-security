@@ -757,6 +757,7 @@ async function analyze(config) {
     // as a result, it causes unnecesarry login requests to Mythril-API. (It ia a kind of race condition problem)
     // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
     await client.login();
+    const tokens = await mythxclient.login();
 
     const { objects, errors } = await doAnalysis(client, config, objContracts, limit);
     const result = doReport(config, objects, errors);
