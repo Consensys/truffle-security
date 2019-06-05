@@ -1,26 +1,13 @@
 const helpers = require('../helpers');
 
-class Armlet {
-    constructor(config, ethAddress, password, clientToolName) {
-
-        const options = { clientToolName };
-
-        if (password && ethAddress) {
-            options.ethAddress = ethAddress;
-            options.password = password;
-        } else if (!password && !ethAddress) {
-            options.ethAddress = trialEthAddress;
-            options.password = trialPassword;
-        }
+class Armlet extends APIClient {
     
-        this.client = new armlet.Client(options);
-        this.clientToolName = clientToolName;
-        this.verifyOptions = options;
-        this.config = helpers.prepareConfig(unpreparedConfig);
+    constructor(config, ethAddress, password, clientToolName) {
+        super('armlet', config, ethAddress, password, clientToolName);
     }
 
     async function analyze() {
-        var config = prepareConfig(this.config);
+        let { config, defaultAnalyzeRateLimit } = this;
 
         const limit = config.limit || defaultAnalyzeRateLimit;
         const log = config.logger.log;
