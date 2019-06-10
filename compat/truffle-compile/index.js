@@ -377,6 +377,8 @@ compile.with_dependencies = async function(options, callback, compileAll) {
           }),
           (err, allSources, required) => {
             if (err) return reject(err);
+            allSources = pathsToForwardSlashes(allSources);
+            
             self.display(sourcePath, Object.keys(allSources), options)
             compile(sourcePath, allSources, options, (err, compileData, isStale) => {
               if (err) {
