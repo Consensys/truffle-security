@@ -203,7 +203,8 @@ const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
 const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateLimit) => {
-    const timeout = (config.timeout || 300) * 1000;
+    const timeout = config.timeout || (config.mode === "full" ? 35 * 60000 : 5 * 60000);
+    
     const initialDelay = ('initial-delay' in config) ? config['initial-delay'] * 1000 : undefined;
     const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
 
