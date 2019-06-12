@@ -1,3 +1,10 @@
+Release 1.5.1
+================
+
+Increased timeout duration for full mode.
+
+Fixed analysis of contracts with relative imports on Windows.
+
 Release 1.5.0
 ================
 
