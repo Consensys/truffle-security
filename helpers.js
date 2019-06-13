@@ -651,7 +651,7 @@ async function analyze(config) {
     if (config.uuid) {
         try {
             const results = await client.getIssues(config.uuid);
-            return ghettoReport(log, results);
+            return ghettoReport(config.logger.log, results);
         } catch (err) {
             config.logger.error(err);
             return 1;

@@ -141,13 +141,13 @@ describe('helpers.js', function() {
         it('should return error when passed value for limit is not a number', async () => {
             config.limit = 'test';
             await rewiredHelpers.analyze(config);
-            assert.equal(loggerStub.getCall(0).args[0], 'limit parameter should be a number; got test.')
+            assert.equal(errorStub.getCall(0).args[0], 'limit parameter should be a number; got test.')
         });
 
         it('should return error when limit is value is out of acceptible range', async () => {
             config.limit = rewiredHelpers.defaultAnalyzeRateLimit + 5;
             await rewiredHelpers.analyze(config);
-            assert.equal(loggerStub.getCall(0).args[0], `limit should be between 0 and ${rewiredHelpers.defaultAnalyzeRateLimit}; got ${rewiredHelpers.defaultAnalyzeRateLimit + 5}.`)
+            assert.equal(errorStub.getCall(0).args[0], `limit should be between 0 and ${rewiredHelpers.defaultAnalyzeRateLimit}; got ${rewiredHelpers.defaultAnalyzeRateLimit + 5}.`)
         });
 
         /* TODO: Logged in messaging tests */
@@ -281,7 +281,7 @@ describe('helpers.js', function() {
             });
             await helpers.analyze(config);
             assert.ok(getIssuesStub.called);
-            assert.ok(loggerStub.getCall(0).args[0], 'Error');
+            assert.ok(errorStub.getCall(0).args[0], 'Error');
         });
     });
 
