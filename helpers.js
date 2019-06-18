@@ -507,6 +507,39 @@ function prepareConfig (config) {
     return config;
 }
 
+function verifyConfig(config) {
+    const limit = config.limit || defaultAnalyzeRateLimit;
+
+    if (isNaN(limit)) {
+        return `limit parameter should be a number; got ${limit}.`;
+    }
+    if (limit < 0 || limit > defaultAnalyzeRateLimit) {
+        return `limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`;
+    }
+    try {
+        getFormatter(config.style);
+    } catch (e) {
+        return "style is not a valid eslint formatter.";
+    }
+    if(config.mode && !["quick", "full"].includes(config.mode)) {
+        return "mode must be 'quick' or 'full'";
+    }
+    if(config.uuid === true) {
+        return "uuid must be specified";
+    }
+    if(["warning", "error"].includes(config.minSeverity)) {
+        return "minSeverity must be 'warning' or 'error'";
+    }
+    if(config.timeout === true) {
+        return "timeout not set";
+    }
+    if(config.initialDelay === true) {
+        return "initial-delay not set";
+    }
+
+    return null;
+}
+
 const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     const options = { clientToolName };
     if (password && ethAddress) {
@@ -560,6 +593,7 @@ const buildObjIsCorrect = (allBuildObjs, contract, buildObj) => {
     return false;
 }
 
+
 /**
  *
  * @param {Object} config - truffle configuration object.
@@ -568,17 +602,13 @@ async function analyze(config) {
 
     config = prepareConfig(config);
 
-    const limit = config.limit || defaultAnalyzeRateLimit;
-    const log = config.logger.log;
+    const err = verifyConfig(config);
+    if(err) {
+        config.logger.error(err);
+        return 1;
+    }
 
-    if (isNaN(limit)) {
-        log(`limit parameter should be a number; got ${limit}.`);
-        return 1;
-    }
-    if (limit < 0 || limit > defaultAnalyzeRateLimit) {
-        log(`limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`);
-        return 1;
-    }
+    const limit = config.limit || defaultAnalyzeRateLimit;
 
     const client = getArmletClient(
         process.env.MYTHX_ETH_ADDRESS,
@@ -593,7 +623,7 @@ async function analyze(config) {
       let roles;
       if(users) {
         roles = users[0].roles;
-        id = users[0].id
+        id = users[0].id;
       }
 
       if(id === "123456789012345678901234") { // Trial user id
@@ -621,9 +651,9 @@ async function analyze(config) {
     if (config.uuid) {
         try {
             const results = await client.getIssues(config.uuid);
-            return ghettoReport(log, results);
+            return ghettoReport(config.logger.log, results);
         } catch (err) {
-            log(err);
+            config.logger.error(err);
             return 1;
         }
     }
