@@ -382,7 +382,20 @@ function doReport(config, objects, errors) {
         const uniqueIssues = eslintHelpers.getUniqueIssues(eslintIssuesByBaseName);
 
         const formatter = getFormatter(config.style);
-        config.logger.log(formatter(uniqueIssues));
+        let formatterResult;
+        const rulesMeta = uniqueIssues.reduce((resultData, issue) => {
+            issue.messages.forEach(({ ruleId }) => {
+                if (!resultData[ruleId]) {
+                    resultData[ruleId] = {
+                        docs: { url: `https://smartcontractsecurity.github.io/SWC-registry/docs/${ruleId}` }
+                    };
+                }
+            });
+            return resultData;
+        }, {});
+
+        formatterResult = formatter(uniqueIssues, { rulesMeta });
+        config.logger.log(formatterResult);
     }
 
     const logGroups = objects.map(obj => { return {'sourcePath': obj.sourcePath, 'logs': obj.logs, 'uuid': obj.uuid};})
