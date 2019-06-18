@@ -383,21 +383,18 @@ function doReport(config, objects, errors) {
 
         const formatter = getFormatter(config.style);
         let formatterResult;
-        if (config.style === 'html') {
-            const rulesMeta = uniqueIssues.reduce((resultData, issue) => {
-                issue.messages.forEach(({ ruleId }) => {
-                    if (!resultData[ruleId]) {
-                        resultData[ruleId] = {
-                            docs: { url: `https://smartcontractsecurity.github.io/SWC-registry/docs/${ruleId}` }
-                        };
-                    }
-                });
-                return resultData;
-            }, {});
-            formatterResult = formatter(uniqueIssues, { rulesMeta });
-        } else {
-            formatterResult = formatter(uniqueIssues);
-        }
+        const rulesMeta = uniqueIssues.reduce((resultData, issue) => {
+            issue.messages.forEach(({ ruleId }) => {
+                if (!resultData[ruleId]) {
+                    resultData[ruleId] = {
+                        docs: { url: `https://smartcontractsecurity.github.io/SWC-registry/docs/${ruleId}` }
+                    };
+                }
+            });
+            return resultData;
+        }, {});
+
+        formatterResult = formatter(uniqueIssues, { rulesMeta });
         config.logger.log(formatterResult);
     }
 
