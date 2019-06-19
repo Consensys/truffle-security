@@ -654,9 +654,9 @@ async function analyze(config) {
               process.exit(0);
           }
           config.logger.log("\nContinuing with MythX Trial mode...\n");
-      } else if(roles.includes('privileged_user')) {
+      } else if(roles.includes('Premium')) {
           config.logger.log("Welcome to MythX! You are currently running in Premium mode.\n");
-      } else if(roles.includes('regular_user')) {
+      } else if(roles.includes('Free')) {
           config.logger.log("Welcome to MythX! You are currently running in Free mode.\n");
       }
     }
