@@ -1,3 +1,14 @@
+Release 1.5.2
+================
+
+Fixed an issue causing issues to be reported at incorrect contracts.
+
+Verify cli arguments better.
+
+Fixed SWC links in html report.
+
+Updated role names to have the same terminology as the api.
+
 Release 1.5.1
 ================
 
