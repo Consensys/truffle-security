@@ -1,20 +1,7 @@
 'use strict';
 
-
-const armletClient = require('./classes/armlet');
-const mythxjsClient = require('mythxjs').Client;
-const path = require('path');
-const trufstuf = require('./lib/trufstuf');
-const { MythXIssues } = require('./lib/issues2eslint');
-const eslintHelpers = require('./lib/eslint');
-const contracts = require('./lib/wfc');
-const mythx = require('./lib/mythx');
-const util = require('util');
-const yaml = require('js-yaml');
-const asyncPool = require('tiny-async-pool');
-const multiProgress = require('multi-progress');
-const sleep = require('sleep');
-const inquirer = require('inquirer');
+const armletClass = require('./classes/armlet');
+const mythxjsClass = require('./classes/mythx');
 
 // TODO: Replaced with new armlet class. Needs deleted.
 const armlet = null;
@@ -23,7 +10,7 @@ const armlet = null;
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
 const trialPassword = 'trial';
 const defaultAnalyzeRateLimit = 4;
-const defaultAPIClient = 'armlet';
+const defaultAPIClient = 'mythxjs';
 
 let client;
 /**
@@ -34,7 +21,10 @@ async function analyze(config) {
     config = prepareConfig(config);
 
     if (config.apiClient === 'armlet') {
-        client = new armletClient( config, 'truffle');
+        client = new armletClass( config, 'truffle');
+    }
+    else {
+        client = new mythxjsClass( config, 'truffle');
     }
     const analysisResponse = await client.analyze();
     return analysisResponse;

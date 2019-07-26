@@ -2,7 +2,6 @@
 
 
 const armlet = require('armlet');
-const mythxjsClient = require('mythxjs').Client;
 const path = require('path');
 const trufstuf = require('./lib/trufstuf');
 const { MythXIssues } = require('./lib/issues2eslint');
@@ -435,7 +434,7 @@ function ghettoReport(logger, results) {
     results.forEach(ele => {
         issuesCount += ele.issues.length;
     });
-    
+
     if (issuesCount === 0) {
         logger('No issues found');
         return 0;
@@ -680,7 +679,7 @@ async function analyze(config) {
                     contract.contractName == contractName &&
                     buildObjIsCorrect(allBuildObjs, contract, buildObj)
                 )
-                
+
                 foundContracts.forEach(contract => {
                     objContracts.push({
                         contractName: contractName,
