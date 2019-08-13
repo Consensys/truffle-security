@@ -203,8 +203,8 @@ const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
 const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateLimit) => {
-    const timeout = config.timeout || (config.mode === "full" ? 35 * 60000 : 5 * 60000);
-    
+    const timeout = config.timeout || (config.mode === "full" ? 125 * 60000 : 5 * 60000);
+
     const initialDelay = ('initial-delay' in config) ? config['initial-delay'] * 1000 : undefined;
     const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
 
@@ -447,7 +447,7 @@ function ghettoReport(logger, results) {
     results.forEach(ele => {
         issuesCount += ele.issues.length;
     });
-    
+
     if (issuesCount === 0) {
         logger('No issues found');
         return 0;
@@ -722,7 +722,7 @@ async function analyze(config) {
                     contract.contractName == contractName &&
                     buildObjIsCorrect(allBuildObjs, contract, buildObj)
                 )
-                
+
                 foundContracts.forEach(contract => {
                     objContracts.push({
                         contractName: contractName,
