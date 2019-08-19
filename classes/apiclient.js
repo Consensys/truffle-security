@@ -3,7 +3,13 @@ const mythxjsClient = require('mythxjs').Client;
 const armlet = require('armlet');
 
 const { ghettoReport, doReport } = require('../utils/reports');
-const { cleanAnalyzeDataEmptyProps, buildObjForContractName, buildObjForSourcePath, buildObjIsCorrect, contractsCompile } = require('../utils/buildutils');
+const {
+    cleanAnalyzeDataEmptyProps,
+    buildObjForContractName,
+    buildObjForSourcePath,
+    buildObjIsCorrect,
+    contractsCompile
+} = require('../utils/buildutils');
 
 const path = require('path');
 const trufstuf = require('../lib/trufstuf');
@@ -321,7 +327,9 @@ class APIClient {
      */
     async doAnalysis(contracts, limit = this.defaultAnalyzeRateLimit) {
         let { client, config } = this;
-        const timeout = (config.timeout || 300) * 1000;
+        const timeout =
+            config.timeout ||
+            (config.mode === 'full' ? 125 * 60000 : 5 * 60000);
         const initialDelay =
             'initial-delay' in config
                 ? config['initial-delay'] * 1000
@@ -514,8 +522,6 @@ class APIClient {
             { errors: [], objects: [] }
         );
     }
-
-
 }
 
 module.exports = APIClient;
