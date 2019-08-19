@@ -58,6 +58,8 @@ given, all are analyzed.
 
 Options:
   --all      Compile all contracts instead of only the contracts changed since last compile.
+  --apiClient { mythxjs | armlet}
+              Which api client to use. Default and recommended is mythxjs.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
   --style { stylish | json | table | tap | unix | markdown | ... },
@@ -155,7 +157,7 @@ function setConfigSWCBlacklist (inputBlacklist) {
 function prepareConfig (config) {
 
     // merge project level configuration
-    let projectConfig
+    let projectConfig;
     try {
         projectConfig = require([config.working_directory, 'truffle-security'].join ('/'));
     } catch (ex) {

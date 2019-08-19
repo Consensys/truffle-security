@@ -1,6 +1,5 @@
 'use strict';
 
-
 const armlet = require('armlet');
 const path = require('path');
 const trufstuf = require('./lib/trufstuf');
@@ -15,7 +14,6 @@ const multiProgress = require('multi-progress');
 const sleep = require('sleep');
 const inquirer = require('inquirer');
 
-
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
 const trialPassword = 'trial';
 const defaultAnalyzeRateLimit = 4;
@@ -27,7 +25,7 @@ const contractsCompile = config => {
         contracts.compile(config, (err, result) => {
             if (err) {
                 reject(err);
-                return ;
+                return;
             }
             resolve(result);
         });
@@ -44,8 +42,8 @@ const contractsCompile = config => {
 function getFormatter(style) {
     const formatterName = style || 'stylish';
     try {
-        if(formatterName == "markdown") {
-            return require('./compat/eslint-formatter-markdown/markdown')
+        if (formatterName == 'markdown') {
+            return require('./compat/eslint-formatter-markdown/markdown');
         }
         return require(`eslint/lib/formatters/${formatterName}`);
     } catch (ex) {
@@ -56,7 +54,6 @@ function getFormatter(style) {
     }
 }
 
-
 /**
  *
  * Returns a JSON object from a version response. Each attribute/key
@@ -66,7 +63,10 @@ function getFormatter(style) {
  * @returns string  A comma-separated string of tool: version
  */
 function versionJSON2String(jsonResponse) {
-    return Object.keys(jsonResponse).sort().map((key) => `${key}: ${jsonResponse[key]}`).join(', ');
+    return Object.keys(jsonResponse)
+        .sort()
+        .map(key => `${key}: ${jsonResponse[key]}`)
+        .join(', ');
 }
 
 /**
@@ -144,7 +144,6 @@ async function printVersion() {
     console.log(`${pjson.name} ${pjson.version}`);
     const versionInfo = await armlet.ApiVersion();
     console.log(versionJSON2String(versionInfo));
-
 }
 
 /*
@@ -157,7 +156,13 @@ async function printVersion() {
    get complaints from MythX. We will manage what we want to say.
 */
 const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
-    const { bytecode, deployedBytecode, sourceMap, deployedSourceMap, ...props } = data;
+    const {
+        bytecode,
+        deployedBytecode,
+        sourceMap,
+        deployedSourceMap,
+        ...props
+    } = data;
     const result = { ...props };
 
     const unusedFields = [];
@@ -187,11 +192,17 @@ const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
     }
 
     if (debug && unusedFields.length > 0) {
-        logger(`${props.contractName}: Empty JSON data fields from compilation - ${unusedFields.join(', ')}`);
+        logger(
+            `${
+                props.contractName
+            }: Empty JSON data fields from compilation - ${unusedFields.join(
+                ', '
+            )}`
+        );
     }
 
     return result;
-}
+};
 
 /**
  * Runs MythX security analyses on smart contract files found
@@ -203,21 +214,35 @@ const cleanAnalyzeDataEmptyProps = (data, debug, logger) => {
  * @param {Array<String>} contractNames - List of smart contract name to run analyze (*Optional*).
  * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
  */
-const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateLimit) => {
+const doAnalysis = async (
+    client,
+    config,
+    contracts,
+    limit = defaultAnalyzeRateLimit
+) => {
     const timeout = (config.timeout || 300) * 1000;
-    const initialDelay = ('initial-delay' in config) ? config['initial-delay'] * 1000 : undefined;
-    const cacheLookup = ('cache-lookup' in config) ? config['cache-lookup'] : true;
+    const initialDelay =
+        'initial-delay' in config ? config['initial-delay'] * 1000 : undefined;
+    const cacheLookup =
+        'cache-lookup' in config ? config['cache-lookup'] : true;
 
     /**
      * Prepare for progress bar
      */
-    const progress = ('debug' in config) ? false : (('progress' in config) ? config.progress : true);
+    const progress =
+        'debug' in config
+            ? false
+            : 'progress' in config
+                ? config.progress
+                : true;
     let multi;
     let indent;
     if (progress) {
         multi = new multiProgress();
         const contractNames = contracts.map(({ contractName }) => contractName);
-        indent = contractNames.reduce((max, next) => max > next.length ? max : next.length);
+        indent = contractNames.reduce((max, next) =>
+            max > next.length ? max : next.length
+        );
     }
 
     const results = await asyncPool(limit, contracts, async buildObj => {
@@ -228,29 +253,42 @@ const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateL
         const obj = new MythXIssues(buildObj.contract, config);
         let analyzeOpts = {
             clientToolName: 'truffle',
-            noCacheLookup: !cacheLookup,
+            noCacheLookup: !cacheLookup
         };
 
-        analyzeOpts.data = cleanAnalyzeDataEmptyProps(obj.buildObj, config.debug,
-                                                    config.logger.debug);
+        analyzeOpts.data = cleanAnalyzeDataEmptyProps(
+            obj.buildObj,
+            config.debug,
+            config.logger.debug
+        );
         analyzeOpts.data.analysisMode = config.mode || 'quick';
         if (config.debug > 1) {
-            config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`);
+            config.logger.debug(
+                `${util.inspect(analyzeOpts, { depth: null })}`
+            );
         }
 
         // create progress bars.
         let bar;
         let timer;
         if (progress) {
-            bar = multi.newBar(`${buildObj.contractName.padStart(indent)} |` + ':bar'.cyan + '| :percent || Elapsed: :elapseds :status', {
-                complete: '*',
-                incomplete: ' ',
-                width: Math.max(Math.min(parseInt((timeout / 1000) / 300 * 100), 100), 40), // based on timeout, but the cap is 300 and the floor is 40.
-                total: timeout / 1000
-            });
+            bar = multi.newBar(
+                `${buildObj.contractName.padStart(indent)} |` +
+                    ':bar'.cyan +
+                    '| :percent || Elapsed: :elapseds :status',
+                {
+                    complete: '*',
+                    incomplete: ' ',
+                    width: Math.max(
+                        Math.min(parseInt((timeout / 1000 / 300) * 100), 100),
+                        40
+                    ), // based on timeout, but the cap is 300 and the floor is 40.
+                    total: timeout / 1000
+                }
+            );
             timer = setInterval(() => {
                 bar.tick({
-                    'status': 'in progress...'
+                    status: 'in progress...'
                 });
                 if (bar.complete) {
                     clearInterval(timer);
@@ -260,14 +298,26 @@ const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateL
 
         // request analysis to armlet.
         try {
-            let {issues, status} = await client.analyzeWithStatus(analyzeOpts, timeout, initialDelay);
-            issues = issues.filter(({ sourceFormat }) => sourceFormat !== 'evm-byzantium-bytecode')
+            let { issues, status } = await client.analyzeWithStatus(
+                analyzeOpts,
+                timeout,
+                initialDelay
+            );
+            issues = issues.filter(
+                ({ sourceFormat }) => sourceFormat !== 'evm-byzantium-bytecode'
+            );
             obj.uuid = status.uuid;
             if (config.debug) {
-                config.logger.debug(`${analyzeOpts.data.contractName}: UUID is ${status.uuid}`);
+                config.logger.debug(
+                    `${analyzeOpts.data.contractName}: UUID is ${status.uuid}`
+                );
                 if (config.debug > 1) {
-                    config.logger.debug(`${util.inspect(issues, {depth: null})}`);
-                    config.logger.debug(`${util.inspect(status, {depth: null})}`);
+                    config.logger.debug(
+                        `${util.inspect(issues, { depth: null })}`
+                    );
+                    config.logger.debug(
+                        `${util.inspect(status, { depth: null })}`
+                    );
                 }
             }
 
@@ -279,15 +329,15 @@ const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateL
             if (status.status === 'Error') {
                 if (progress) {
                     bar.tick({
-                        'status': '✗ Error'.red
+                        status: '✗ Error'.red
                     });
-                    bar.terminate();    // terminate since bar.complete is false at this time
+                    bar.terminate(); // terminate since bar.complete is false at this time
                 }
                 return [status, null];
             } else {
                 if (progress) {
                     bar.tick(timeout / 1000, {
-                        'status': '✓ completed'.green
+                        status: '✓ completed'.green
                     });
                 }
                 obj.setIssues(issues);
@@ -313,36 +363,41 @@ const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateL
             }
 
             // Check error message from armlet to determine if a timeout occurred.
-            if (errStr.includes('User or default timeout reached after')
-               || errStr.includes('Timeout reached after')) {
+            if (
+                errStr.includes('User or default timeout reached after') ||
+                errStr.includes('Timeout reached after')
+            ) {
                 if (progress) {
                     bar.tick({
-                        'status': `✗ timeout`.yellow
+                        status: '✗ timeout'.yellow
                     });
-                    bar.terminate();    // terminate since bar.complete is false at this time
+                    bar.terminate(); // terminate since bar.complete is false at this time
                 }
-                return [(buildObj.contractName + ": ").yellow + errStr, null];
+                return [(buildObj.contractName + ': ').yellow + errStr, null];
             } else {
                 if (progress) {
                     bar.tick({
-                        'status': '✗ error'.red
+                        status: '✗ error'.red
                     });
-                    bar.terminate();    // terminate since bar.complete is false at this time
+                    bar.terminate(); // terminate since bar.complete is false at this time
                 }
-                return [(buildObj.contractName + ": ").red + errStr, null];
+                return [(buildObj.contractName + ': ').red + errStr, null];
             }
         }
     });
 
-    return results.reduce((accum, curr) => {
-        const [ err, obj ] = curr;
-        if (err) {
-            accum.errors.push(err);
-        } else if (obj) {
-            accum.objects.push(obj);
-        }
-        return accum;
-    }, { errors: [], objects: [] });
+    return results.reduce(
+        (accum, curr) => {
+            const [err, obj] = curr;
+            if (err) {
+                accum.errors.push(err);
+            } else if (obj) {
+                accum.objects.push(obj);
+            }
+            return accum;
+        },
+        { errors: [], objects: [] }
+    );
 };
 
 function doReport(config, objects, errors) {
@@ -352,41 +407,55 @@ function doReport(config, objects, errors) {
     // Ignore logs with log.level "info" unless the "debug" flag
     // has been set.
     function showLog(log) {
-        return config.debug || (log.level !== 'info');
+        return config.debug || log.level !== 'info';
     }
 
     // Return 1 if some vulenrabilities were found.
     objects.forEach(ele => {
         ele.issues.forEach(ele => {
             ret = ele.issues.length > 0 ? 1 : ret;
-        })
-    })
+        });
+    });
 
     if (config.yaml) {
         const yamlDumpObjects = objects;
-        for(let i = 0; i < yamlDumpObjects.length; i++) {
-          delete yamlDumpObjects[i].logger;
+        for (let i = 0; i < yamlDumpObjects.length; i++) {
+            delete yamlDumpObjects[i].logger;
         }
-        config.logger.log(yaml.safeDump(yamlDumpObjects, {'skipInvalid': true}));
+        config.logger.log(
+            yaml.safeDump(yamlDumpObjects, { skipInvalid: true })
+        );
     } else if (config.json) {
         config.logger.log(JSON.stringify(objects, null, 4));
     } else {
-        const spaceLimited = ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
+        const spaceLimited =
+            ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
         const eslintIssues = objects
             .map(obj => obj.getEslintIssues(config, spaceLimited))
             .reduce((acc, curr) => acc.concat(curr), []);
 
         // FIXME: temporary solution until backend will return correct filepath and output.
-        const eslintIssuesByBaseName = groupEslintIssuesByBasename(eslintIssues);
+        const eslintIssuesByBaseName = groupEslintIssuesByBasename(
+            eslintIssues
+        );
 
-        const uniqueIssues = eslintHelpers.getUniqueIssues(eslintIssuesByBaseName);
+        const uniqueIssues = eslintHelpers.getUniqueIssues(
+            eslintIssuesByBaseName
+        );
 
         const formatter = getFormatter(config.style);
         config.logger.log(formatter(uniqueIssues));
     }
 
-    const logGroups = objects.map(obj => { return {'sourcePath': obj.sourcePath, 'logs': obj.logs, 'uuid': obj.uuid};})
-          .reduce((acc, curr) => acc.concat(curr), []);
+    const logGroups = objects
+        .map(obj => {
+            return {
+                sourcePath: obj.sourcePath,
+                logs: obj.logs,
+                uuid: obj.uuid
+            };
+        })
+        .reduce((acc, curr) => acc.concat(curr), []);
 
     let haveLogs = false;
     logGroups.some(logGroup => {
@@ -396,7 +465,7 @@ function doReport(config, objects, errors) {
                 return;
             }
         });
-        if(haveLogs) return;
+        if (haveLogs) return;
     });
 
     if (haveLogs) {
@@ -442,33 +511,32 @@ function ghettoReport(logger, results) {
     for (const group of results) {
         logger(group.sourceList.join(', ').underline);
         for (const issue of group.issues) {
-            logger(yaml.safeDump(issue, {'skipInvalid': true}));
+            logger(yaml.safeDump(issue, { skipInvalid: true }));
         }
     }
     return 1;
 }
 
-function setConfigSeverityLevel (inputSeverity) {
-
+function setConfigSeverityLevel(inputSeverity) {
     // converting severity to a number makes it easier to deal with in `issues2eslint.js`
     const severity2Number = {
-        'error': 2,
-        'warning': 1
+        error: 2,
+        warning: 1
     };
 
     // default to `warning`
     return severity2Number[inputSeverity] || 1;
 }
 
-function setConfigSWCBlacklist (inputBlacklist) {
+function setConfigSWCBlacklist(inputBlacklist) {
     if (!inputBlacklist) {
         return false;
     }
 
     return inputBlacklist
         .toString()
-        .split(",")
-        .map(swc => "SWC-" + swc.trim());
+        .split(',')
+        .map(swc => 'SWC-' + swc.trim());
 }
 
 /**
@@ -479,22 +547,26 @@ function setConfigSWCBlacklist (inputBlacklist) {
  * @returns {Oject} config - Extended Truffle configuration object.
  */
 
-function prepareConfig (config) {
-
+function prepareConfig(config) {
     // merge project level configuration
-    let projectConfig
+    let projectConfig;
     try {
-        projectConfig = require([config.working_directory, 'truffle-security'].join ('/'));
+        projectConfig = require([
+            config.working_directory,
+            'truffle-security'
+        ].join('/'));
     } catch (ex) {
-        projectConfig = {}
+        projectConfig = {};
         if (config.debug) {
-            config.logger.log("truffle-security.json either not found or improperly formatted. Default options will be applied.");
+            config.logger.log(
+                'truffle-security.json either not found or improperly formatted. Default options will be applied.'
+            );
         }
     }
 
     const projectLevelKeys = Object.keys(projectConfig);
 
-    projectLevelKeys.forEach(function (property) {
+    projectLevelKeys.forEach(function(property) {
         if (!config.hasOwnProperty(property)) {
             config[property] = projectConfig[property];
         }
@@ -518,20 +590,26 @@ const getArmletClient = (ethAddress, password, clientToolName = 'truffle') => {
     }
 
     return new armlet.Client(options);
-}
+};
 
 const buildObjForContractName = (allBuildObjs, contractName) => {
     // Deprecated. Delete this for v2.0.0
-    const buildObjsThatContainContract = allBuildObjs.filter(buildObj =>
-        Object.keys(buildObj.sources).filter(sourceKey =>
-            buildObj.sources[sourceKey].contracts.filter(contract =>
-                contract.contractName == contractName
+    const buildObjsThatContainContract = allBuildObjs.filter(
+        buildObj =>
+            Object.keys(buildObj.sources).filter(
+                sourceKey =>
+                    buildObj.sources[sourceKey].contracts.filter(
+                        contract => contract.contractName == contractName
+                    ).length > 0
             ).length > 0
-        ).length > 0
-    )
-    if(buildObjsThatContainContract.length == 0) return null;
-    return buildObjsThatContainContract.reduce((prev, curr) => Object.keys(prev.sources).length < Object.keys(curr.sources).length ? prev : curr)
-}
+    );
+    if (buildObjsThatContainContract.length == 0) return null;
+    return buildObjsThatContainContract.reduce((prev, curr) =>
+        Object.keys(prev.sources).length < Object.keys(curr.sources).length
+            ? prev
+            : curr
+    );
+};
 
 const buildObjForSourcePath = (allBuildObjs, sourcePath) => {
     // From all lists of contracts that include ContractX, the shortest list is gaurenteed to be the
@@ -543,29 +621,39 @@ const buildObjForSourcePath = (allBuildObjs, sourcePath) => {
 
     const buildObjsThatContainFile = allBuildObjs.filter(buildObj =>
         Object.keys(buildObj.sources).includes(sourcePath)
-    )
-    if(buildObjsThatContainFile.length == 0) return null;
-    return buildObjsThatContainFile.reduce((prev, curr) => Object.keys(prev.sources).length < Object.keys(curr.sources).length ? prev : curr)
-}
+    );
+    if (buildObjsThatContainFile.length == 0) return null;
+    return buildObjsThatContainFile.reduce((prev, curr) =>
+        Object.keys(prev.sources).length < Object.keys(curr.sources).length
+            ? prev
+            : curr
+    );
+};
 
 const buildObjIsCorrect = (allBuildObjs, contract, buildObj) => {
     // Whether or not the given build object is the one where the given contract was compiled to.
     // false if the contract is not in the build object or if it was an import
 
-    const correctBuildObj = buildObjForSourcePath(allBuildObjs, contract.sourcePath)
+    const correctBuildObj = buildObjForSourcePath(
+        allBuildObjs,
+        contract.sourcePath
+    );
     // If the length is the same and the contract is in it, they are the same object and it is not an import.
-    if(correctBuildObj && Object.keys(correctBuildObj.sources).length == Object.keys(buildObj.sources).length) {
+    if (
+        correctBuildObj &&
+        Object.keys(correctBuildObj.sources).length ==
+            Object.keys(buildObj.sources).length
+    ) {
         return true;
     }
     return false;
-}
+};
 
 /**
  *
  * @param {Object} config - truffle configuration object.
  */
 async function analyze(config) {
-
     config = prepareConfig(config);
 
     const limit = config.limit || defaultAnalyzeRateLimit;
@@ -576,46 +664,62 @@ async function analyze(config) {
         return 1;
     }
     if (limit < 0 || limit > defaultAnalyzeRateLimit) {
-        log(`limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`);
+        log(
+            `limit should be between 0 and ${defaultAnalyzeRateLimit}; got ${limit}.`
+        );
         return 1;
     }
 
     const client = getArmletClient(
         process.env.MYTHX_ETH_ADDRESS,
         process.env.MYTHX_PASSWORD
-    )
+    );
 
-    const progress = ('debug' in config) ? false : (('progress' in config) ? config.progress : true);
+    const progress =
+        'debug' in config
+            ? false
+            : 'progress' in config
+                ? config.progress
+                : true;
 
     let id;
     if (progress) {
-      const users = (await client.getUserInfo()).users;
-      let roles;
-      if(users) {
-        roles = users[0].roles;
-        id = users[0].id
-      }
+        const users = (await client.getUserInfo()).users;
+        let roles;
+        if (users) {
+            roles = users[0].roles;
+            id = users[0].id;
+        }
 
-      if(id === "123456789012345678901234") { // Trial user id
-          const prefix = "You are currently running MythX in Trial mode. This mode reports only a partial analysis of your smart contracts, limited to three vulnerabilities. To get a complete analysis, sign up for a free MythX account at https://mythx.io.\n";
-          config.logger.log(prefix);
+        if (id === '123456789012345678901234') {
+            // Trial user id
+            const prefix =
+                'You are currently running MythX in Trial mode. This mode reports only a partial analysis of your smart contracts, limited to three vulnerabilities. To get a complete analysis, sign up for a free MythX account at https://mythx.io.\n';
+            config.logger.log(prefix);
 
-          const question = "Would you like to continue with a partial analysis [Y/n]?";
-          const r = (await inquirer.prompt([{
-              "name": "cont",
-              "message": question,
-          }])).cont;
+            const question =
+                'Would you like to continue with a partial analysis [Y/n]?';
+            const r = (await inquirer.prompt([
+                {
+                    name: 'cont',
+                    message: question
+                }
+            ])).cont;
 
-          const re = /(n|no)/i
-          if(re.exec(r)) {
-              process.exit(0);
-          }
-          config.logger.log("\nContinuing with MythX Trial mode...\n");
-      } else if(roles.includes('privileged_user')) {
-          config.logger.log("Welcome to MythX! You are currently running in Premium mode.\n");
-      } else if(roles.includes('regular_user')) {
-          config.logger.log("Welcome to MythX! You are currently running in Free mode.\n");
-      }
+            const re = /(n|no)/i;
+            if (re.exec(r)) {
+                process.exit(0);
+            }
+            config.logger.log('\nContinuing with MythX Trial mode...\n');
+        } else if (roles.includes('privileged_user')) {
+            config.logger.log(
+                'Welcome to MythX! You are currently running in Premium mode.\n'
+            );
+        } else if (roles.includes('regular_user')) {
+            config.logger.log(
+                'Welcome to MythX! You are currently running in Free mode.\n'
+            );
+        }
     }
 
     if (config.uuid) {
@@ -629,105 +733,143 @@ async function analyze(config) {
     }
 
     // Extract list of contracts passed in cli to verify
-    const selectedContracts = config._.length > 1 ? config._.slice(1, config._.length) : null;
+    const selectedContracts =
+        config._.length > 1 ? config._.slice(1, config._.length) : null;
 
-    config.build_mythx_contracts = path.join(config.build_directory,
-                                             "mythx", "contracts");
+    config.build_mythx_contracts = path.join(
+        config.build_directory,
+        'mythx',
+        'contracts'
+    );
     await contractsCompile(config);
 
     // Get list of smart contract build json files from truffle build folder
-    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(config.build_mythx_contracts);
+    const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(
+        config.build_mythx_contracts
+    );
 
     if (!config.style) {
         config.style = 'stylish';
     }
 
-    const allBuildObjs = await Promise.all(jsonFiles.map(async file => await trufstuf.parseBuildJson(file)));
+    const allBuildObjs = await Promise.all(
+        jsonFiles.map(async file => await trufstuf.parseBuildJson(file))
+    );
 
     let objContracts = [];
     if (selectedContracts) {
         // User specified contracts; only analyze those
-        await Promise.all(selectedContracts.map(async selectedContract => {
-            const [contractFile, contractName] = selectedContract.split(':');
+        await Promise.all(
+            selectedContracts.map(async selectedContract => {
+                const [contractFile, contractName] = selectedContract.split(
+                    ':'
+                );
 
-            let fullPath = path.resolve(contractFile);
-            if (path.sep === '\\') {
-                const regex = new RegExp('\\\\', 'g');
-                fullPath = fullPath.replace(regex, '/');
-            }
-
-
-            let buildObj = buildObjForSourcePath(allBuildObjs, fullPath)
-            if(!buildObj) {
-                if(!contractName) {
-                    buildObj = buildObjForContractName(allBuildObjs, contractFile)
+                let fullPath = path.resolve(contractFile);
+                if (path.sep === '\\') {
+                    const regex = new RegExp('\\\\', 'g');
+                    fullPath = fullPath.replace(regex, '/');
                 }
-                if(!buildObj) {
-                    config.logger.log(`Cound not find file: ${contractFile}.`.red)
-                    return;
+
+                let buildObj = buildObjForSourcePath(allBuildObjs, fullPath);
+                if (!buildObj) {
+                    if (!contractName) {
+                        buildObj = buildObjForContractName(
+                            allBuildObjs,
+                            contractFile
+                        );
+                    }
+                    if (!buildObj) {
+                        config.logger.log(
+                            `Cound not find file: ${contractFile}.`.red
+                        );
+                        return;
+                    }
+                    if (progress) {
+                        config.logger.log(
+                            `DEPRECATION WARNING: Found contract named "${contractFile}". Analyzing contracts by name will be removed in a later version.`
+                                .yellow
+                        );
+                    }
                 }
-                if(progress) {
-                    config.logger.log(`DEPRECATION WARNING: Found contract named "${contractFile}". Analyzing contracts by name will be removed in a later version.`.yellow)
-                }
-            }
 
-            const contracts = mythx.newTruffleObjToOldTruffleByContracts(buildObj);
+                const contracts = mythx.newTruffleObjToOldTruffleByContracts(
+                    buildObj
+                );
 
-            if (contractName) {
-                // All non-imported contracts from file with same name.
-                const foundContracts = contracts.filter(contract =>
-                    contract.contractName == contractName &&
-                    buildObjIsCorrect(allBuildObjs, contract, buildObj)
-                )
+                if (contractName) {
+                    // All non-imported contracts from file with same name.
+                    const foundContracts = contracts.filter(
+                        contract =>
+                            contract.contractName == contractName &&
+                            buildObjIsCorrect(allBuildObjs, contract, buildObj)
+                    );
 
-                foundContracts.forEach(contract => {
-                    objContracts.push({
-                        contractName: contractName,
-                        contract: contract
+                    foundContracts.forEach(contract => {
+                        objContracts.push({
+                            contractName: contractName,
+                            contract: contract
+                        });
                     });
-                })
 
-                if(foundContracts.length == 0) {
-                    config.logger.error(`Contract ${contractName} not found in ${contractFile}.`.red)
+                    if (foundContracts.length == 0) {
+                        config.logger.error(
+                            `Contract ${contractName} not found in ${contractFile}.`
+                                .red
+                        );
+                    }
+                } else {
+                    // No contractName; add all non-imported contracts from the file.
+                    contracts
+                        .filter(contract =>
+                            buildObjIsCorrect(allBuildObjs, contract, buildObj)
+                        )
+                        .forEach(contract => {
+                            objContracts.push({
+                                contractName: contract.contractName,
+                                contract: contract
+                            });
+                        });
                 }
-            } else {
-                // No contractName; add all non-imported contracts from the file.
-                contracts.filter(contract =>
-                    buildObjIsCorrect(allBuildObjs, contract, buildObj)
-                ).forEach(contract => {
-                    objContracts.push({
-                        contractName: contract.contractName,
-                        contract: contract
-                    });
-                })
-            }
-        }));
+            })
+        );
     } else {
         // User did not specify contracts; analyze everything
         // How to avoid duplicates: From all lists of contracts that include ContractX, the shortest list is gaurenteed
         // to be the one where it was compiled in because only it and its imports are needed, and contracts that import it
         // will not be included.
         allBuildObjs.map(async buildObj => {
-            const contracts = mythx.newTruffleObjToOldTruffleByContracts(buildObj);
+            const contracts = mythx.newTruffleObjToOldTruffleByContracts(
+                buildObj
+            );
 
-            contracts.filter(contract => {
-                const correctBuildObj = buildObjForSourcePath(allBuildObjs, contract.sourcePath)
-                // If the length is the same and the contract is in it, they are the same object.
-                if(correctBuildObj && Object.keys(correctBuildObj.sources).length == Object.keys(buildObj.sources).length) {
-                    return true;
-                }
-                return false;
-            }).forEach(contract => {
-                objContracts.push({
-                    contractName: contract.contractName,
-                    contract: contract
+            contracts
+                .filter(contract => {
+                    const correctBuildObj = buildObjForSourcePath(
+                        allBuildObjs,
+                        contract.sourcePath
+                    );
+                    // If the length is the same and the contract is in it, they are the same object.
+                    if (
+                        correctBuildObj &&
+                        Object.keys(correctBuildObj.sources).length ==
+                            Object.keys(buildObj.sources).length
+                    ) {
+                        return true;
+                    }
+                    return false;
+                })
+                .forEach(contract => {
+                    objContracts.push({
+                        contractName: contract.contractName,
+                        contract: contract
+                    });
                 });
-            })
         });
     }
 
-    if(objContracts.length == 0) {
-        config.logger.error("No contracts found, aborting analysis.".red);
+    if (objContracts.length == 0) {
+        config.logger.error('No contracts found, aborting analysis.'.red);
         process.exit(1);
     }
 
@@ -738,14 +880,20 @@ async function analyze(config) {
     // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
     await client.login();
 
-    const { objects, errors } = await doAnalysis(client, config, objContracts, limit);
+    const { objects, errors } = await doAnalysis(
+        client,
+        config,
+        objContracts,
+        limit
+    );
     const result = doReport(config, objects, errors);
-    if(progress && id === "123456789012345678901234") {
-        config.logger.log("You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete report.");
+    if (progress && id === '123456789012345678901234') {
+        config.logger.log(
+            'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete report.'
+        );
     }
     return result;
 }
-
 
 /**
  * A 2-level line-column comparison function.
@@ -755,9 +903,7 @@ async function analyze(config) {
       positive:  line1/column1 > line2/column2
 */
 function compareLineCol(line1, column1, line2, column2) {
-    return line1 === line2 ?
-        (column1 - column2) :
-        (line1 - line2);
+    return line1 === line2 ? column1 - column2 : line1 - line2;
 }
 
 /**
@@ -773,10 +919,21 @@ function compareLineCol(line1, column1, line2, column2) {
 
 */
 function compareMessLCRange(mess1, mess2) {
-    const c = compareLineCol(mess1.line, mess1.column, mess2.line, mess2.column);
-    return c != 0 ? c : compareLineCol(mess1.endLine, mess1.endCol, mess2.endLine, mess2.endCol);
+    const c = compareLineCol(
+        mess1.line,
+        mess1.column,
+        mess2.line,
+        mess2.column
+    );
+    return c != 0
+        ? c
+        : compareLineCol(
+            mess1.endLine,
+            mess1.endCol,
+            mess2.endLine,
+            mess2.endCol
+        );
 }
-
 
 /**
  * Temporary function which turns eslint issues grouped by filepath
@@ -793,7 +950,7 @@ const groupEslintIssuesByBasename = issues => {
             fixableErrorCount,
             fixableWarningCount,
             filePath,
-            messages,
+            messages
         } = issue;
 
         const basename = filePath;
@@ -804,7 +961,7 @@ const groupEslintIssuesByBasename = issues => {
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
                 filePath: filePath,
-                messages: [],
+                messages: []
             };
         }
         accum[basename].errorCount += errorCount;
@@ -820,11 +977,9 @@ const groupEslintIssuesByBasename = issues => {
         group.messages = group.messages.sort(function(mess1, mess2) {
             return compareMessLCRange(mess1, mess2);
         });
-
     }
     return issueGroups;
 };
-
 
 module.exports = {
     analyze,
@@ -840,5 +995,5 @@ module.exports = {
     cleanAnalyzeDataEmptyProps,
     getArmletClient,
     trialEthAddress,
-    trialPassword,
+    trialPassword
 };

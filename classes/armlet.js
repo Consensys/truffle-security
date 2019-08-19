@@ -1,21 +1,14 @@
-'use strict';
-// const helpers = require('../helpers');
-const APIClient = require('./apiclient');
+"use strict";
 
-const asyncPool = require('tiny-async-pool');
-const multiProgress = require('multi-progress');
-const { MythXIssues } = require('../lib/issues2eslint');
-const sleep = require('sleep');
+const APIClient = require("./apiclient");
 
 class Armlet extends APIClient {
+  constructor(config, clientToolName) {
+    // Bootstrap apiclient class first with super
+    super("armlet", config, clientToolName);
+  }
 
-    constructor(config, clientToolName) {
-        // Bootstrap apiclient class first with super
-        super('armlet', config, clientToolName);
-    }
-
-
-   /**
+  /**
      * Do armlet analysis
      *
      * @param {Array<String>} contracts - List of smart contract.
@@ -24,11 +17,13 @@ class Armlet extends APIClient {
 
      * @returns {Promise} - Resolves analysis object.
      */
-    async doAnalysisFromClient( analyzeOpts, timeout, initialDelay ) {
-      return await this.client.analyzeWithStatus(analyzeOpts, timeout, initialDelay);
-    }
-
-
+  async doAnalysisFromClient(analyzeOpts, timeout, initialDelay) {
+    return await this.client.analyzeWithStatus(
+      analyzeOpts,
+      timeout,
+      initialDelay
+    );
+  }
 }
 
 module.exports = Armlet;

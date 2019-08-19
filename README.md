@@ -127,6 +127,8 @@ given, all are analyzed.
 
 Options:
   --all      Compile all contracts instead of only the contracts changed since last compile.
+  --apiClient { mythxjs | armlet}
+            Which api client to use. Default and recommended is mythxjs.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
   --style { stylish | json | table | tap | unix | markdown | ... },
