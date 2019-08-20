@@ -34,6 +34,7 @@ const doReport = async function(objects, errors, config) {
 
     // Return 1 if some vulenrabilities were found.
     objects.forEach(ele => {
+
         ele.issues.forEach(ele => {
             ret = ele.issues.length > 0 ? 1 : ret;
         });

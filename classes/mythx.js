@@ -20,7 +20,8 @@ class MythXJS extends APIClient {
         let detectedIssues = await this.client.getDetectedIssues(
             analysisResponse.uuid
         );
-        return { status: analysisResponse.status, issues: detectedIssues };
+        console.log('analysisResponse:', analysisResponse);
+        return { status: analysisResponse, issues: detectedIssues };
     }
 }
 module.exports = MythXJS;

@@ -180,7 +180,7 @@ function prepareConfig (config) {
     config.swcBlacklist = setConfigSWCBlacklist(config['swc-blacklist']);
 
     // API Client configuration
-    if (typeof config.apiClient !== undefined) {
+    if (typeof config.apiClient === undefined) {
         config.apiClient = defaultAPIClient;
     }
 

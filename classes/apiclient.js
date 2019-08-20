@@ -412,7 +412,7 @@ class APIClient {
                 }, 1000);
             }
 
-            // request analysis to armlet.
+
             try {
                 // let {issues, status} = await client.analyzeWithStatus(analyzeOpts, timeout, initialDelay);
                 let { issues, status } = await this.doAnalysisFromClient(
@@ -424,6 +424,7 @@ class APIClient {
                     ({ sourceFormat }) =>
                         sourceFormat !== 'evm-byzantium-bytecode'
                 );
+                console.log('CHECK THIS STATUS OBJ', status);
                 obj.uuid = status.uuid;
                 if (config.debug) {
                     config.logger.debug(
