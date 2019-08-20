@@ -424,7 +424,6 @@ class APIClient {
                     ({ sourceFormat }) =>
                         sourceFormat !== 'evm-byzantium-bytecode'
                 );
-                console.log('CHECK THIS STATUS OBJ', status);
                 obj.uuid = status.uuid;
                 if (config.debug) {
                     config.logger.debug(
