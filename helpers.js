@@ -230,9 +230,15 @@ const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateL
             clientToolName: 'truffle',
             noCacheLookup: !cacheLookup,
         };
+        /**REMOVE THIS */
+        // config.logger.debug('build obj', obj.buildObj);
 
         analyzeOpts.data = cleanAnalyzeDataEmptyProps(obj.buildObj, config.debug,
                                                     config.logger.debug);
+
+        /**REMOVE THIS */
+        // config.logger.debug('analyseOpts.data', analyzeOpts.data);
+
         analyzeOpts.data.analysisMode = config.mode || 'quick';
         if (config.debug > 1) {
             config.logger.debug(`${util.inspect(analyzeOpts, {depth: null})}`);
@@ -261,7 +267,25 @@ const doAnalysis = async (client, config, contracts, limit = defaultAnalyzeRateL
         // request analysis to armlet.
         try {
             let {issues, status} = await client.analyzeWithStatus(analyzeOpts, timeout, initialDelay);
-            issues = issues.filter(({ sourceFormat }) => sourceFormat !== 'evm-byzantium-bytecode')
+
+            issues.filter(
+                ({sourceFormat}) =>{
+                    return sourceFormat !== 'evm-byzantium-bytecode'
+                }
+            );
+
+            if (issues && issues[0].issues && issues[0].issues.locations) {
+                issues[0].issues.locations = issues[0].locations.filter(
+                    (location) =>{
+                        return location.sourceFormat !== 'evm-byzantium-bytecode'
+                    }
+                );
+                issues[0].issues.decodedLocations = issues[0].decodedLocations.filter(
+                    (decodedLocation) =>{
+                        return decodedLocation.length > 0
+                    }
+                );
+            }
             obj.uuid = status.uuid;
             if (config.debug) {
                 config.logger.debug(`${analyzeOpts.data.contractName}: UUID is ${status.uuid}`);
@@ -419,8 +443,9 @@ function doReport(config, objects, errors) {
             config.logger.log(`\n${logGroup.sourcePath}`.yellow);
             config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
             logGroup.logs.forEach(log => {
-                if (showLog(log)) {
-                    config.logger.log(`${log.level}: ${log.msg}`);
+                if (showLog(log) && log.length > 0) {
+
+                    config.logger.log(`${log[0].level}: ${log[0].msg}`);
                 }
             });
         });
