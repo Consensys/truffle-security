@@ -34,7 +34,6 @@ const doReport = async function(objects, errors, config) {
 
     // Return 1 if some vulenrabilities were found.
     objects.forEach(ele => {
-
         ele.issues.forEach(ele => {
             ret = ele.issues.length > 0 ? 1 : ret;
         });
@@ -74,7 +73,7 @@ const doReport = async function(objects, errors, config) {
             return {
                 sourcePath: obj.sourcePath,
                 logs: obj.logs,
-                uuid: obj.uuid
+                uuid: obj.uuid,
             };
         })
         .reduce((acc, curr) => acc.concat(curr), []);
@@ -97,8 +96,8 @@ const doReport = async function(objects, errors, config) {
             config.logger.log(`\n${logGroup.sourcePath}`.yellow);
             config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
             logGroup.logs.forEach(log => {
-                if (showLog(log)) {
-                    config.logger.log(`${log.level}: ${log.msg}`);
+                if (showLog(log) && log.length > 0) {
+                    config.logger.log(`${log[0].level}: ${log[0].msg}`);
                 }
             });
         });
@@ -133,7 +132,7 @@ const groupEslintIssuesByBasename = async function(issues) {
             fixableErrorCount,
             fixableWarningCount,
             filePath,
-            messages
+            messages,
         } = issue;
 
         const basename = filePath;
@@ -144,7 +143,7 @@ const groupEslintIssuesByBasename = async function(issues) {
                 fixableErrorCount: 0,
                 fixableWarningCount: 0,
                 filePath: filePath,
-                messages: []
+                messages: [],
             };
         }
         accum[basename].errorCount += errorCount;
@@ -231,5 +230,5 @@ const compareMessLCRange = (mess1, mess2) => {
 
 module.exports = {
     ghettoReport,
-    doReport
+    doReport,
 };

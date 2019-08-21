@@ -4,7 +4,7 @@ const APIClient = require('./apiclient');
 class MythXJS extends APIClient {
     constructor(config, clientToolName) {
         // Bootstrap apiclient class first with super
-        super('mythxjs', config, clientToolName);
+        super('MythXJS', config, clientToolName);
     }
 
     /**
@@ -20,7 +20,6 @@ class MythXJS extends APIClient {
         let detectedIssues = await this.client.getDetectedIssues(
             analysisResponse.uuid
         );
-        console.log('analysisResponse:', analysisResponse);
         return { status: analysisResponse, issues: detectedIssues };
     }
 }

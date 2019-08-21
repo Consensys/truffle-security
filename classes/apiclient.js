@@ -8,7 +8,7 @@ const {
     buildObjForContractName,
     buildObjForSourcePath,
     buildObjIsCorrect,
-    contractsCompile
+    contractsCompile,
 } = require('../utils/buildutils');
 
 const path = require('path');
@@ -86,16 +86,13 @@ class APIClient {
                     : 'progress' in config
                         ? config.progress
                         : true;
-
-            // Only works with armlet currently
             let id;
-            console.log(await client.login());
+            await client.login();
             if (progress) {
                 const users = (this.apiClientType === 'MythXJS'
                     ? await client.getUsers()
                     : await client.getUserInfo()
                 ).users;
-                console.log(users);
                 let roles;
                 if (users) {
                     roles = users[0].roles;
@@ -113,8 +110,8 @@ class APIClient {
                     const r = (await inquirer.prompt([
                         {
                             name: 'cont',
-                            message: question
-                        }
+                            message: question,
+                        },
                     ])).cont;
 
                     const re = /(n|no)/i;
@@ -174,7 +171,7 @@ class APIClient {
                     selectedContracts.map(async selectedContract => {
                         const [
                             contractFile,
-                            contractName
+                            contractName,
                         ] = selectedContract.split(':');
 
                         let fullPath = path.resolve(contractFile);
@@ -227,7 +224,7 @@ class APIClient {
                             foundContracts.forEach(contract => {
                                 objContracts.push({
                                     contractName: contractName,
-                                    contract: contract
+                                    contract: contract,
                                 });
                             });
 
@@ -250,7 +247,7 @@ class APIClient {
                                 .forEach(contract => {
                                     objContracts.push({
                                         contractName: contract.contractName,
-                                        contract: contract
+                                        contract: contract,
                                     });
                                 });
                         }
@@ -284,7 +281,7 @@ class APIClient {
                         .forEach(contract => {
                             objContracts.push({
                                 contractName: contract.contractName,
-                                contract: contract
+                                contract: contract,
                             });
                         });
                 });
@@ -300,7 +297,6 @@ class APIClient {
             // However `doAnalysis` calls `analyzeWithStatus` simultaneously several times,
             // as a result, it causes unnecesarry login requests to Mythril-API. (It ia a kind of race condition problem)
             // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
-            await client.login();
             const { objects, errors } = await this.doAnalysis(
                 objContracts,
                 limit
@@ -314,6 +310,32 @@ class APIClient {
             return result;
         } catch (e) {
             console.log('Error: ', e);
+        }
+    }
+
+    filterIssuesAndLocations(issues) {
+        issues.filter(({ sourceFormat }) => {
+            return sourceFormat !== 'evm-byzantium-bytecode';
+        });
+
+        if (issues && issues[0].issues) {
+            issues[0].issues.map(issue => {
+                if (issue.locations) {
+                    issue.locations = issue.locations.filter(location => {
+                        return (
+                            location.sourceFormat !== 'evm-byzantium-bytecode'
+                        );
+                    });
+                }
+
+                if (issue.decodedLocations) {
+                    issue.decodedLocations = issue.decodedLocations.filter(
+                        decodedLocation => {
+                            return decodedLocation.length > 0;
+                        }
+                    );
+                }
+            });
         }
     }
 
@@ -366,7 +388,7 @@ class APIClient {
             const obj = new MythXIssues(buildObj.contract, config);
             let analyzeOpts = {
                 clientToolName: 'truffle',
-                noCacheLookup: !cacheLookup
+                noCacheLookup: !cacheLookup,
             };
 
             analyzeOpts.data = cleanAnalyzeDataEmptyProps(
@@ -399,19 +421,18 @@ class APIClient {
                             ),
                             40
                         ), // based on timeout, but the cap is 300 and the floor is 40.
-                        total: timeout / 1000
+                        total: timeout / 1000,
                     }
                 );
                 timer = setInterval(() => {
                     bar.tick({
-                        status: 'in progress...'
+                        status: 'in progress...',
                     });
                     if (bar.complete) {
                         clearInterval(timer);
                     }
                 }, 1000);
             }
-
 
             try {
                 // let {issues, status} = await client.analyzeWithStatus(analyzeOpts, timeout, initialDelay);
@@ -420,10 +441,8 @@ class APIClient {
                     timeout,
                     initialDelay
                 );
-                issues = issues.filter(
-                    ({ sourceFormat }) =>
-                        sourceFormat !== 'evm-byzantium-bytecode'
-                );
+                filterIssuesAndLocations(issues);
+
                 obj.uuid = status.uuid;
                 if (config.debug) {
                     config.logger.debug(
@@ -440,16 +459,14 @@ class APIClient {
                         );
                     }
                 }
-
                 if (progress) {
                     clearInterval(timer);
                     sleep.msleep(1000); // wait for last setInterval finising
                 }
-
                 if (status.status === 'Error') {
                     if (progress) {
                         bar.tick({
-                            status: '✗ Error'.red
+                            status: '✗ Error'.red,
                         });
                         bar.terminate(); // terminate since bar.complete is false at this time
                     }
@@ -457,11 +474,12 @@ class APIClient {
                 } else {
                     if (progress) {
                         bar.tick(timeout / 1000, {
-                            status: '✓ completed'.green
+                            status: '✓ completed'.green,
                         });
                     }
                     obj.setIssues(issues);
                 }
+
                 return [null, obj];
             } catch (err) {
                 if (progress) {
@@ -489,18 +507,18 @@ class APIClient {
                 ) {
                     if (progress) {
                         bar.tick({
-                            status: '✗ timeout'.yellow
+                            status: '✗ timeout'.yellow,
                         });
                         bar.terminate(); // terminate since bar.complete is false at this time
                     }
                     return [
                         (buildObj.contractName + ': ').yellow + errStr,
-                        null
+                        null,
                     ];
                 } else {
                     if (progress) {
                         bar.tick({
-                            status: '✗ error'.red
+                            status: '✗ error'.red,
                         });
                         bar.terminate(); // terminate since bar.complete is false at this time
                     }
