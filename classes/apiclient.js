@@ -441,7 +441,7 @@ class APIClient {
                     timeout,
                     initialDelay
                 );
-                filterIssuesAndLocations(issues);
+                this.filterIssuesAndLocations(issues);
 
                 obj.uuid = status.uuid;
                 if (config.debug) {
