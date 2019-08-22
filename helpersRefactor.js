@@ -21,6 +21,7 @@ async function analyze(config) {
     config = prepareConfig(config);
 
     if (config.apiClient === 'armlet') {
+        console.log('WARNING: You are using Armlet we will be deprecating Armlet in future versions of truffle-security in favour of MythXJS.')
         client = new armletClass( config, 'truffle');
     }
     else {

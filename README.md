@@ -71,7 +71,10 @@ module.exports = {
   }
 };
 ```
+## Armlet Deprecation Notice
 
+We will be deprecating Armlet in future versions of truffle-security in favour of MythXJS which is the new default. For now you can still use armlet with the parameter. 
+```truffle run verify --apiClient armlet``` 
 
 ## Running Security Analyses
 
