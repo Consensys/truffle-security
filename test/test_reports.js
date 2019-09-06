@@ -8,7 +8,7 @@ const sinon = require('sinon');
 const trufstuf = require('../lib/trufstuf');
 // const mythx = require('../lib/mythx');
 // const util = require('util');
-// const yaml = require('js-yaml');
+const yaml = require('js-yaml');
 const rewiredReports = rewire('../utils/reports');
 
 describe('Reporting Utilities', function() {
@@ -147,25 +147,7 @@ describe('Reporting Utilities', function() {
             let result = rewiredReports.__get__('groupEslintIssuesByBasename')(
                 issues
             );
-            console.log(result);
-            console.log([
-                {
-                    errorCount: 1,
-                    warningCount: 2,
-                    fixableErrorCount: 0,
-                    fixableWarningCount: 0,
-                    filePath: '/tmp/test_dir/contract.sol',
-                    messages: ['message 1', 'message 2', 'message 4'],
-                },
-                {
-                    errorCount: 0,
-                    warningCount: 1,
-                    fixableErrorCount: 0,
-                    fixableWarningCount: 0,
-                    filePath: '/tmp/test_dir/contract2.sol',
-                    messages: ['message 3'],
-                },
-            ]);
+
             result.then(resultAfterPromise => {
                 assert.deepEqual(resultAfterPromise, [
                     {
@@ -188,6 +170,263 @@ describe('Reporting Utilities', function() {
 
                 return;
             });
+        });
+    });
+
+    describe('doReport', () => {
+        let loggerStub;
+        let errorStub;
+        let config;
+
+        beforeEach(() => {
+            loggerStub = sinon.stub();
+            errorStub = sinon.stub();
+
+            config = {
+                logger: {
+                    log: loggerStub,
+                    error: errorStub,
+                },
+                json: true,
+            };
+        });
+
+        it('should return 0 when no errors, no issues, and no logs', async () => {
+            const results = {
+                errors: [],
+                objects: [
+                    {
+                        issues: [
+                            {
+                                issues: [],
+                            },
+                        ],
+                        logs: [],
+                    },
+                    {
+                        issues: [
+                            {
+                                issues: [],
+                            },
+                        ],
+                        logs: [],
+                    },
+                ],
+            };
+            const ret = rewiredReports.__get__('doReport')(
+                results.objects,
+                results.errors,
+                config,
+            );
+            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(
+                !errorStub.calledWith('Internal MythX errors encountered:'.red)
+            );
+
+            ret.then(retAfterPromise => {
+              assert.equal(retAfterPromise, 0);
+            })
+
+        });
+
+        it('should return 1 when errors is 1 or more', async () => {
+            const results = {
+                errors: [
+                    {
+                        status: 'Error',
+                    },
+                ],
+                objects: [
+                    {
+                        issues: [
+                            {
+                                issues: [],
+                            },
+                        ],
+                        logs: [],
+                    },
+                    {
+                        issues: [
+                            {
+                                issues: [],
+                            },
+                        ],
+                        logs: [],
+                    },
+                ],
+            };
+            const ret = rewiredReports.__get__('doReport')(
+              results.objects,
+              results.errors,
+              config,
+          );
+            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(
+                errorStub.calledWith('Internal MythX errors encountered:'.red)
+            );
+
+            ret.then(retAfterPromise => {
+              assert.equal(retAfterPromise, 1);
+            })
+        });
+
+        it('should return 1 when issues is 1 or more', () => {
+            const results = {
+                errors: [],
+                objects: [
+                    {
+                        issues: [
+                            {
+                                issues: [
+                                    {
+                                        description: {
+                                            head: 'Head message',
+                                            tail: 'Tail message',
+                                        },
+                                        locations: [
+                                            {
+                                                sourceMap: '444:1:0',
+                                            },
+                                        ],
+                                        severity: 'High',
+                                        swcID: 'SWC-000',
+                                        swcTitle: 'Test Title',
+                                    },
+                                ],
+                            },
+                        ],
+                        logs: [],
+                    },
+                    {
+                        issues: [
+                            {
+                                issues: [],
+                            },
+                        ],
+                        logs: [],
+                    },
+                ],
+            };
+            const ret = rewiredReports.__get__('doReport')(
+              results.objects,
+              results.errors,
+              config,
+          );
+            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(
+                !errorStub.calledWith('Internal MythX errors encountered:'.red)
+            );
+            ret.then(retAfterPromise => {
+              assert.equal(retAfterPromise, 1);
+            })
+        });
+
+        it('should return 0 when logs is 1 or more with debug', async () => {
+            config.debug = true;
+            const results = {
+                errors: [],
+                objects: [
+                    {
+                        issues: [
+                            {
+                                issues: [],
+                            },
+                        ],
+                        logs: [
+                            {
+                                level: 'info',
+                                msg: 'message1',
+                            },
+                        ],
+                    },
+                    {
+                        issues: [
+                            {
+                                issues: [],
+                            },
+                        ],
+                        logs: [],
+                    },
+                ],
+            };
+            const ret = rewiredReports.__get__('doReport')(
+              results.objects,
+              results.errors,
+              config,
+          );
+            assert.ok(loggerStub.calledWith('MythX Logs:'.yellow));
+            assert.ok(
+                !errorStub.calledWith('Internal MythX errors encountered:'.red)
+            );
+            ret.then(retAfterPromise => {
+              assert.equal(retAfterPromise, 1);
+            })
+        });
+    });
+
+    describe('ghettoReport', () => {
+        let loggerStub = sinon.stub();
+        beforeEach(() => {
+            loggerStub = sinon.stub();
+        });
+
+        it('should return 0 when issues count is 0', () => {
+            const results = [
+                {
+                    issues: [],
+                },
+            ];
+            const ret = rewiredReports.__get__('ghettoReport')(
+                loggerStub,
+                results
+            );
+            assert.ok(loggerStub.calledWith('No issues found'));
+            assert.equal(ret, 0);
+        });
+
+        it('should return 1 when issues count is 1 or more', () => {
+            const results = [
+                {
+                    sourceFormat: 'evm-byzantium-bytecode',
+                    sourceList: ['list1', 'list2'],
+                    sourceType: 'raw-bytecode',
+                    issues: [
+                        {
+                            description: {
+                                head: 'Head message',
+                                tail: 'Tail message',
+                            },
+                            locations: [
+                                {
+                                    sourceMap: '444:1:0',
+                                },
+                            ],
+                            severity: 'High',
+                            swcID: 'SWC-000',
+                            swcTitle: 'Test Title',
+                        },
+                    ],
+                    meta: {
+                        selected_compiler: '0.5.0',
+                        error: [],
+                        warning: [],
+                    },
+                },
+            ];
+
+            const ret = rewiredReports.__get__('ghettoReport')(
+                loggerStub,
+                results
+            );
+            assert.ok(!loggerStub.calledWith('No issues found'));
+            assert.ok(loggerStub.calledWith('list1, list2'.underline));
+            assert.ok(
+                loggerStub.calledWith(
+                    yaml.safeDump(results[0].issues[0], { skipInvalid: true })
+                )
+            );
+
+            assert.equal(ret, 1);
         });
     });
 });
