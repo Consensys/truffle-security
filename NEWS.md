@@ -1,3 +1,9 @@
+Release 1.6.0
+================
+
+Default apiClient is now MythXJS to use armlet run `truffle run verify --apiClient armlet`. This will be deprecated in future.
+
+
 Release 1.5.0
 ================
 

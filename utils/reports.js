@@ -1,5 +1,6 @@
 const yaml = require('js-yaml');
 const eslintHelpers = require('../lib/eslint');
+// const trufstuf = require('../lib/trufstuf');
 
 // A stripped-down listing for issues.
 // We will need this until we can beef up information in UUID retrieval
@@ -231,4 +232,5 @@ const compareMessLCRange = (mess1, mess2) => {
 module.exports = {
     ghettoReport,
     doReport,
+    compareLineCol
 };

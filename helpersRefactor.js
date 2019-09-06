@@ -1,10 +1,10 @@
 'use strict';
 
+const armlet = require('armlet');
 const armletClass = require('./classes/armlet');
 const mythxjsClass = require('./classes/mythx');
 
-// TODO: Replaced with new armlet class. Needs deleted.
-const armlet = null;
+
 
 
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
