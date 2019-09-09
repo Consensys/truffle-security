@@ -789,7 +789,11 @@ async function analyze(config) {
             config.logger.log(
                 'Welcome to MythX! You are currently running in Premium mode.\n'
             );
-        } else if (roles.includes('Free')) {
+         } else if (roles.includes('Professional')) {
+            config.logger.log(
+                'Welcome to MythX! You are currently running in Pro mode.\n'
+            );
+         } else if (roles.includes('Free')) {
             config.logger.log(
                 'Welcome to MythX! You are currently running in Free mode.\n'
             );
