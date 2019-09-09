@@ -19,6 +19,7 @@ const asyncPool = require('tiny-async-pool');
 const multiProgress = require('multi-progress');
 const { MythXIssues } = require('../lib/issues2eslint');
 const sleep = require('sleep');
+const inquirer = require('inquirer');
 
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
 const trialPassword = 'trial';
@@ -121,7 +122,7 @@ class APIClient {
                     log('\nContinuing with MythX Trial mode...\n');
                 } else if (roles.includes('privileged_user')) {
                     log(
-                        'Welcome to MythX! You are currently running in Premium mode.\n'
+                        'Welcome to MythX! You are currently running in Pro mode.\n'
                     );
                 } else if (roles.includes('regular_user')) {
                     log(
