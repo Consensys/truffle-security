@@ -82,7 +82,9 @@
     "esdoc-node": "^1.0.4",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": ">=5.9.0",
+    "husky": "^3.0.5",
     "ipfsd-ctl": "^0.21.0",
+    "lint-staged": "^9.2.5",
     "node-fetch": "^2.3.0",
     "nyc": "^14.1.0",
     "rewire": "^4.0.1",
@@ -91,5 +93,16 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run build && npm run test && lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }
