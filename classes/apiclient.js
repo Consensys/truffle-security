@@ -121,13 +121,13 @@ class APIClient {
                     }
                     log('\nContinuing with MythX Trial mode...\n');
                 } else if (roles.includes('privileged_user')) {
-                    log(
-                        'Welcome to MythX! You are currently running in Pro mode.\n'
-                    );
+                    // log(
+                    //     'Welcome to MythX! You are currently running in Pro mode.\n'
+                    // );
                 } else if (roles.includes('regular_user')) {
-                    log(
-                        'Welcome to MythX! You are currently running in Free mode.\n'
-                    );
+                    // log(
+                    //     'Welcome to MythX! You are currently running in Free mode.\n'
+                    // );
                 }
             }
 
