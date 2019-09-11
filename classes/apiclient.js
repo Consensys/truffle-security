@@ -52,7 +52,8 @@ class APIClient {
             this.apiClientType = 'MythXJS';
             this.client = new mythxjsClient(
                 options.ethAddress,
-                options.password
+                options.password,
+                'truffle'
             );
             break;
         }
@@ -302,10 +303,17 @@ class APIClient {
                 objContracts,
                 limit
             );
-            const result = await doReport(objects, errors, config);
-            if (progress && id === '123456789012345678901234') {
+
+            let isTrial = false;
+
+            if (id === '123456789012345678901234') {
+              isTrial = true;
+            }
+
+            const result = await doReport(objects, errors, config, isTrial);
+            if (progress && isTrial) {
                 config.logger.log(
-                    'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete report.'
+                    'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete analysis and view online reports.'
                 );
             }
             return result;
@@ -319,7 +327,7 @@ class APIClient {
             return sourceFormat !== 'evm-byzantium-bytecode';
         });
 
-        if (issues && issues[0].issues) {
+        if (issues && issues[0] && issues[0].issues) {
             issues[0].issues.map(issue => {
                 if (issue.locations) {
                     issue.locations = issue.locations.filter(location => {
@@ -338,6 +346,8 @@ class APIClient {
                 }
             });
         }
+        return issues;
+
     }
 
     /**
@@ -442,7 +452,7 @@ class APIClient {
                     timeout,
                     initialDelay
                 );
-                this.filterIssuesAndLocations(issues);
+                issues = this.filterIssuesAndLocations(issues, obj.sourcePath);
 
                 obj.uuid = status.uuid;
                 if (config.debug) {

@@ -23,7 +23,7 @@ const ghettoReport = (logger, results) => {
     return 1;
 };
 
-const doReport = async function(objects, errors, config) {
+const doReport = async function(objects, errors, config, isTrial) {
     let ret = 0;
 
     // Return true if we shold show log.
@@ -96,6 +96,10 @@ const doReport = async function(objects, errors, config) {
         logGroups.forEach(logGroup => {
             config.logger.log(`\n${logGroup.sourcePath}`.yellow);
             config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
+            if (!isTrial) {
+              config.logger.log(`View Report: https://dashboard.mythx.io/#/console/analyses/${logGroup.uuid}`.green);
+            }
+
             logGroup.logs.forEach(log => {
                 if (showLog(log) && log.length > 0) {
                     config.logger.log(`${log[0].level}: ${log[0].msg}`);
