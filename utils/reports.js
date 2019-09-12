@@ -25,7 +25,6 @@ const ghettoReport = (logger, results) => {
 
 const doReport = async function(objects, errors, config, isTrial) {
     let ret = 0;
-
     // Return true if we shold show log.
     // Ignore logs with log.level "info" unless the "debug" flag
     // has been set.
