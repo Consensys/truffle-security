@@ -785,14 +785,18 @@ async function analyze(config) {
                 process.exit(0);
             }
             config.logger.log('\nContinuing with MythX Trial mode...\n');
-        } else if (roles.includes('Premium')) {
-            config.logger.log(
-                'Welcome to MythX! You are currently running in Premium mode.\n'
+        } else {
+            let mode = 'Free';
+            if (roles.includes('admin')) mode = 'Admin';
+            else if (roles.includes('Professional')) mode = 'Professional';
+            console.logger.log(
+                `Welcome to MythX! You are currently running in ${mode} mode.\n`,
             );
-        } else if (roles.includes('Free')) {
-            config.logger.log(
-                'Welcome to MythX! You are currently running in Free mode.\n'
-            );
+            if (roles.includes('beta_user')) {
+                console.logger.log(
+                    'You are also recognized as a Beta user, who adopted MythX prior to its offical production release. We are very grateful for that!\n'
+                );
+            }
         }
     }
 
