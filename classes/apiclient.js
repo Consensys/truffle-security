@@ -121,15 +121,18 @@ class APIClient {
                         process.exit(0);
                     }
                     log('\nContinuing with MythX Trial mode...\n');
-                } else if (roles.includes('privileged_user')) {
-                    // log(
-                    //     'Welcome to MythX! You are currently running in Pro mode.\n'
-                    // );
-                } else if (roles.includes('regular_user')) {
-                    // log(
-                    //     'Welcome to MythX! You are currently running in Free mode.\n'
-                    // );
-                }
+                  } else {
+                    let mode = 'Free';
+                    if (roles.includes('admin')) mode = 'Admin';
+                    else if (roles.includes('Professional')) mode = 'Professional';
+                    console.logger.log(
+                        `Welcome to MythX! You are currently running in ${mode} mode.\n`,
+                    );
+                    if (roles.includes('beta_user')) {
+                        console.logger.log(
+                            'You are also recognized as a Beta user, who adopted MythX prior to its offical production release. We are very grateful for that!\n'
+                        );
+                  }
             }
 
             if (config.uuid) {
