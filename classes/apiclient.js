@@ -125,14 +125,15 @@ class APIClient {
                     let mode = 'Free';
                     if (roles.includes('admin')) mode = 'Admin';
                     else if (roles.includes('Professional')) mode = 'Professional';
-                    console.logger.log(
+                    config.logger.log(
                         `Welcome to MythX! You are currently running in ${mode} mode.\n`,
                     );
                     if (roles.includes('beta_user')) {
-                        console.logger.log(
+                        config.logger.log(
                             'You are also recognized as a Beta user, who adopted MythX prior to its offical production release. We are very grateful for that!\n'
                         );
                   }
+                }
             }
 
             if (config.uuid) {

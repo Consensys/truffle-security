@@ -68,7 +68,10 @@ describe('issues2Eslint', function() {
                         'tail': 'Tail message'
                     },
                     'locations': [{
-                        'sourceMap': '444:1:0'
+                        'sourceMap': '444:1:0',
+                        'sourceList': [
+                            sourcePath
+                        ],
                     }],
                     'severity': 'High',
                     'swcID': 'SWC-000',
@@ -112,7 +115,10 @@ describe('issues2Eslint', function() {
                         'tail': 'Tail message'
                     },
                     'locations': [{
-                        'sourceMap': '310:23:0'
+                        'sourceMap': '310:23:0',
+                        'sourceList': [
+                          sourcePath
+                        ]
                     }],
                     'severity': 'High',
                     'swcID': 'SWC-000',
@@ -202,7 +208,10 @@ describe('issues2Eslint', function() {
                         'tail': 'Tail message'
                     },
                     'locations': [{
-                        'sourceMap': '310:23:0'
+                        'sourceMap': '310:23:0',
+                        'sourceList': [
+                          sourcePath,
+                      ],
                     }],
                     'severity': 'High',
                     'swcID': 'SWC-000',
@@ -260,7 +269,10 @@ describe('issues2Eslint', function() {
                         'tail': 'Tail message'
                     },
                     'locations': [{
-                        'sourceMap': '310:23:0'
+                        'sourceMap': '310:23:0',
+                        'sourceList': [
+                            sourcePath,
+                        ],
                     }],
                     'severity': 'High',
                     'swcID': 'SWC-000',
@@ -309,7 +321,10 @@ describe('issues2Eslint', function() {
                         'tail': 'Tail message'
                     },
                     'locations': [{
-                        'sourceMap': '310:23:0'
+                        'sourceMap': '310:23:0',
+                        'sourceList': [
+                            sourcePath
+                        ],
                     }],
                     'severity': 'High',
                     'swcID': 'SWC-000',
@@ -340,7 +355,10 @@ describe('issues2Eslint', function() {
                         'tail': 'Tail message'
                     },
                     'locations': [{
-                        'sourceMap': '310:23:0'
+                        'sourceMap': '310:23:0',
+                        'sourceList': [
+                          sourcePath
+                      ],
                     }],
                     'severity': 'High',
                     'swcID': 'SWC-000',
