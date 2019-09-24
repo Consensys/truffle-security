@@ -47,7 +47,7 @@ describe('trufstuf', () => {
     it('should return paths of filtered JSON files', async () => {
         statStub.yields(null, { mtime: 1000000 });
         statStub.onCall(2).yields('error');
-        
+
 
         readdirStub.yields(null, [
             'Contract.json',
@@ -55,7 +55,10 @@ describe('trufstuf', () => {
             'OtherContract.json',
         ]);
 
-        const files = await trufstuf.getTruffleBuildJsonFiles('/test/build/contracts');
+        let files = await trufstuf.getTruffleBuildJsonFiles('/test/build/contracts');
+        files = files.map(file => {
+          return file.replace(/\\/g, '/')
+        });
         assert.deepEqual(files, [
             '/test/build/contracts/Contract.json',
             '/test/build/contracts/OtherContract.json',

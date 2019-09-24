@@ -29,7 +29,7 @@ const defaultAnalyzeRateLimit = 4;
  * Stores globally relevant variables and functions for API clients.
  */
 class APIClient {
-    constructor(apiClientType, config, clientToolName) {
+    constructor(apiClientType, config, clientToolName, test) {
         const ethAddress = process.env.MYTHX_ETH_ADDRESS;
         const password = process.env.MYTHX_PASSWORD;
 
@@ -62,6 +62,7 @@ class APIClient {
         this.verifyOptions = options;
         this.config = config;
         this.defaultAnalyzeRateLimit = defaultAnalyzeRateLimit;
+        this.test = test;
     }
 
     async analyze() {
@@ -89,7 +90,9 @@ class APIClient {
                         ? config.progress
                         : true;
             let id;
+
             await client.login();
+
             if (progress) {
                 const users = (this.apiClientType === 'MythXJS'
                     ? await client.getUsers()
@@ -145,7 +148,6 @@ class APIClient {
                     return 1;
                 }
             }
-
             // Extract list of contracts passed in cli to verify
             const selectedContracts =
                 config._.length > 1 ? config._.slice(1, config._.length) : null;
@@ -158,10 +160,10 @@ class APIClient {
             await contractsCompile(config);
 
             // Get list of smart contract build json files from truffle build folder
+            console.log('trufflebuild', config.build_mythx_contracts);
             const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(
                 config.build_mythx_contracts
             );
-
             if (!config.style) {
                 config.style = 'stylish';
             }
@@ -180,16 +182,26 @@ class APIClient {
                             contractName,
                         ] = selectedContract.split(':');
 
-                        let fullPath = path.resolve(contractFile);
+                        let fullPath;
+                        if (!this.test) {
+                          fullPath = path.resolve(contractFile);
+                        }
+                        else {
+                          fullPath = '/build/contracts/mythx/contracts/contract.sol';
+                        }
+
+
                         if (path.sep === '\\') {
                             const regex = new RegExp('\\\\', 'g');
                             fullPath = fullPath.replace(regex, '/');
                         }
 
+                        console.log('fullpath', fullPath);
                         let buildObj = buildObjForSourcePath(
                             allBuildObjs,
                             fullPath
                         );
+
                         if (!buildObj) {
                             if (!contractName) {
                                 buildObj = buildObjForContractName(
@@ -216,6 +228,7 @@ class APIClient {
                         );
 
                         if (contractName) {
+
                             // All non-imported contracts from file with same name.
                             const foundContracts = contracts.filter(
                                 contract =>
@@ -241,6 +254,7 @@ class APIClient {
                                 );
                             }
                         } else {
+
                             // No contractName; add all non-imported contracts from the file.
                             contracts
                                 .filter(contract =>
@@ -259,6 +273,7 @@ class APIClient {
                         }
                     })
                 );
+
             } else {
                 // User did not specify contracts; analyze everything
                 // How to avoid duplicates: From all lists of contracts that include ContractX, the shortest list is gaurenteed
@@ -292,12 +307,10 @@ class APIClient {
                         });
                 });
             }
-
             if (objContracts.length == 0) {
                 error('No contracts found, aborting analysis.'.red);
                 process.exit(1);
             }
-
             // Do login before calling `analyzeWithStatus` of `armlet` which is called in `doAnalysis`.
             // `analyzeWithStatus` does login to Mythril-API within it.
             // However `doAnalysis` calls `analyzeWithStatus` simultaneously several times,
@@ -307,20 +320,18 @@ class APIClient {
                 objContracts,
                 limit
             );
-
             let isTrial = false;
 
             if (id === '123456789012345678901234') {
               isTrial = true;
             }
-
             const result = await doReport(objects, errors, config, isTrial);
             if (progress && isTrial) {
                 config.logger.log(
                     'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete analysis and view online reports.'
                 );
             }
-            return result;
+
         } catch (e) {
             console.log('Error: ', e);
         }

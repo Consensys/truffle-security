@@ -1,10 +1,11 @@
 'use strict';
 const APIClient = require('./apiclient');
+const path = require('path');
 
 class MythXJS extends APIClient {
-    constructor(config, clientToolName) {
+    constructor(config, clientToolName, test) {
         // Bootstrap apiclient class first with super
-        super('MythXJS', config, clientToolName);
+        super('MythXJS', config, clientToolName, test);
     }
 
     /**
@@ -16,6 +17,7 @@ class MythXJS extends APIClient {
      * @returns {Promise} - Resolves analysis object.
      */
     async doAnalysisFromClient(analyzeOpts, timeout, initialDelay) {
+
         let analysisResponse = await this.client.analyze(analyzeOpts.data);
         let detectedIssues = await this.client.getDetectedIssues(
             analysisResponse.uuid

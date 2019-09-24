@@ -30,6 +30,7 @@ describe('mythx.js', () => {
           deployedSourceMap:
             truffleJSON.sources[solFilePath].contracts[0].deployedSourceMap,
           mainSource: '/test/simple_dao/contracts/simple_dao.sol',
+          solcVersion: '0.4.25+commit.59dbf8f1.Emscripten.clang',
           sourceList: [solFilePath],
           sources: {
             '/test/simple_dao/contracts/simple_dao.sol': {

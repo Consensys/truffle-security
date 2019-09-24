@@ -6,7 +6,6 @@ const mythxjsClass = require('./classes/mythx');
 
 
 
-
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
 const trialPassword = 'trial';
 const defaultAnalyzeRateLimit = 4;
@@ -17,15 +16,15 @@ let client;
  *
  * @param {Object} config - truffle configuration object.
  */
-async function analyze(config) {
+async function analyze(config, test = false) {
     config = prepareConfig(config);
 
     if (config.apiClient === 'armlet') {
         console.log('WARNING: You are using Armlet we will be deprecating Armlet in future versions of truffle-security in favour of MythXJS.')
-        client = new armletClass( config, 'truffle');
+        client = new armletClass( config, 'truffle', test);
     }
     else {
-        client = new mythxjsClass( config, 'truffle');
+        client = new mythxjsClass( config, 'truffle', test);
     }
     const analysisResponse = await client.analyze();
     return analysisResponse;
