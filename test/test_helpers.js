@@ -10,7 +10,7 @@ const mythx = require('../lib/mythx');
 const util = require('util');
 const yaml = require('js-yaml');
 const reports = require('../utils/reports');
-const apiClient = require('../classes/apiClient');
+const apiClient = require('../classes/apiclient');
 const mythxjsClient = require('../classes/mythx');
 
 
@@ -90,8 +90,12 @@ describe('helpers.js', function() {
         let pathStub;
 
         let apiClass;
+        let mythx;
+        let armlet
 
         beforeEach(() => {
+            helpers = proxyquire('../helpersRefactor', {});
+
             getTruffleBuildJsonFilesStub = sinon.stub(trufstuf, 'getTruffleBuildJsonFiles');
             // getTruffleBuildJsonFilesStub = sinon.stub(apiClient.prototype, 'getTruffleBuildJsonFiles').callsFake(() => {
             //   return {}
@@ -108,7 +112,7 @@ describe('helpers.js', function() {
             // loginStub = sinon.stub(armlet.Client.prototype, 'login');
             contractsCompileStub = sinon.stub();
             pathStub = {
-                resolve: sinon.stub(mythxjsClient.prototype.path),
+                resolve: sinon.stub(),
                 join: path.join
             }
 
@@ -124,25 +128,37 @@ describe('helpers.js', function() {
                 progress: false,
             };
 
-            // apiClass = new apiClient(config);
+            buildUtilsRewired = rewire('../utils/buildutils');
+            buildUtilsRewired.contractsCompile = contractsCompileStub;
+            reportsRewired = rewire('../utils/reports');
+            reportsRewired.doReport = doReportStub;
+            reportsRewired.ghettoReportStub = ghettoReportStub;
 
-            reportsWired = rewire('../utils/reports');
-            buildUtilsWired = rewire('../utils/buildUtils');
-            apiClientWired = rewire('../classes/apiClient');
+            let apiclient = proxyquire('../classes/apiclient', {
+                path: pathStub,
+                "../utils/buildutils": buildUtilsRewired,
+                "../utils/reports": reportsRewired,
+            });
+            mythx = proxyquire('../classes/mythx', {
+                "./apiclient": apiclient
+            });
+            armlet = proxyquire('../classes/armlet', {
+                "./apiclient": apiclient
+            });
+
+            doAnalysisStub = sinon.stub(apiclient.prototype, 'doAnalysis')
+
             helpers = rewire('../helpersRefactor');
-            apiClientWired.__set__('path', pathStub);
-            buildUtilsWired.__set__('contractsCompile', contractsCompileStub);
             helpers.__set__('analyze', doAnalysisStub);
-            reportsWired.__set__('doReport', doReportStub);
-            reportsWired.__set__('ghettoReport', ghettoReportStub);
+            helpers.__set__('mythxjsClass', mythx);
+            helpers.__set__('armletClass', armlet);
         });
 
         afterEach(() => {
             getTruffleBuildJsonFilesStub.restore();
-            // getUserInfoStub.restore();
+            getTruffleBuildJsonFilesStub.restore();
             parseBuildJsonStub.restore();
-            // getIssuesStub.restore();
-            // loginStub.restore();
+            doAnalysisStub.restore();
         });
 
         it('should return error when passed value for limit is not a number', async () => {
@@ -193,13 +209,13 @@ describe('helpers.js', function() {
             // doAnalysisStub.resolves({ objects: 1, errors: 3 });
             getTruffleBuildJsonFilesStub.resolves(['contract.json']);
             parseBuildJsonStub.resolves(fakeBuildJson);
+            pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol")
+            doAnalysisStub.resolves({ objects: 1, errors: 3 });
 
             await helpers.analyze(config, true);
-            console.log('called ', getTruffleBuildJsonFilesStub.called);
-            console.log('arg ', getTruffleBuildJsonFilesStub.getCall(0).args[0]);
-            assert.ok(getTruffleBuildJsonFilesStub.getCall(0).args[0] === '\\build\\contracts\\mythx\\contracts');
-            assert.ok(doAnalysisStub.calledWith(sinon.match.any, config, [ { contractName: "Contract1", contract: sinon.match.any} ], helpers.defaultAnalyzeRateLimit));
-            assert.ok(doReportStub.calledWith(config, 1, 3));
+            assert.ok(getTruffleBuildJsonFilesStub.getCall(0).args[0] === '/build/contracts/mythx/contracts');
+            assert.ok(doAnalysisStub.calledWith([ { contractName: "Contract1", contract: sinon.match.any} ], helpers.defaultAnalyzeRateLimit));
+            assert.ok(doReportStub.calledWith(1, 3, config, false));
         });
 
 

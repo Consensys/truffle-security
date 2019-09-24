@@ -183,12 +183,7 @@ class APIClient {
                         ] = selectedContract.split(':');
 
                         let fullPath;
-                        if (!this.test) {
-                          fullPath = path.resolve(contractFile);
-                        }
-                        else {
-                          fullPath = '/build/contracts/mythx/contracts/contract.sol';
-                        }
+                        fullPath = path.resolve(contractFile);
 
 
                         if (path.sep === '\\') {
