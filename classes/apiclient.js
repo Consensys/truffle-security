@@ -62,10 +62,10 @@ class APIClient {
         this.verifyOptions = options;
         this.config = config;
         this.defaultAnalyzeRateLimit = defaultAnalyzeRateLimit;
-        this.test = test;
     }
 
     async analyze() {
+      console.log('analyzing');
         try {
             let { client, config, defaultAnalyzeRateLimit } = this;
             const { log, error } = config.logger;
@@ -133,7 +133,7 @@ class APIClient {
                     );
                     if (roles.includes('beta_user')) {
                         config.logger.log(
-                            'You are also recognized as a Beta user, who adopted MythX prior to its offical production release. We are very grateful for that!\n'
+                            'You are also recognized as a Beta user, who adopted MythX prior to its offical production release. We are very grateful for this!\n'
                         );
                   }
                 }
@@ -141,7 +141,14 @@ class APIClient {
 
             if (config.uuid) {
                 try {
-                    const results = await client.getIssues(config.uuid);
+                  let results;
+                    if (this.apiClientType === 'MythXJS') {
+                      results = await client.getDetectedIssues(config.uuid);
+                    }
+                    else {
+                      results = await client.getIssues(config.uuid);
+                    }
+
                     return ghettoReport(log, results);
                 } catch (err) {
                     log(err);
@@ -160,7 +167,6 @@ class APIClient {
             await contractsCompile(config);
 
             // Get list of smart contract build json files from truffle build folder
-            console.log('trufflebuild', config.build_mythx_contracts);
             const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(
                 config.build_mythx_contracts
             );
@@ -191,7 +197,6 @@ class APIClient {
                             fullPath = fullPath.replace(regex, '/');
                         }
 
-                        console.log('fullpath', fullPath);
                         let buildObj = buildObjForSourcePath(
                             allBuildObjs,
                             fullPath

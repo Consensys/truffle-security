@@ -3,9 +3,9 @@ const APIClient = require('./apiclient');
 const path = require('path');
 
 class MythXJS extends APIClient {
-    constructor(config, clientToolName, test) {
+    constructor(config, clientToolName) {
         // Bootstrap apiclient class first with super
-        super('MythXJS', config, clientToolName, test);
+        super('MythXJS', config, clientToolName);
     }
 
     /**
