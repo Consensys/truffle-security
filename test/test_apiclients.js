@@ -35,4 +35,79 @@ describe('API Client Classes', function() {
 
         afterEach(function() {});
     });
+
+    describe('analyze', () => {
+        let APIClient;
+        let doAnalysisFromClientStub;
+
+        beforeEach(function() {
+            debuggerStub = sinon.stub();
+
+            APIClient = require('../classes/mythx');
+            doAnalysisFromClientStub = sinon.stub(APIClient.prototype, "doAnalysisFromClient");
+        });
+
+        afterEach(function() {
+            doAnalysisFromClientStub.restore();
+        });
+
+        it('should return 1 mythXIssues object and no errors', async function() {
+            const config = {
+                _: [],
+                debug: true,
+                logger: {debug: debuggerStub},
+                style: 'test-style',
+                progress: false,
+            }
+            const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
+            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
+            const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
+            const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
+            const mythXInput = mythx.truffle2MythXJSON(objContracts[0].contract);
+            doAnalysisFromClientStub.resolves({
+                issues: [{
+                    'sourceFormat': 'evm-byzantium-bytecode',
+                    'sourceList': [
+                        `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`
+                    ],
+                    'sourceType': 'raw-bytecode',
+                    'issues': [{
+                        'description': {
+                            'head': 'Head message',
+                            'tail': 'Tail message'
+                        },
+                        'locations': [{
+                            'sourceMap': '444:1:0',
+                            'sourceList': [
+                                `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`
+                            ]
+                        }],
+                        'severity': 'High',
+                        'swcID': 'SWC-000',
+                        'swcTitle': 'Test Title'
+                    }],
+                    'meta': {
+                        'selected_compiler': '0.5.0',
+                        'error': [],
+                        'warning': []
+                    }
+                }],
+                status: { status: 'Finished' },
+            });
+
+            //pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
+            apiClient = new APIClient(config, "truffle");
+            const results = await apiClient.doAnalysis(objContracts);
+            mythXInput.analysisMode = 'quick';
+            assert.ok(doAnalysisFromClientStub.calledWith({
+                clientToolName: 'truffle',
+                data: mythXInput,
+                noCacheLookup: false,
+            }, 300000, undefined));
+            console.error(results)
+            assert.equal(results.errors.length, 0);
+            assert.equal(results.objects.length, 1);
+        });
+
+    })
 });

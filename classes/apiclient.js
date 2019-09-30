@@ -65,7 +65,6 @@ class APIClient {
     }
 
     async analyze() {
-      console.log('analyzing');
         try {
             let { client, config, defaultAnalyzeRateLimit } = this;
             const { log, error } = config.logger;

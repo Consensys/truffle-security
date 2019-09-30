@@ -86,10 +86,8 @@ describe('helpers.js', function() {
         let doReportStub;
         let ghettoReportStub;
         let getIssuesStub;
-        let loginStub;
         let pathStub;
 
-        let apiClass;
         let mythx;
         let armlet
 
@@ -97,21 +95,13 @@ describe('helpers.js', function() {
             helpers = proxyquire('../helpersRefactor', {});
 
             getTruffleBuildJsonFilesStub = sinon.stub(trufstuf, 'getTruffleBuildJsonFiles');
-            // getTruffleBuildJsonFilesStub = sinon.stub(apiClient.prototype, 'getTruffleBuildJsonFiles').callsFake(() => {
-            //   return {}
-            // });
             parseBuildJsonStub = sinon.stub(trufstuf, 'parseBuildJson');
             doReportStub = sinon.stub();
-            doAnalysisStub = sinon.stub();
             loggerStub = sinon.stub();
             errorStub = sinon.stub();
             ghettoReportStub = sinon.stub();
             getDetectedIssuesStub = sinon.stub();
 
-
-            // getUserInfoStub = sinon.stub(armlet.Client.prototype, 'getUserInfo');
-            // getIssuesStub = sinon.stub(armlet.Client.prototype, 'getIssues');
-            // loginStub = sinon.stub(armlet.Client.prototype, 'login');
             contractsCompileStub = sinon.stub();
             pathStub = {
                 resolve: sinon.stub(),
@@ -134,32 +124,32 @@ describe('helpers.js', function() {
             buildUtilsRewired.contractsCompile = contractsCompileStub;
             reportsRewired = rewire('../utils/reports');
             reportsRewired.doReport = doReportStub;
-            reportsRewired.ghettoReportStub = ghettoReportStub;
+            reportsRewired.ghettoReport = ghettoReportStub;
+
+            let mythxjsRewired = rewire('mythxjs');
+            let armletRewired = rewire('armlet');
+
+            getDetectedIssuesStub = sinon.stub(mythxjsRewired.Client.prototype, "getDetectedIssues");
+            getIssuesStub = sinon.stub(armletRewired.Client.prototype, "getIssues");
 
             let apiclient = proxyquire('../classes/apiclient', {
                 path: pathStub,
                 "../utils/buildutils": buildUtilsRewired,
                 "../utils/reports": reportsRewired,
+                "mythxjs": mythxjsRewired,
+                "armlet": armletRewired,
             });
-
-            let mythxjsclient = proxyquire('mythxjs', {
-              client: {
-                getDetectedIssues: getDetectedIssuesStub,
-              }
-            })
+            doAnalysisStub = sinon.stub(apiclient.prototype, "doAnalysis");
 
             mythx = proxyquire('../classes/mythx', {
                 "./apiclient": apiclient,
-                client: mythxjsclient,
             });
+
             armlet = proxyquire('../classes/armlet', {
                 "./apiclient": apiclient
             });
 
-
-
             helpers = rewire('../helpersRefactor');
-            helpers.__set__('analyze', doAnalysisStub);
             helpers.__set__('mythxjsClass', mythx);
             helpers.__set__('armletClass', armlet);
         });
@@ -169,6 +159,8 @@ describe('helpers.js', function() {
             getTruffleBuildJsonFilesStub.restore();
             parseBuildJsonStub.restore();
             doAnalysisStub.restore();
+            getDetectedIssuesStub.restore();
+            getIssuesStub.restore();
         });
 
         it('should return error when passed value for limit is not a number', async () => {
@@ -223,7 +215,7 @@ describe('helpers.js', function() {
             doAnalysisStub.resolves({ objects: 1, errors: 3 });
 
             await helpers.analyze(config, true);
-            assert.ok(getTruffleBuildJsonFilesStub.getCall(0).args[0] === "\\build\\contracts\\mythx\\contracts");
+            assert.ok(getTruffleBuildJsonFilesStub.getCall(0).args[0] === "/build/contracts/mythx/contracts");
             assert.ok(doAnalysisStub.calledWith([ { contractName: "Contract1", contract: sinon.match.any} ], helpers.defaultAnalyzeRateLimit));
             assert.ok(doReportStub.calledWith(1, 3, config, false));
         });
@@ -264,21 +256,13 @@ describe('helpers.js', function() {
             parseBuildJsonStub.resolves(fakeBuildJson);
 
             await helpers.analyze(config);
-            assert.ok(getTruffleBuildJsonFilesStub.getCall(0).args[0] === "\\build\\contracts\\mythx\\contracts");
+            assert.ok(getTruffleBuildJsonFilesStub.getCall(0).args[0] === "/build/contracts/mythx/contracts");
             assert.ok(doAnalysisStub.called);
             assert.ok(doReportStub.calledWith(1, 3, config, false));
 
         });
 
-        it('should call getIssues when uuid is provided', async () => {
-            // getUserInfoStub.resolves({
-            //   total: 1,
-            //   users: [
-            //     { id: '000000000000000000000002',
-            //       roles: ['regular_user', 'privlidged_user'],
-            //     }
-            //   ]
-            // });
+        it('should call getDetectedIssues when uuid is provided', async () => {
             const fakeBuildJson = {
               "compiler": { "name": "", "version": "" },
               "updatedAt": "",
@@ -312,231 +296,25 @@ describe('helpers.js', function() {
           getTruffleBuildJsonFilesStub.resolves(['test.json']);
           parseBuildJsonStub.resolves(fakeBuildJson);
 
+          getDetectedIssuesStub.resolves({})
+          getIssuesStub.resolves({})
+
           config.uuid = 'test';
 
           getDetectedIssuesStub.resolves('testIssues');
           await helpers.analyze(config);
-          // assert.ok(getIssuesStub.called);
+          assert.ok(getDetectedIssuesStub.called);
           assert.ok(ghettoReportStub.called);
         });
 
-        it('should show error when getIssues break', async () => {
+        it('should show error when getDetectedIssues break', async () => {
             config.uuid = 'test';
-            // getIssuesStub.throws('Error')
-            // getUserInfoStub.resolves({
-            //   total: 1,
-            //   users: [
-            //     { id: '000000000000000000000001',
-            //       roles: ['regular_user'],
-            //     }
-            //   ]
-            // });
+            getDetectedIssuesStub.throws('Error');
             await helpers.analyze(config);
-            // assert.ok(getIssuesStub.called);
+            assert.ok(getDetectedIssuesStub.called);
             assert.ok(loggerStub.getCall(0).args[0], 'Error');
         });
     });
-
-    describe('doAnalysis', () => {
-        let armletClient, stubAnalyze, debuggerStub, pathStub, getDetectedIssuesStub, mythxjsClientInstantiated, contractsCompileStub, ghettoReportStub, doReportStub, newTruffleObjToOldTruffleByContractsStub;
-        let mythx;
-        let armlet;
-
-
-        beforeEach(() => {
-          let config = {};
-          getDetectedIssuesStub = sinon.stub();
-
-          // let mythxClient = new mythxjsClient(config, 'truffle');
-          pathStub = {
-            resolve: sinon.stub(),
-            join: path.join
-          }
-
-          mythxjsClientInstantiated = new mythxjsClient({
-            ethAddress: helpers.trialEthAddress,
-            password: helpers.trialPassword
-          })
-
-          contractsCompileStub = sinon.stub();
-          ghettoReportStub = sinon.stub();
-
-          buildUtilsRewired = rewire('../utils/buildutils');
-          reportsRewired = rewire('../utils/reports');
-          newTruffleObjToOldTruffleByContractsStub = sinon.stub();
-
-          let apiclient = proxyquire('../classes/apiclient', {
-              path: pathStub,
-              "../utils/buildutils": buildUtilsRewired,
-              "../utils/reports": reportsRewired,
-          });
-
-          let mythxjsclient = proxyquire('mythxjs', {
-            client: {
-              getDetectedIssues: getDetectedIssuesStub,
-            }
-          })
-
-          mythx = proxyquire('../classes/mythx', {
-              "./apiclient": apiclient,
-              client: mythxjsclient,
-          });
-
-          armlet = proxyquire('../classes/armlet', {
-              "./apiclient": apiclient
-          });
-
-
-
-          stubAnalyze = sinon.stub(mythxjsClientInstantiated, 'analyze');
-          debuggerStub = sinon.stub();
-        });
-
-        afterEach(() => {
-            stubAnalyze.restore();
-            stubAnalyze = null;
-        });
-
-        it('should return 1 mythXIssues object and no errors', async () => {
-            const doAnalysis = helpers.__get__('analyze');
-            // const config = {
-            //     _: [],
-            //     debug: true,
-            //     logger: {debug: debuggerStub},
-            //     style: 'test-style',
-            //     progress: false,
-            // }
-            const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
-            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
-            const contracts = mythxLib.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-            const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
-            const mythXInput = mythxLib.truffle2MythXJSON(objContracts[0].contract);
-            stubAnalyze.resolves({
-                issues: [{
-                    'sourceFormat': 'evm-byzantium-bytecode',
-                    'sourceList': [
-                        `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`
-                    ],
-                    'sourceType': 'raw-bytecode',
-                    'issues': [{
-                        'description': {
-                            'head': 'Head message',
-                            'tail': 'Tail message'
-                        },
-                        'locations': [{
-                            'sourceMap': '444:1:0'
-                        }],
-                        'severity': 'High',
-                        'swcID': 'SWC-000',
-                        'swcTitle': 'Test Title'
-                    }],
-                    'meta': {
-                        'selected_compiler': '0.5.0',
-                        'error': [],
-                        'warning': []
-                    }
-                }],
-                status: { status: 'Finished' },
-            });
-
-            const results = await mythx.doAnalysis(objContracts);
-            // const results = await doAnalysis(armletClient, config, objContracts);
-            mythXInput.analysisMode = 'quick';
-            assert.ok(stubAnalyze.calledWith({
-                clientToolName: 'truffle',
-                data: mythXInput,
-                noCacheLookup: false,
-            }, 300000, undefined));
-            assert.equal(results.errors.length, 0);
-            assert.equal(results.objects.length, 1);
-        });
-
-        it('should return 0 mythXIssues objects and 1 error', async () => {
-            const doAnalysis = helpers.__get__('analyze');
-            const config = {
-                _: [],
-                debug: true,
-                logger: {debug: debuggerStub},
-                style: 'test-style',
-                progress: false,
-            }
-            const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
-            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
-            const contracts = mythxLib.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-            const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
-            const mythXInput = mythxLib.truffle2MythXJSON(objContracts[0].contract);
-            stubAnalyze.resolves({
-                issues: [],
-                status: { status: 'Error'},
-            });
-            const results = await doAnalysis(armletClient, config, objContracts);
-            mythXInput.analysisMode = 'quick';
-            assert.ok(stubAnalyze.calledWith({
-                clientToolName: 'truffle',
-                data: mythXInput,
-                noCacheLookup: false,
-            }, 300000, undefined));
-            assert.equal(results.errors.length, 1);
-            assert.equal(results.objects.length, 0);
-        });
-
-        it('should return 1 mythXIssues object and 1 error', async () => {
-            const doAnalysis = helpers.__get__('analyze');
-            const config = {
-                _: [],
-                debug: true,
-                logger: {debug: debuggerStub},
-                style: 'test-style',
-                progress: false,
-            }
-            const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
-            const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
-            const contracts = mythxLib.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-            const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] }, { contractName: "SimpleDAO", contract: contracts[0] } ];
-            const mythXInput = mythxLib.truffle2MythXJSON(objContracts[0].contract);
-            stubAnalyze.onFirstCall().resolves({
-                issues: {},
-                status: { status: 'Error' },
-            });
-            stubAnalyze.onSecondCall().resolves({
-                issues: [{
-                    'sourceFormat': 'evm-byzantium-bytecode',
-                    'sourceList': [
-                        `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`
-                    ],
-                    'sourceType': 'raw-bytecode',
-                    'issues': [{
-                        'description': {
-                            'head': 'Head message',
-                            'tail': 'Tail message'
-                        },
-                        'locations': [{
-                            'sourceMap': '444:1:0'
-                        }],
-                        'severity': 'High',
-                        'swcID': 'SWC-000',
-                        'swcTitle': 'Test Title'
-                    }],
-                    'meta': {
-                        'selected_compiler': '0.5.0',
-                        'error': [],
-                        'warning': []
-                    },
-                }],
-                status: {status: 'Pending' },
-            });
-            const results = await doAnalysis(armletClient, config, objContracts);
-            mythXInput.analysisMode = 'quick';
-            assert.ok(stubAnalyze.calledWith({
-                clientToolName: 'truffle',
-                data: mythXInput,
-                noCacheLookup: false,
-            }, 300000, undefined));
-            assert.equal(results.errors.length, 1);
-            assert.equal(results.objects.length, 1);
-        });
-    });
-
 
     describe('prepareConfig', () => {
         it('should return a numeric severityThreshold', () => {
@@ -569,5 +347,4 @@ describe('helpers.js', function() {
             assert.deepEqual(result, [ 'SWC-cat' ]);
         });
     });
-
 });
