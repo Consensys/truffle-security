@@ -104,7 +104,6 @@ describe('API Client Classes', function() {
                 data: mythXInput,
                 noCacheLookup: false,
             }, 300000, undefined));
-            console.error(results)
             assert.equal(results.errors.length, 0);
             assert.equal(results.objects.length, 1);
         });
