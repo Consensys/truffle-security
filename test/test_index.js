@@ -4,14 +4,14 @@ const helpers = require('../helpers');
 const rewire = require('rewire');
 
 describe('index.js', function() {
-    
+
     const pluginAnalyze = require('../index');
     const rewiredIndex = rewire('../index');
 
     let analyzeStub;
     let errorStub;
     let config;
-    
+
     beforeEach(() =>  {
         errorStub = sinon.stub();
         analyzeStub = sinon.stub(helpers, 'analyze');
@@ -50,19 +50,19 @@ describe('index.js', function() {
     it('should terminate with return code 0 when analyze returns 0', async () => {
         const returnCode = 0;
         analyzeStub.returns(returnCode);
-        
+
         await rewiredIndex(config);
-        
+
         assert.ok(analyzeStub.called);
         assert.ok(!errorStub.calledWith('Unexpected Error occured. return value of analyze should be either 0 or 1'));
-        assert.ok(!exitStub.callled);
+        assert.ok(!exitStub.called);
     });
 
     it('should terminate with return code 1 when analyze returns 1', async () => {
         analyzeStub.returns(1);
-        
+
         await rewiredIndex(config);
-        
+
         assert.ok(analyzeStub.called);
         assert.ok(!errorStub.calledWith('Unexpected Error occured. return value of analyze should be either 0 or 1'));
         assert.ok(exitStub.calledWith(1));
@@ -70,9 +70,9 @@ describe('index.js', function() {
 
     it('should terminate with return code 1 when analyze returns neither 0 nor 1', async () => {
         analyzeStub.returns(2)
-        
+
         await rewiredIndex(config);
-        
+
         assert.ok(analyzeStub.called);
         assert.ok(errorStub.calledWith('Unexpected Error occured. return value of analyze should be either 0 or 1'));
         assert.ok(exitStub.calledWith(1));

@@ -71,7 +71,10 @@ module.exports = {
   }
 };
 ```
+## Armlet Deprecation Notice
 
+We will be deprecating Armlet in future versions of truffle-security in favour of MythXJS which is the new default. For now you can still use armlet with the parameter. 
+```truffle run verify --apiClient armlet``` 
 
 ## Running Security Analyses
 
@@ -127,6 +130,8 @@ given, all are analyzed.
 
 Options:
   --all      Compile all contracts instead of only the contracts changed since last compile.
+  --apiClient { mythxjs | armlet}
+            Which api client to use. Default and recommended is mythxjs.
   --mode { quick | full }
              Perform quick or in-depth (full) analysis.
   --style { stylish | json | table | tap | unix | markdown | ... },
