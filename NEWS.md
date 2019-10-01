@@ -7,6 +7,25 @@ Various bug fixes.
 
 Test updates.
 
+=======
+Release 1.5.2
+================
+
+Fixed an issue causing issues to be reported at incorrect contracts.
+
+Verify cli arguments better.
+
+Fixed SWC links in html report.
+
+Updated role names to have the same terminology as the api.
+
+Release 1.5.1
+================
+
+Increased timeout duration for full mode.
+
+Fixed analysis of contracts with relative imports on Windows.
+
 
 Release 1.5.0
 ================
