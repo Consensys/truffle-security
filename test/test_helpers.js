@@ -45,7 +45,7 @@ describe('helpers.js', function() {
         let stubLog;
 
         beforeEach(function () {
-            helpers = proxyquire('../helpersRefactor', {});
+            helpers = proxyquire('../helpers', {});
             stubLog = sinon.spy(console, 'log');
         });
 
@@ -92,7 +92,7 @@ describe('helpers.js', function() {
         let armlet
 
         beforeEach(() => {
-            helpers = proxyquire('../helpersRefactor', {});
+            helpers = proxyquire('../helpers', {});
 
             getTruffleBuildJsonFilesStub = sinon.stub(trufstuf, 'getTruffleBuildJsonFiles');
             parseBuildJsonStub = sinon.stub(trufstuf, 'parseBuildJson');
@@ -149,7 +149,7 @@ describe('helpers.js', function() {
                 "./apiclient": apiclient
             });
 
-            helpers = rewire('../helpersRefactor');
+            helpers = rewire('../helpers');
             helpers.__set__('mythxjsClass', mythx);
             helpers.__set__('armletClass', armlet);
         });
@@ -215,7 +215,11 @@ describe('helpers.js', function() {
             doAnalysisStub.resolves({ objects: 1, errors: 3 });
 
             await helpers.analyze(config, true);
-            assert.ok(getTruffleBuildJsonFilesStub.getCall(0).args[0] === "/build/contracts/mythx/contracts");
+            let buildPathBool = false;
+            if (getTruffleBuildJsonFilesStub.getCall(0).args[0] === "/build/contracts/mythx/contracts" ||  getTruffleBuildJsonFilesStub.getCall(0).args[0] === "\\build\\contracts\\mythx\\contracts" ) {
+              buildPathBool = true;
+            }
+            assert.ok(buildPathBool);
             assert.ok(doAnalysisStub.calledWith([ { contractName: "Contract1", contract: sinon.match.any} ], helpers.defaultAnalyzeRateLimit));
             assert.ok(doReportStub.calledWith(1, 3, config, false));
         });
@@ -256,7 +260,11 @@ describe('helpers.js', function() {
             parseBuildJsonStub.resolves(fakeBuildJson);
 
             await helpers.analyze(config);
-            assert.ok(getTruffleBuildJsonFilesStub.getCall(0).args[0] === "/build/contracts/mythx/contracts");
+            let buildPathBool = false;
+            if (getTruffleBuildJsonFilesStub.getCall(0).args[0] === "/build/contracts/mythx/contracts" ||  getTruffleBuildJsonFilesStub.getCall(0).args[0] === "\\build\\contracts\\mythx\\contracts" ) {
+              buildPathBool = true;
+            }
+            assert.ok(buildPathBool);
             assert.ok(doAnalysisStub.called);
             assert.ok(doReportStub.calledWith(1, 3, config, false));
 

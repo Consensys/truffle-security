@@ -10,7 +10,7 @@ const trufstuf = require('../lib/trufstuf');
 // const util = require('util');
 // const yaml = require('js-yaml');
 const rewiredBuild = rewire('../utils/buildutils');
-const rewiredHelpers = rewire('../helpersRefactor');
+const rewiredHelpers = rewire('../helpers');
 
 describe('Build Utilities', function() {
     let armletClient, stubAnalyze, debuggerStub;

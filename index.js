@@ -5,7 +5,7 @@
 */
 'use strict';
 
-const helpers = require('./helpersRefactor');
+const helpers = require('./helpers');
 
 
 /**

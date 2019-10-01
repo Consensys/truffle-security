@@ -1,6 +1,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
-const helpers = require('../helpersRefactor');
+const helpers = require('../helpers');
 const rewire = require('rewire');
 
 describe('index.js', function() {
