@@ -218,7 +218,7 @@ describe('Reporting Utilities', function() {
                 results.errors,
                 config,
             );
-            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+
             assert.ok(
                 !errorStub.calledWith('Internal MythX errors encountered:'.red)
             );
@@ -260,7 +260,7 @@ describe('Reporting Utilities', function() {
               results.errors,
               config,
           );
-            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+
             assert.ok(
                 errorStub.calledWith('Internal MythX errors encountered:'.red)
             );
@@ -312,7 +312,7 @@ describe('Reporting Utilities', function() {
               results.errors,
               config,
           );
-            assert.ok(!loggerStub.calledWith('MythX Logs:'.yellow));
+
             assert.ok(
                 !errorStub.calledWith('Internal MythX errors encountered:'.red)
             );
