@@ -89,23 +89,24 @@ const doReport = async function(objects, errors, config, isTrial) {
         if (haveLogs) return;
     });
 
-    if (haveLogs) {
-        ret = 1;
-        config.logger.log('MythX Logs:'.yellow);
-        logGroups.forEach(logGroup => {
-            config.logger.log(`\n${logGroup.sourcePath}`.yellow);
-            config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
-            if (!isTrial) {
-              config.logger.log(`View Report: https://dashboard.mythx.io/#/console/analyses/${logGroup.uuid}`.green);
+    ret = 1;
+    config.logger.log('MythX Logs:'.yellow);
+    logGroups.forEach(logGroup => {
+        config.logger.log(`\n${logGroup.sourcePath}`.yellow);
+        config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
+        if (!isTrial) {
+          config.logger.log(`View Report: https://dashboard.mythx.io/#/console/analyses/${logGroup.uuid}`.green);
+        }
+        if (haveLogs) {
+          logGroup.logs.forEach(log => {
+            if (showLog(log) && log.length > 0) {
+                config.logger.log(`${log[0].level}: ${log[0].msg}`);
             }
+          });
+        }
 
-            logGroup.logs.forEach(log => {
-                if (showLog(log) && log.length > 0) {
-                    config.logger.log(`${log[0].level}: ${log[0].msg}`);
-                }
-            });
-        });
-    }
+    });
+
 
     if (errors.length > 0) {
         ret = 1;

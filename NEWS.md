@@ -1,3 +1,8 @@
+Release 1.6.1
+================
+
+Minor bug fixes
+
 Release 1.6.0
 ================
 

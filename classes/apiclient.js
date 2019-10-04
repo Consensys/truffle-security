@@ -70,7 +70,6 @@ class APIClient {
             const { log, error } = config.logger;
 
             const limit = config.limit || defaultAnalyzeRateLimit;
-
             if (isNaN(limit)) {
                 log(`limit parameter should be a number; got ${limit}.`);
                 return 1;
@@ -81,7 +80,6 @@ class APIClient {
                 );
                 return 1;
             }
-
             const progress =
                 'debug' in config
                     ? false
@@ -91,7 +89,6 @@ class APIClient {
             let id;
 
             await client.login();
-
             if (progress) {
                 const users = (this.apiClientType === 'MythXJS'
                     ? await client.getUsers()
@@ -137,7 +134,6 @@ class APIClient {
                   }
                 }
             }
-
             if (config.uuid) {
                 try {
                   let results;
@@ -147,7 +143,6 @@ class APIClient {
                     else {
                       results = await client.getIssues(config.uuid);
                     }
-
                     return ghettoReport(log, results);
                 } catch (err) {
                     log(err);
@@ -164,7 +159,6 @@ class APIClient {
                 'contracts'
             );
             await contractsCompile(config);
-
             // Get list of smart contract build json files from truffle build folder
             const jsonFiles = await trufstuf.getTruffleBuildJsonFiles(
                 config.build_mythx_contracts
@@ -176,7 +170,6 @@ class APIClient {
             const allBuildObjs = await Promise.all(
                 jsonFiles.map(async file => await trufstuf.parseBuildJson(file))
             );
-
             let objContracts = [];
             if (selectedContracts) {
                 // User specified contracts; only analyze those
@@ -186,7 +179,6 @@ class APIClient {
                             contractFile,
                             contractName,
                         ] = selectedContract.split(':');
-
                         let fullPath;
                         fullPath = path.resolve(contractFile);
 
@@ -212,7 +204,8 @@ class APIClient {
                                 log(
                                     `Cound not find file: ${contractFile}.`.red
                                 );
-                                return;
+
+                                return 1;
                             }
                             if (progress) {
                                 log(
@@ -221,7 +214,6 @@ class APIClient {
                                 );
                             }
                         }
-
                         const contracts = mythx.newTruffleObjToOldTruffleByContracts(
                             buildObj
                         );
@@ -253,7 +245,7 @@ class APIClient {
                                 );
                             }
                         } else {
-
+                          console.log('8');
                             // No contractName; add all non-imported contracts from the file.
                             contracts
                                 .filter(contract =>
@@ -330,7 +322,7 @@ class APIClient {
                     'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete analysis and view online reports.'
                 );
             }
-
+            return 0;
         } catch (e) {
             console.log('Error: ', e);
         }
