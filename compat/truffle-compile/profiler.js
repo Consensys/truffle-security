@@ -6,8 +6,8 @@ var async = require("async");
 var fs = require("fs");
 var Parser = require("./parser");
 var CompilerSupplier = require("./compilerSupplier");
-var expect = require("truffle-expect");
-var find_contracts = require("truffle-contract-sources");
+var expect = require("@truffle/expect");
+var find_contracts = require("@truffle/contract-sources");
 var debug = require("debug")("compile:profiler"); // eslint-disable-line no-unused-vars
 const semver = require("semver");
 
@@ -243,7 +243,7 @@ module.exports = {
           // and search the entire file corpus to find any sources that import it.
           // Those sources are added to list of compilation targets as well as
           // the update queue because their own ancestors need to be discovered.
-          
+
           async.whilst(
             () => updates.length > 0,
             updateFinished => {

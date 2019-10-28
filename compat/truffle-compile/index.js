@@ -16,9 +16,9 @@ const path = require("path");
 const Profiler = require("./profiler");
 const CompileError = require("./compileerror");
 const CompilerSupplier = require("./compilerSupplier");
-const expect = require("truffle-expect");
-const find_contracts = require("truffle-contract-sources");
-const Config = require("truffle-config");
+const expect = require("@truffle/expect");
+const find_contracts = require("@truffle/contract-sources");
+const Config = require("@truffle/config");
 
 const getSourceFileName = sourcePath => {
   let shortName = path.basename(sourcePath);
@@ -208,7 +208,7 @@ const compile = function(sourcePath, allSources, options, callback, isStale) {
 
       const forwardSlashSources = pathsToForwardSlashes(allSources);
 
-      solcStandardInput.sources = {};      
+      solcStandardInput.sources = {};
       Object.keys(forwardSlashSources).forEach(p => {
         solcStandardInput.sources[p] = {
           content: forwardSlashSources[p],
@@ -336,7 +336,7 @@ compile.with_dependencies = async function(options, callback, compileAll) {
   ]);
 
   var config = Config.default().merge(options);
-  
+
   // Filter out of the list of files to be compiled those for which we have a JSON that
   // is newer than the last modified time of the source file.
 
@@ -378,7 +378,7 @@ compile.with_dependencies = async function(options, callback, compileAll) {
           (err, allSources, required) => {
             if (err) return reject(err);
             allSources = pathsToForwardSlashes(allSources);
-            
+
             self.display(sourcePath, Object.keys(allSources), options)
             compile(sourcePath, allSources, options, (err, compileData, isStale) => {
               if (err) {
