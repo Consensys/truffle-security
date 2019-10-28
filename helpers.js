@@ -95,6 +95,8 @@ Options:
   --progress, --no-progress
              Enable/disable progress bars during analysis. The default is enabled.
              Note: this is disabled if debug is set.
+  --mythx-logs --no-mythx-logs
+              Enable/disable  MythX logs.
   --color, --no-color
              Enable/disable output coloring. The default is enabled.
 `;
@@ -177,7 +179,9 @@ function prepareConfig (config) {
     // modify and extend initial config params
     config.severityThreshold = setConfigSeverityLevel(config['min-severity']);
     config.swcBlacklist = setConfigSWCBlacklist(config['swc-blacklist']);
-
+    if (typeof(config['mythx-logs']) === 'undefined') {
+      config.mythxLogs = true;
+    }
     // API Client configuration
     if (typeof config.apiClient === undefined) {
         config.apiClient = defaultAPIClient;

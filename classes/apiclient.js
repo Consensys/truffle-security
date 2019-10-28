@@ -245,7 +245,6 @@ class APIClient {
                                 );
                             }
                         } else {
-                          console.log('8');
                             // No contractName; add all non-imported contracts from the file.
                             contracts
                                 .filter(contract =>

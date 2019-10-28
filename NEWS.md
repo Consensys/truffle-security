@@ -1,3 +1,8 @@
+Release 1.6.2
+================
+
+no-mythx-logs command to remove mythx logs from Truffle Security output.
+
 Release 1.6.1
 ================
 

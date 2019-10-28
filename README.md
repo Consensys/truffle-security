@@ -166,6 +166,8 @@ Options:
   --version  Show package and MythX version information.
   --progress, --no-progress
              Enable/disable progress bars during analysis. The default is enabled.
+  --mythx-logs --no-mythx-logs
+              Enable/disable  MythX logs.
   --color, --no-color
              Enable/disable output coloring. The default is enabled.
 
