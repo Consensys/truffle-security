@@ -31,10 +31,11 @@ const doReport = async function(objects, errors, config, isTrial) {
   function showLog(log) {
     return config.debug || log.level !== 'info';
   }
-
+  let issues = [];
   // Return 1 if some vulenrabilities were found.
-  objects.forEach(ele => {
-    ele.issues.forEach(ele => {
+  objects.forEach(obj => {
+    obj.issues.forEach(ele => {
+      issues.push(ele.issues);
       ret = ele.issues.length > 0 ? 1 : ret;
     });
   });
@@ -47,12 +48,15 @@ const doReport = async function(objects, errors, config, isTrial) {
     config.logger.log(yaml.safeDump(yamlDumpObjects, { skipInvalid: true }));
   } else if (config.json) {
     config.logger.log(JSON.stringify(objects, null, 4));
+
   } else {
     const spaceLimited =
       ['tap', 'markdown', 'json'].indexOf(config.style) === -1;
     const eslintIssues = objects
       .map(obj => obj.getEslintIssues(config, spaceLimited))
       .reduce((acc, curr) => acc.concat(curr), []);
+
+
 
     // FIXME: temporary solution until backend will return correct filepath and output.
     const eslintIssuesByBaseName = await groupEslintIssuesByBasename(
@@ -119,7 +123,7 @@ const doReport = async function(objects, errors, config, isTrial) {
     }
   }
 
-  return ret;
+  return issues;
 };
 
 /**

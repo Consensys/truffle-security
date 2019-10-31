@@ -7,6 +7,8 @@ Fix output styles.
 
 Updated all truffle packages.
 
+Added --ci and --ci-whitelist for throwing an error based on results
+
 
 
 Release 1.6.1

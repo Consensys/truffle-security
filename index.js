@@ -26,7 +26,8 @@ module.exports = async (config) => {
         if (returnCode === 0) {
             return;
         } else if (returnCode === 1) {
-            exit(1);
+
+          exit(1);
         } else {
 
             throw 'Unexpected Error occured. return value of analyze should be either 0 or 1'

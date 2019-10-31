@@ -96,7 +96,11 @@ Options:
              Enable/disable progress bars during analysis. The default is enabled.
              Note: this is disabled if debug is set.
   --mythx-logs --no-mythx-logs
-              Enable/disable  MythX logs.
+             Enable/disable  MythX logs.
+  --ci
+             Blocking non zero return for CI integrations to throw an error (non-zero exit code).
+  --ci-whitelist { 101 | 103,111,115 | ... }
+             List of allowed SWCs that will not throw an error (non-zero exit code).
   --color, --no-color
              Enable/disable output coloring. The default is enabled.
 `;

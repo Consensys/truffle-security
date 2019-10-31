@@ -315,12 +315,36 @@ class APIClient {
             if (id === '123456789012345678901234') {
               isTrial = true;
             }
-            const result = await doReport(objects, errors, config, isTrial);
+            const issues = await doReport(objects, errors, config, isTrial);
             if (progress && isTrial) {
                 config.logger.log(
                     'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete analysis and view online reports.'
                 );
             }
+            // console.log('objects:', objects);
+
+            let { ci, ciWhitelist } = config;
+            ciWhitelist = ciWhitelist.split(',');
+
+            if (ci) {
+              let swcIds = [];
+              issues.map(issueGroup=> {
+                issueGroup.forEach(issue => {
+                  swcIds.push(issue.swcID.replace('SWC-', ''));
+                })
+              })
+
+              ciWhitelist.forEach(ciSwcId => {
+                swcIds= swcIds.filter(swcId => swcId !== ciSwcId);
+              })
+
+              if (swcIds.length > 0) {
+                return 1;
+              }
+
+            }
+
+
             return 0;
         } catch (e) {
             console.log('Error: ', e);
