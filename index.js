@@ -26,7 +26,6 @@ module.exports = async (config) => {
         if (returnCode === 0) {
             return;
         } else if (returnCode === 1) {
-
           exit(1);
         } else {
 
