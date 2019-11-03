@@ -96,15 +96,15 @@ const doReport = async function(objects, errors, config, isTrial, roles = []) {
     logGroups.forEach(logGroup => {
       config.logger.log(`\n${logGroup.sourcePath}`.yellow);
       config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
-      if (!isTrial && roles.includes('Professional')) {
+      if (!isTrial /*&& roles.includes('Professional')*/) {
         config.logger.log(
           `View Report: https://dashboard.mythx.io/#/console/analyses/${logGroup.uuid}`
             .green
         );
       }
-      else {
+      /*else {
         config.logger.log('Purchase Professional to view detailed MythX report: https://mythx.io/plans');
-      }
+      }*/
       if (haveLogs) {
         logGroup.logs.forEach(log => {
           if (showLog(log) && log.length > 0) {
