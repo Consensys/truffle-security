@@ -315,7 +315,7 @@ class APIClient {
             if (id === '123456789012345678901234') {
               isTrial = true;
             }
-            const issues = await doReport(objects, errors, config, isTrial, roles);
+            const issues = await doReport(objects, errors, config, isTrial);
             if (progress && isTrial) {
                 config.logger.log(
                     'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete analysis and view online reports.'
@@ -324,7 +324,7 @@ class APIClient {
             // console.log('objects:', objects);
 
             let { ci, ciWhitelist } = config;
-            ciWhitelist = ciWhitelist.split(',');
+
 
             if (ci) {
               let swcIds = [];
@@ -334,9 +334,13 @@ class APIClient {
                 })
               })
 
-              ciWhitelist.forEach(ciSwcId => {
-                swcIds= swcIds.filter(swcId => swcId !== ciSwcId);
-              })
+              if (ciWhitelist) {
+                ciWhitelist = ciWhitelist.split(',');
+                ciWhitelist.forEach(ciSwcId => {
+                  swcIds= swcIds.filter(swcId => swcId !== ciSwcId);
+                })
+              }
+
 
               swcIds= swcIds.filter(swcId => swcId !== '-1');
 

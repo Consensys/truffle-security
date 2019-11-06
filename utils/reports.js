@@ -105,13 +105,13 @@ const doReport = async function(objects, errors, config, isTrial, roles = []) {
       /*else {
         config.logger.log('Purchase Professional to view detailed MythX report: https://mythx.io/plans');
       }*/
-      if (haveLogs) {
-        logGroup.logs.forEach(log => {
-          if (showLog(log) && log.length > 0) {
-            config.logger.log(`${log[0].level}: ${log[0].msg}`);
-          }
-        });
-      }
+      // if (haveLogs) {
+      //   logGroup.logs.forEach(log => {
+      //     if (showLog(log) && log.length > 0) {
+      //       config.logger.log(`${log[0].level}: ${log[0].msg}`);
+      //     }
+      //   });
+      // }
     });
 
     if (errors.length > 0) {

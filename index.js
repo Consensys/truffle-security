@@ -26,6 +26,7 @@ module.exports = async (config) => {
         if (returnCode === 0) {
             return;
         } else if (returnCode === 1) {
+          console.log('Non-zero exit');
           exit(1);
         } else {
 
