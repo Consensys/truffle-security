@@ -29,7 +29,8 @@
     "remix-lib": ">=0.4.1",
     "sleep": "6.1.0",
     "solc": "^0.5.8",
-    "tiny-async-pool": "^1.0.4"
+    "tiny-async-pool": "^1.0.4",
+    "uuid": "^3.3.3"
   },
   "nyc": {
     "exclude": [

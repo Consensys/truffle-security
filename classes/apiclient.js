@@ -20,6 +20,7 @@ const multiProgress = require('multi-progress');
 const { MythXIssues } = require('../lib/issues2eslint');
 const sleep = require('sleep');
 const inquirer = require('inquirer');
+const uuid = require('uuid/v4');
 
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
 const trialPassword = 'trial';
@@ -434,6 +435,8 @@ class APIClient {
             const obj = new MythXIssues(buildObj.contract, config);
             let analyzeOpts = {
                 clientToolName: 'truffle',
+                toolName: 'truffle',
+                groupId: new uuid(),
                 noCacheLookup: !cacheLookup,
             };
 
@@ -485,7 +488,7 @@ class APIClient {
                 let { issues, status } = await this.doAnalysisFromClient(
                     analyzeOpts,
                     timeout,
-                    initialDelay
+                    initialDelay,
                 );
                 issues = this.filterIssuesAndLocations(issues, obj.sourcePath);
 
