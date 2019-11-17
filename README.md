@@ -80,6 +80,8 @@ We will be deprecating Armlet in future versions of truffle-security in favour o
 
 Once the plugin is installed the `truffle run verify` becomes available. You can either analyze a specific file by running `truffle run verify <file-name>`, a contract by running `truffle run verify <file-name>:<contract-name>`, or the entire project with simply `truffle run verify`.
 
+Alternatively you can use `truffle run mythx` instead of `truffle run verify`.
+
 **Your project must compile successfully for the security analysis to work.** Note that the `verify` command invokes `truffle compile` automatically if the build files are not up to date.
 
 Here is the output of `truffle verify` for an [example](https://github.com/ConsenSys/mythx-playground/tree/master/exercise2) from the [DevCon4 MythX Workshop](https://github.com/ConsenSys/mythx-workshop):

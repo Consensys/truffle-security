@@ -9,6 +9,8 @@ Updated all truffle packages.
 
 Added --ci and --ci-whitelist for throwing an error based on results
 
+Can now use `truffle run mythx` as ana alternative to `truffle run verify`
+
 
 
 Release 1.6.1
