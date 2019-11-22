@@ -1,16 +1,21 @@
 Release 1.6.2
 ================
 
+Grouping analyses into batches with links to relevant page on dashboard has been added.
+
 Added --no-mythx-logs command to remove mythx logs from Truffle Security output.
 
 Fix output styles.
 
 Updated all truffle packages.
 
-Added --ci and --ci-whitelist for throwing an error based on results
+Added --ci and --ci-whitelist for throwing an error based on results.
 
-Can now use `truffle run mythx` as ana alternative to `truffle run verify`
+Can now use `truffle run mythx` as an alternative to `truffle run verify`.
 
+Cancelling during full mode analysis will now return a link to group on the dashboard.
+
+MYTHX_API_URL environment variable is now passed to mythxjs.
 
 
 Release 1.6.1
