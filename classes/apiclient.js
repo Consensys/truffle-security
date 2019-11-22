@@ -437,7 +437,7 @@ class APIClient {
 
         /* Create Group for analysis batch */
         this.group = await client.createGroup();
-
+        console.log(this.group);
         const groupId = this.group.id;
 
         const results = await asyncPool(limit, contracts, async buildObj => {
@@ -449,7 +449,6 @@ class APIClient {
             let analyzeOpts = {
                 clientToolName: 'truffle',
                 toolName: 'truffle',
-                groupId: groupId,
                 noCacheLookup: !cacheLookup,
             };
 
@@ -503,8 +502,7 @@ class APIClient {
                 let { issues, status } = await this.doAnalysisFromClient(
                     analyzeOpts,
                     timeout,
-                    initialDelay,
-                    groupId
+                    initialDelay
                 );
                 issues = this.filterIssuesAndLocations(issues, obj.sourcePath);
 
