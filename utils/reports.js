@@ -23,7 +23,7 @@ const ghettoReport = (logger, results) => {
   return 1;
 };
 
-const doReport = async function(objects, errors, config, isTrial, roles = []) {
+const doReport = async function(objects, errors, config, isTrial, group) {
   let ret = 0;
   // Return true if we shold show log.
   // Ignore logs with log.level "info" unless the "debug" flag
@@ -93,6 +93,7 @@ const doReport = async function(objects, errors, config, isTrial, roles = []) {
 
   if (config.mythxLogs) {
     config.logger.log('MythX Logs:'.yellow);
+
     logGroups.forEach(logGroup => {
       config.logger.log(`\n${logGroup.sourcePath}`.yellow);
       config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
@@ -113,6 +114,11 @@ const doReport = async function(objects, errors, config, isTrial, roles = []) {
       //   });
       // }
     });
+
+    config.logger.log('');
+    config.logger.log(`Group ID: ${group.id}`.yellow);
+    config.logger.log('View analyses batch here:'.yellow);
+    config.logger.log(`https://dashboard.mythx.io/#/console/analyses/groups/${group.id}`.green);
 
     if (errors.length > 0) {
       ret = 1;

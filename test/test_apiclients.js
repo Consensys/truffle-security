@@ -39,12 +39,14 @@ describe('API Client Classes', function() {
     describe('analyze', () => {
         let APIClient;
         let doAnalysisFromClientStub;
+        let createGroupStub;
 
         beforeEach(function() {
             debuggerStub = sinon.stub();
 
             APIClient = require('../classes/mythx');
             doAnalysisFromClientStub = sinon.stub(APIClient.prototype, "doAnalysisFromClient");
+            // createGroupStub = sinon.stub( ,"client.createGroup")
         });
 
         afterEach(function() {

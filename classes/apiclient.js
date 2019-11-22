@@ -33,6 +33,11 @@ class APIClient {
     constructor(apiClientType, config, clientToolName, test) {
         const ethAddress = process.env.MYTHX_ETH_ADDRESS;
         const password = process.env.MYTHX_PASSWORD;
+        let apiUrl = process.env.MYTHX_API_URL;
+        if (!apiUrl) {
+          apiUrl = 'https://api.mythx.io/v1'
+        }
+
 
         const options = { clientToolName };
 
@@ -54,7 +59,8 @@ class APIClient {
             this.client = new mythxjsClient(
                 options.ethAddress,
                 options.password,
-                'truffle'
+                'truffle',
+                apiUrl
             );
             break;
         }
@@ -63,11 +69,12 @@ class APIClient {
         this.verifyOptions = options;
         this.config = config;
         this.defaultAnalyzeRateLimit = defaultAnalyzeRateLimit;
+        this.group = undefined;
     }
 
     async analyze() {
         try {
-            let { client, config, defaultAnalyzeRateLimit } = this;
+            let { client, config, defaultAnalyzeRateLimit, group } = this;
             const { log, error } = config.logger;
 
             const limit = config.limit || defaultAnalyzeRateLimit;
@@ -307,6 +314,7 @@ class APIClient {
             // However `doAnalysis` calls `analyzeWithStatus` simultaneously several times,
             // as a result, it causes unnecesarry login requests to Mythril-API. (It ia a kind of race condition problem)
             // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
+
             const { objects, errors } = await this.doAnalysis(
                 objContracts,
                 limit
@@ -316,13 +324,13 @@ class APIClient {
             if (id === '123456789012345678901234') {
               isTrial = true;
             }
-            const issues = await doReport(objects, errors, config, isTrial);
+
+            const issues = await doReport(objects, errors, config, isTrial, this.group);
             if (progress && isTrial) {
                 config.logger.log(
                     'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete analysis and view online reports.'
                 );
             }
-            // console.log('objects:', objects);
 
             let { ci, ciWhitelist } = config;
 
@@ -395,7 +403,7 @@ class APIClient {
      * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
      */
     async doAnalysis(contracts, limit = this.defaultAnalyzeRateLimit) {
-        let { client, config } = this;
+        const { client, config } = this;
         const timeout =
             config.timeout ||
             (config.mode === 'full' ? 125 * 60000 : 5 * 60000);
@@ -427,6 +435,11 @@ class APIClient {
             );
         }
 
+        /* Create Group for analysis batch */
+        this.group = await client.createGroup();
+
+        const groupId = this.group.id;
+
         const results = await asyncPool(limit, contracts, async buildObj => {
             /**
              * If contractNames have been passed then skip analyze for unwanted ones.
@@ -436,9 +449,11 @@ class APIClient {
             let analyzeOpts = {
                 clientToolName: 'truffle',
                 toolName: 'truffle',
-                groupId: new uuid(),
+                groupId: groupId,
                 noCacheLookup: !cacheLookup,
             };
+
+            obj.buildObj.groupId = groupId;
 
             analyzeOpts.data = cleanAnalyzeDataEmptyProps(
                 obj.buildObj,
@@ -489,6 +504,7 @@ class APIClient {
                     analyzeOpts,
                     timeout,
                     initialDelay,
+                    groupId
                 );
                 issues = this.filterIssuesAndLocations(issues, obj.sourcePath);
 
@@ -575,6 +591,9 @@ class APIClient {
                 }
             }
         });
+
+        // Close the group after posting
+        this.group = await client.groupOperation(groupId, 'seal_group');
 
         return results.reduce(
             (accum, curr) => {
