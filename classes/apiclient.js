@@ -437,8 +437,12 @@ class APIClient {
 
         /* Create Group for analysis batch */
         this.group = await client.createGroup();
-        console.log(this.group);
         const groupId = this.group.id;
+
+        if (config.mythxLogs && config.mode === 'full') {
+          config.logger.log('\n Full analyses may take a while to complete, you can view progress here:'.yellow);
+          config.logger.log(`https://dashboard.mythx.io/#/console/analyses/groups/${groupId}`.green);
+        }
 
         const results = await asyncPool(limit, contracts, async buildObj => {
             /**
