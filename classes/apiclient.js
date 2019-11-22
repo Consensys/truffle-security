@@ -394,6 +394,12 @@ class APIClient {
 
     }
 
+    sigintFunction(config, groupId) {
+      config.logger.log('\n Truffle Security has been cancelled early, you can view your reports here:'.red);
+      config.logger.log(`https://dashboard.mythx.io/#/console/analyses/groups/${groupId}`.green);
+      process.exit(0);
+    }
+
     /**
      * Runs MythX security analyses on smart contract files found
      * in truffle build folder
@@ -442,6 +448,18 @@ class APIClient {
         if (config.mythxLogs && config.mode === 'full') {
           config.logger.log('\n Full analyses may take a while to complete, you can view progress here:'.yellow);
           config.logger.log(`https://dashboard.mythx.io/#/console/analyses/groups/${groupId}`.green);
+        }
+
+        let sigintFunction = this.sigintFunction;
+        if (config.mode === 'full') {
+          process.on('SIGINT', function () {
+            sigintFunction(config, groupId);
+
+          });
+          process.on('SIGTERM', function () {
+            sigintFunction(config, groupId);
+
+          });
         }
 
         const results = await asyncPool(limit, contracts, async buildObj => {
