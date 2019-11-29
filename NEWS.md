@@ -17,6 +17,8 @@ Cancelling during full mode analysis will now return a link to group on the dash
 
 MYTHX_API_URL environment variable is now passed to mythxjs.
 
+Can now pass api key generated from dashboard with --apiKey {apiKey}.
+
 
 Release 1.6.1
 ================

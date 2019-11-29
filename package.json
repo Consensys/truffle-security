@@ -6,7 +6,7 @@
   "dependencies": {
     "@truffle/artifactor": "^4.0.36",
     "@truffle/compile-vyper": "^1.0.33",
-    "@truffle/config": "^1.2.3",
+    "@truffle/config": "^1.2.6",
     "@truffle/contract": "^4.0.37",
     "@truffle/contract-sources": "^0.1.6",
     "@truffle/error": "0.0.7",

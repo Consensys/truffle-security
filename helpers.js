@@ -19,7 +19,7 @@ let client;
 async function analyze(config) {
     config = prepareConfig(config);
     if (config.apiClient === 'armlet') {
-        console.log('WARNING: You are using Armlet we will be deprecating Armlet in future versions of truffle-security in favour of MythXJS.')
+        console.log('WARNING: You are using Armlet we will be deprecating Armlet in future versions of truffle-security in favour of MythXJS as it is no longer supported.')
         client = new armletClass( config, 'truffle');
     }
     else {
@@ -101,6 +101,8 @@ Options:
              Blocking non zero return for CI integrations to throw an error (non-zero exit code).
   --ci-whitelist { 101 | 103,111,115 | ... }
              List of allowed SWCs that will not throw an error (non-zero exit code).
+  --apiKey { api key generated from profile dashboard}
+             Authenticate with api key instead of login details.
   --color, --no-color
              Enable/disable output coloring. The default is enabled.
 `;

@@ -48,7 +48,6 @@ class APIClient {
             options.ethAddress = trialEthAddress;
             options.password = trialPassword;
         }
-
         switch (apiClientType) {
         case 'armlet':
             this.apiClientType = 'Armlet';
@@ -60,7 +59,8 @@ class APIClient {
                 options.ethAddress,
                 options.password,
                 'truffle',
-                apiUrl
+                apiUrl,
+                config.apiKey ? config.apiKey : '',
             );
             break;
         }
@@ -96,7 +96,10 @@ class APIClient {
                         : true;
             let id;
 
-            await client.login();
+            if (!config.apiKey) {
+              await client.login();
+            }
+
             if (progress) {
                 const users = (this.apiClientType === 'MythXJS'
                     ? await client.getUsers()
