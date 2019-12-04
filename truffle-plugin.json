@@ -1,5 +1,6 @@
 {
   "commands": {
-    "verify": "index.js"
+    "verify": "index.js",
+    "mythx": "index.js"
   }
 }

@@ -80,6 +80,8 @@ We will be deprecating Armlet in future versions of truffle-security in favour o
 
 Once the plugin is installed the `truffle run verify` becomes available. You can either analyze a specific file by running `truffle run verify <file-name>`, a contract by running `truffle run verify <file-name>:<contract-name>`, or the entire project with simply `truffle run verify`.
 
+Alternatively you can use `truffle run mythx` instead of `truffle run verify`.
+
 **Your project must compile successfully for the security analysis to work.** Note that the `verify` command invokes `truffle compile` automatically if the build files are not up to date.
 
 Here is the output of `truffle verify` for an [example](https://github.com/ConsenSys/mythx-playground/tree/master/exercise2) from the [DevCon4 MythX Workshop](https://github.com/ConsenSys/mythx-workshop):
@@ -166,6 +168,14 @@ Options:
   --version  Show package and MythX version information.
   --progress, --no-progress
              Enable/disable progress bars during analysis. The default is enabled.
+  --mythx-logs --no-mythx-logs
+             Enable/disable  MythX logs.
+  --ci
+             Blocking non zero return for CI integrations to throw an error (non-zero exit code).
+  --ci-whitelist { 101 | 103,111,115 | ... }
+             List of allowed SWCs that will not throw an error (non-zero exit code).
+  --apiKey { api key generated from profile dashboard}
+             Authenticate with api key instead of login details.
   --color, --no-color
              Enable/disable output coloring. The default is enabled.
 

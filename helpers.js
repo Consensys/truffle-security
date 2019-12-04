@@ -19,7 +19,7 @@ let client;
 async function analyze(config) {
     config = prepareConfig(config);
     if (config.apiClient === 'armlet') {
-        console.log('WARNING: You are using Armlet we will be deprecating Armlet in future versions of truffle-security in favour of MythXJS.')
+        console.log('WARNING: You are using Armlet we will be deprecating Armlet in future versions of truffle-security in favour of MythXJS as it is no longer supported.')
         client = new armletClass( config, 'truffle');
     }
     else {
@@ -95,6 +95,14 @@ Options:
   --progress, --no-progress
              Enable/disable progress bars during analysis. The default is enabled.
              Note: this is disabled if debug is set.
+  --mythx-logs --no-mythx-logs
+             Enable/disable  MythX logs.
+  --ci
+             Blocking non zero return for CI integrations to throw an error (non-zero exit code).
+  --ci-whitelist { 101 | 103,111,115 | ... }
+             List of allowed SWCs that will not throw an error (non-zero exit code).
+  --apiKey { api key generated from profile dashboard}
+             Authenticate with api key instead of login details.
   --color, --no-color
              Enable/disable output coloring. The default is enabled.
 `;
@@ -177,7 +185,9 @@ function prepareConfig (config) {
     // modify and extend initial config params
     config.severityThreshold = setConfigSeverityLevel(config['min-severity']);
     config.swcBlacklist = setConfigSWCBlacklist(config['swc-blacklist']);
-
+    if (typeof(config['mythx-logs']) === 'undefined') {
+      config.mythxLogs = true;
+    }
     // API Client configuration
     if (typeof config.apiClient === undefined) {
         config.apiClient = defaultAPIClient;

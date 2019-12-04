@@ -17,7 +17,6 @@ class MythXJS extends APIClient {
      * @returns {Promise} - Resolves analysis object.
      */
     async doAnalysisFromClient(analyzeOpts, timeout, initialDelay) {
-
         let analysisResponse = await this.client.analyze(analyzeOpts.data);
         let detectedIssues = await this.client.getDetectedIssues(
             analysisResponse.uuid

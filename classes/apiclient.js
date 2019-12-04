@@ -20,6 +20,7 @@ const multiProgress = require('multi-progress');
 const { MythXIssues } = require('../lib/issues2eslint');
 const sleep = require('sleep');
 const inquirer = require('inquirer');
+const uuid = require('uuid/v4');
 
 const trialEthAddress = '0x0000000000000000000000000000000000000000';
 const trialPassword = 'trial';
@@ -32,6 +33,11 @@ class APIClient {
     constructor(apiClientType, config, clientToolName, test) {
         const ethAddress = process.env.MYTHX_ETH_ADDRESS;
         const password = process.env.MYTHX_PASSWORD;
+        let apiUrl = process.env.MYTHX_API_URL;
+        if (!apiUrl) {
+          apiUrl = 'https://api.mythx.io/v1'
+        }
+
 
         const options = { clientToolName };
 
@@ -42,7 +48,6 @@ class APIClient {
             options.ethAddress = trialEthAddress;
             options.password = trialPassword;
         }
-
         switch (apiClientType) {
         case 'armlet':
             this.apiClientType = 'Armlet';
@@ -53,7 +58,9 @@ class APIClient {
             this.client = new mythxjsClient(
                 options.ethAddress,
                 options.password,
-                'truffle'
+                'truffle',
+                apiUrl,
+                config.apiKey ? config.apiKey : '',
             );
             break;
         }
@@ -62,11 +69,12 @@ class APIClient {
         this.verifyOptions = options;
         this.config = config;
         this.defaultAnalyzeRateLimit = defaultAnalyzeRateLimit;
+        this.group = undefined;
     }
 
     async analyze() {
         try {
-            let { client, config, defaultAnalyzeRateLimit } = this;
+            let { client, config, defaultAnalyzeRateLimit, group } = this;
             const { log, error } = config.logger;
 
             const limit = config.limit || defaultAnalyzeRateLimit;
@@ -88,7 +96,10 @@ class APIClient {
                         : true;
             let id;
 
-            await client.login();
+            if (!config.apiKey) {
+              await client.login();
+            }
+
             if (progress) {
                 const users = (this.apiClientType === 'MythXJS'
                     ? await client.getUsers()
@@ -124,12 +135,12 @@ class APIClient {
                     let mode = 'Free';
                     if (roles.includes('admin')) mode = 'Admin';
                     else if (roles.includes('Professional')) mode = 'Professional';
-                    config.logger.log(
-                        `Welcome to MythX! You are currently running in ${mode} mode.\n`,
-                    );
+                    // config.logger.log(
+                    //     `Welcome to MythX! You are currently running in ${mode} mode.\n`,
+                    // );
                     if (roles.includes('beta_user')) {
                         config.logger.log(
-                            'You are also recognized as a Beta user, who adopted MythX prior to its offical production release. We are very grateful for this!\n'
+                            'You are recognized as a Beta user, who adopted MythX prior to its offical production release. We are very grateful for this!\n'
                         );
                   }
                 }
@@ -245,7 +256,6 @@ class APIClient {
                                 );
                             }
                         } else {
-                          console.log('8');
                             // No contractName; add all non-imported contracts from the file.
                             contracts
                                 .filter(contract =>
@@ -307,6 +317,7 @@ class APIClient {
             // However `doAnalysis` calls `analyzeWithStatus` simultaneously several times,
             // as a result, it causes unnecesarry login requests to Mythril-API. (It ia a kind of race condition problem)
             // refer to https://github.com/ConsenSys/armlet/pull/64 for the detail.
+
             const { objects, errors } = await this.doAnalysis(
                 objContracts,
                 limit
@@ -316,12 +327,42 @@ class APIClient {
             if (id === '123456789012345678901234') {
               isTrial = true;
             }
-            const result = await doReport(objects, errors, config, isTrial);
+
+            const issues = await doReport(objects, errors, config, isTrial, this.group);
             if (progress && isTrial) {
                 config.logger.log(
                     'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete analysis and view online reports.'
                 );
             }
+
+            let { ci, ciWhitelist } = config;
+
+
+            if (ci) {
+              let swcIds = [];
+              issues.map(issueGroup=> {
+                issueGroup.forEach(issue => {
+                  swcIds.push(issue.swcID.replace('SWC-', ''));
+                })
+              })
+
+              if (ciWhitelist) {
+                ciWhitelist = ciWhitelist.split(',');
+                ciWhitelist.forEach(ciSwcId => {
+                  swcIds= swcIds.filter(swcId => swcId !== ciSwcId);
+                })
+              }
+
+
+              swcIds= swcIds.filter(swcId => swcId !== '-1');
+
+              if (swcIds.length > 0) {
+                return 1;
+              }
+
+            }
+
+
             return 0;
         } catch (e) {
             console.log('Error: ', e);
@@ -356,6 +397,12 @@ class APIClient {
 
     }
 
+    sigintFunction(config, groupId) {
+      config.logger.log('\n Truffle Security has been cancelled early, you can view your reports here:'.red);
+      config.logger.log(`https://dashboard.mythx.io/#/console/analyses/groups/${groupId}`.green);
+      process.exit(0);
+    }
+
     /**
      * Runs MythX security analyses on smart contract files found
      * in truffle build folder
@@ -365,7 +412,7 @@ class APIClient {
      * @returns {Promise} - Resolves array of hashmaps with issues for each contract.
      */
     async doAnalysis(contracts, limit = this.defaultAnalyzeRateLimit) {
-        let { client, config } = this;
+        const { client, config } = this;
         const timeout =
             config.timeout ||
             (config.mode === 'full' ? 125 * 60000 : 5 * 60000);
@@ -397,6 +444,27 @@ class APIClient {
             );
         }
 
+        /* Create Group for analysis batch */
+        this.group = await client.createGroup();
+        const groupId = this.group.id;
+
+        if (config.mythxLogs && config.mode === 'full') {
+          config.logger.log('\n Full analyses may take a while to complete, you can view progress here:'.yellow);
+          config.logger.log(`https://dashboard.mythx.io/#/console/analyses/groups/${groupId}`.green);
+        }
+
+        let sigintFunction = this.sigintFunction;
+        if (config.mode === 'full') {
+          process.on('SIGINT', function () {
+            sigintFunction(config, groupId);
+
+          });
+          process.on('SIGTERM', function () {
+            sigintFunction(config, groupId);
+
+          });
+        }
+
         const results = await asyncPool(limit, contracts, async buildObj => {
             /**
              * If contractNames have been passed then skip analyze for unwanted ones.
@@ -405,8 +473,11 @@ class APIClient {
             const obj = new MythXIssues(buildObj.contract, config);
             let analyzeOpts = {
                 clientToolName: 'truffle',
+                toolName: 'truffle',
                 noCacheLookup: !cacheLookup,
             };
+
+            obj.buildObj.groupId = groupId;
 
             analyzeOpts.data = cleanAnalyzeDataEmptyProps(
                 obj.buildObj,
@@ -543,6 +614,9 @@ class APIClient {
                 }
             }
         });
+
+        // Close the group after posting
+        this.group = await client.groupOperation(groupId, 'seal_group');
 
         return results.reduce(
             (accum, curr) => {

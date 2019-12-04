@@ -39,12 +39,14 @@ describe('API Client Classes', function() {
     describe('analyze', () => {
         let APIClient;
         let doAnalysisFromClientStub;
+        let createGroupStub;
 
         beforeEach(function() {
             debuggerStub = sinon.stub();
 
             APIClient = require('../classes/mythx');
             doAnalysisFromClientStub = sinon.stub(APIClient.prototype, "doAnalysisFromClient");
+
         });
 
         afterEach(function() {
@@ -64,6 +66,8 @@ describe('API Client Classes', function() {
             const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
             const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
             const mythXInput = mythx.truffle2MythXJSON(objContracts[0].contract);
+
+
             doAnalysisFromClientStub.resolves({
                 issues: [{
                     'sourceFormat': 'evm-byzantium-bytecode',
@@ -97,12 +101,34 @@ describe('API Client Classes', function() {
 
             //pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
             apiClient = new APIClient(config, "truffle");
+
+            const group = { id: '5dd7fd009a44e30011e177d8',
+            name: '',
+            createdAt: '2019-11-22T15:21:36.432Z',
+            createdBy: '5d6fca19f78f5a0011109b65',
+            completedAt: null,
+            progress: 100,
+            status: 'opened',
+            mainSourceFiles: [],
+            numAnalyses: { total: 0, queued: 0, running: 0, failed: 0, finished: 0 },
+            numVulnerabilities: { high: 0, medium: 0, low: 0, none: 0 } };
+
+            createGroupStub = sinon.stub(apiClient.client, "createGroup");
+            createGroupStub.resolves(group);
+
+            groupOperationStub = sinon.stub(apiClient.client, "groupOperation");
+
+
+
             const results = await apiClient.doAnalysis(objContracts);
             mythXInput.analysisMode = 'quick';
+            mythXInput.groupId = group.id;
+
             assert.ok(doAnalysisFromClientStub.calledWith({
                 clientToolName: 'truffle',
-                data: mythXInput,
+                toolName: 'truffle',
                 noCacheLookup: false,
+                data: mythXInput,
             }, 300000, undefined));
             assert.equal(results.errors.length, 0);
             assert.equal(results.objects.length, 1);
@@ -128,12 +154,34 @@ describe('API Client Classes', function() {
 
           //pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
           apiClient = new APIClient(config, "truffle");
+
+          const group = { id: '5dd7fd009a44e30011e177d8',
+          name: '',
+          createdAt: '2019-11-22T15:21:36.432Z',
+          createdBy: '5d6fca19f78f5a0011109b65',
+          completedAt: null,
+          progress: 100,
+          status: 'opened',
+          mainSourceFiles: [],
+          numAnalyses: { total: 0, queued: 0, running: 0, failed: 0, finished: 0 },
+          numVulnerabilities: { high: 0, medium: 0, low: 0, none: 0 } };
+
+          createGroupStub = sinon.stub(apiClient.client, "createGroup");
+          createGroupStub.resolves(group);
+
+          groupOperationStub = sinon.stub(apiClient.client, "groupOperation");
+
           const results = await apiClient.doAnalysis(objContracts);
+
+
           mythXInput.analysisMode = 'quick';
+          mythXInput.groupId = group.id;
+
           assert.ok(doAnalysisFromClientStub.calledWith({
               clientToolName: 'truffle',
-              data: mythXInput,
+              toolName: 'truffle',
               noCacheLookup: false,
+              data: mythXInput,
           }, 300000, undefined));
           assert.equal(results.errors.length, 1);
           assert.equal(results.objects.length, 0);
@@ -186,12 +234,32 @@ describe('API Client Classes', function() {
       });
         //pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
         apiClient = new APIClient(config, "truffle");
+
+        const group = { id: '5dd7fd009a44e30011e177d8',
+        name: '',
+        createdAt: '2019-11-22T15:21:36.432Z',
+        createdBy: '5d6fca19f78f5a0011109b65',
+        completedAt: null,
+        progress: 100,
+        status: 'opened',
+        mainSourceFiles: [],
+        numAnalyses: { total: 0, queued: 0, running: 0, failed: 0, finished: 0 },
+        numVulnerabilities: { high: 0, medium: 0, low: 0, none: 0 } };
+
+        createGroupStub = sinon.stub(apiClient.client, "createGroup");
+        createGroupStub.resolves(group);
+
+        groupOperationStub = sinon.stub(apiClient.client, "groupOperation");
+
         const results = await apiClient.doAnalysis(objContracts);
         mythXInput.analysisMode = 'quick';
+        mythXInput.groupId = group.id;
+
         assert.ok(doAnalysisFromClientStub.calledWith({
             clientToolName: 'truffle',
-            data: mythXInput,
+            toolName: 'truffle',
             noCacheLookup: false,
+            data: mythXInput,
         }, 300000, undefined));
         assert.equal(results.errors.length, 1);
         assert.equal(results.objects.length, 0);
