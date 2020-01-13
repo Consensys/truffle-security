@@ -178,6 +178,8 @@ class APIClient {
                 config.style = 'stylish';
             }
 
+
+
             const allBuildObjs = await Promise.all(
                 jsonFiles.map(async file => await trufstuf.parseBuildJson(file))
             );
@@ -276,10 +278,12 @@ class APIClient {
                 );
 
             } else {
+
                 // User did not specify contracts; analyze everything
-                // How to avoid duplicates: From all lists of contracts that include ContractX, the shortest list is gaurenteed
+                // How to avoid duplicates: From all lists of contracts that include ContractX, the shortest list is guaranteed
                 // to be the one where it was compiled in because only it and its imports are needed, and contracts that import it
                 // will not be included.
+
                 allBuildObjs.map(async buildObj => {
                     const contracts = mythx.newTruffleObjToOldTruffleByContracts(
                         buildObj
@@ -403,6 +407,22 @@ class APIClient {
       process.exit(0);
     }
 
+    absoluteToRelativePaths(analyzeData) {
+      let directoryPath = this.config.working_directory.replace(/\\/g, '/');
+      let rootDirectory = directoryPath.split('/');
+      rootDirectory = rootDirectory[rootDirectory.length - 1];
+      analyzeData.mainSource = trufstuf.convertAbsoluteToRelativePath(analyzeData.mainSource, directoryPath, rootDirectory);
+
+      let newSources = {};
+      let sourcesKeys = Object.keys(analyzeData.sources);
+      sourcesKeys.map((key)=> {
+        newSources[trufstuf.convertAbsoluteToRelativePath(key, directoryPath, rootDirectory)] = analyzeData.sources[key];
+      })
+
+      analyzeData.sources = newSources;
+      return analyzeData;
+    }
+
     /**
      * Runs MythX security analyses on smart contract files found
      * in truffle build folder
@@ -478,7 +498,6 @@ class APIClient {
             };
 
             obj.buildObj.groupId = groupId;
-
             analyzeOpts.data = cleanAnalyzeDataEmptyProps(
                 obj.buildObj,
                 config.debug,
@@ -524,6 +543,7 @@ class APIClient {
 
             try {
                 // let {issues, status} = await client.analyzeWithStatus(analyzeOpts, timeout, initialDelay);
+                analyzeOpts.data = this.absoluteToRelativePaths(analyzeOpts.data);
                 let { issues, status } = await this.doAnalysisFromClient(
                     analyzeOpts,
                     timeout,
