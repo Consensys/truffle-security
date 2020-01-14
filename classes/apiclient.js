@@ -435,7 +435,7 @@ class APIClient {
         const { client, config } = this;
         const timeout =
             config.timeout ||
-            (config.mode === 'full' ? 125 * 60000 : 5 * 60000);
+            (config.mode === 'deep'  ? 125 * 60000 : 5 * 60000);
         const initialDelay =
             'initial-delay' in config
                 ? config['initial-delay'] * 1000
@@ -468,13 +468,13 @@ class APIClient {
         this.group = await client.createGroup();
         const groupId = this.group.id;
 
-        if (config.mythxLogs && config.mode === 'full') {
-          config.logger.log('\n Full analyses may take a while to complete, you can view progress here:'.yellow);
+        if (config.mythxLogs && config.mode === 'deep') {
+          config.logger.log('\n Deep analyses may take a while to complete, you can view progress here:'.yellow);
           config.logger.log(`https://dashboard.mythx.io/#/console/analyses/groups/${groupId}`.green);
         }
 
         let sigintFunction = this.sigintFunction;
-        if (config.mode === 'full') {
+        if (config.mode === 'deep') {
           process.on('SIGINT', function () {
             sigintFunction(config, groupId);
 
