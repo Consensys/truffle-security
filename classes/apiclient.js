@@ -433,7 +433,6 @@ class APIClient {
 
 
       analyzeData.sources = newSources;
-      console.log(analyzeData);
       return analyzeData;
     }
 
