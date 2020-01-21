@@ -411,15 +411,29 @@ class APIClient {
       let directoryPath = this.config.working_directory.replace(/\\/g, '/');
       let rootDirectory = directoryPath.split('/');
       rootDirectory = rootDirectory[rootDirectory.length - 1];
+
       analyzeData.mainSource = trufstuf.convertAbsoluteToRelativePath(analyzeData.mainSource, directoryPath, rootDirectory);
 
       let newSources = {};
       let sourcesKeys = Object.keys(analyzeData.sources);
       sourcesKeys.map((key)=> {
+        // Remove AST References
+        analyzeData.sources[key].ast.absolutePath = trufstuf.convertAbsoluteToRelativePath(analyzeData.sources[key].ast.absolutePath, directoryPath, rootDirectory);
+        analyzeData.sources[key].legacyAST.attributes.absolutePath = trufstuf.convertAbsoluteToRelativePath(analyzeData.sources[key].legacyAST.attributes.absolutePath, directoryPath, rootDirectory);
+        // Remap key
         newSources[trufstuf.convertAbsoluteToRelativePath(key, directoryPath, rootDirectory)] = analyzeData.sources[key];
       })
 
+      if (analyzeData.sourceList.length > 0) {
+        analyzeData.sourceList = analyzeData.sourceList.map(source => {
+          return trufstuf.convertAbsoluteToRelativePath(source, directoryPath, rootDirectory)
+        });
+      }
+
+
+
       analyzeData.sources = newSources;
+      console.log(analyzeData);
       return analyzeData;
     }
 
@@ -438,7 +452,7 @@ class APIClient {
             (config.mode === 'full' ? 125 * 60000 : 5 * 60000);
         const initialDelay =
             'initial-delay' in config
-                ? config['initial-delay'] * 1000
+                ? config['initial-delay'] * 10003
                 : undefined;
         const cacheLookup =
             'cache-lookup' in config ? config['cache-lookup'] : true;
