@@ -114,7 +114,7 @@ class APIClient {
                 if (id === '123456789012345678901234') {
                     // Trial user id
                     const prefix =
-                        'You are currently running MythX in Trial mode. This mode reports only a partial analysis of your smart contracts, limited to three vulnerabilities. To get a complete analysis, sign up for a free MythX account at https://mythx.io.\n';
+                        'You are currently running MythX in Trial mode. The trial account will soon be discontinued. Sign up for a Free MythX account today at https://dashboard.mythx.io. This mode reports only a partial analysis of your smart contracts, limited to three vulnerabilities.\n';
                     log(prefix);
 
                     const question =
@@ -451,7 +451,7 @@ class APIClient {
             (config.mode === 'full' ? 125 * 60000 : 5 * 60000);
         const initialDelay =
             'initial-delay' in config
-                ? config['initial-delay'] * 10003
+                ? config['initial-delay'] * 1000
                 : undefined;
         const cacheLookup =
             'cache-lookup' in config ? config['cache-lookup'] : true;
