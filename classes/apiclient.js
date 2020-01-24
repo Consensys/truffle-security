@@ -96,55 +96,39 @@ class APIClient {
                         : true;
             let id;
 
+            let hasAuthentication = false;
+
+            if ((process.env.MYTHX_ETH_ADDRESS && process.env.MYTHX_PASSWORD) || config.apiKey) {
+              hasAuthentication = true;
+            }
+
+            if (!hasAuthentication) {
+              // Trial user id
+              const prefix =
+                  'MythX trial accounts have been deprecated. Please create a free account at https://dashboard.mythx.io\n';
+              log(prefix);
+
+              process.exit(1);
+
+            }
+
             if (!config.apiKey) {
+
               await client.login();
             }
 
-            if (progress) {
-                const users = (this.apiClientType === 'MythXJS'
-                    ? await client.getUsers()
-                    : await client.getUserInfo()
-                ).users;
-                let roles;
-                if (users) {
-                    roles = users[0].roles;
-                    id = users[0].id;
-                }
+            const users = (this.apiClientType === 'MythXJS'
+            ? await client.getUsers()
+            : await client.getUserInfo()
+        ).users;
+        let roles;
+        if (users) {
+            roles = users[0].roles;
+            id = users[0].id;
+        }
 
-                if (id === '123456789012345678901234') {
-                    // Trial user id
-                    const prefix =
-                        'You are currently running MythX in Trial mode. The trial account will soon be discontinued. Sign up for a Free MythX account today at https://dashboard.mythx.io. This mode reports only a partial analysis of your smart contracts, limited to three vulnerabilities.\n';
-                    log(prefix);
 
-                    const question =
-                        'Would you like to continue with a partial analysis [Y/n]?';
-                    const r = (await inquirer.prompt([
-                        {
-                            name: 'cont',
-                            message: question,
-                        },
-                    ])).cont;
 
-                    const re = /(n|no)/i;
-                    if (re.exec(r)) {
-                        process.exit(0);
-                    }
-                    log('\nContinuing with MythX Trial mode...\n');
-                  } else {
-                    let mode = 'Free';
-                    if (roles.includes('admin')) mode = 'Admin';
-                    else if (roles.includes('Professional')) mode = 'Professional';
-                    // config.logger.log(
-                    //     `Welcome to MythX! You are currently running in ${mode} mode.\n`,
-                    // );
-                    if (roles.includes('beta_user')) {
-                        config.logger.log(
-                            'You are recognized as a Beta user, who adopted MythX prior to its offical production release. We are very grateful for this!\n'
-                        );
-                  }
-                }
-            }
             if (config.uuid) {
                 try {
                   let results;
@@ -326,18 +310,8 @@ class APIClient {
                 objContracts,
                 limit
             );
-            let isTrial = false;
 
-            if (id === '123456789012345678901234') {
-              isTrial = true;
-            }
-
-            const issues = await doReport(objects, errors, config, isTrial, this.group);
-            if (progress && isTrial) {
-                config.logger.log(
-                    'You are currently running MythX in Trial mode, which returns a maximum of three vulnerabilities per contract. Sign up for a free account at https://mythx.io to run a complete analysis and view online reports.'
-                );
-            }
+            const issues = await doReport(objects, errors, config, this.group);
 
             let { ci, ciWhitelist } = config;
 

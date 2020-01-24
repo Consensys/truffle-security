@@ -23,7 +23,7 @@ const ghettoReport = (logger, results) => {
   return 1;
 };
 
-const doReport = async function(objects, errors, config, isTrial, group) {
+const doReport = async function(objects, errors, config, group) {
   let ret = 0;
   // Return true if we shold show log.
   // Ignore logs with log.level "info" unless the "debug" flag
@@ -97,12 +97,12 @@ const doReport = async function(objects, errors, config, isTrial, group) {
     logGroups.forEach(logGroup => {
       config.logger.log(`\n${logGroup.sourcePath}`.yellow);
       config.logger.log(`UUID: ${logGroup.uuid}`.yellow);
-      if (!isTrial /*&& roles.includes('Professional')*/) {
-        config.logger.log(
-          `View Report: https://dashboard.mythx.io/#/console/analyses/${logGroup.uuid}`
-            .green
-        );
-      }
+
+      config.logger.log(
+        `View Report: https://dashboard.mythx.io/#/console/analyses/${logGroup.uuid}`
+          .green
+      );
+
       /*else {
         config.logger.log('Purchase Professional to view detailed MythX report: https://mythx.io/plans');
       }*/
