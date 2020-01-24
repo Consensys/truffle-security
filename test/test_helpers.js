@@ -221,7 +221,7 @@ describe('helpers.js', function() {
             }
             assert.ok(buildPathBool);
             assert.ok(doAnalysisStub.calledWith([ { contractName: "Contract1", contract: sinon.match.any} ], helpers.defaultAnalyzeRateLimit));
-            assert.ok(doReportStub.calledWith(1, 3, config, false));
+            assert.ok(doReportStub.calledWith(1, 3, config));
         });
 
 
@@ -266,7 +266,7 @@ describe('helpers.js', function() {
             }
             assert.ok(buildPathBool);
             assert.ok(doAnalysisStub.called);
-            assert.ok(doReportStub.calledWith(1, 3, config, false));
+            assert.ok(doReportStub.calledWith(1, 3, config));
 
         });
 
