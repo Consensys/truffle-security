@@ -117,7 +117,7 @@ class APIClient {
                 await client.login();
               }
               catch(e) {
-                console.log("Error: 400 Wrong credentials - check your username and password");
+                console.log('Error: 400 Wrong credentials - check your username and password');
                 process.exit(1);
               }
 
