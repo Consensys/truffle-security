@@ -113,7 +113,14 @@ class APIClient {
             }
 
             if (!config.apiKey) {
-              await client.login();
+              try {
+                await client.login();
+              }
+              catch(e) {
+                console.log("Error: 400 Wrong credentials - check your username and password");
+                process.exit(1);
+              }
+
             }
 
             if (config.uuid) {
