@@ -105,7 +105,7 @@ class APIClient {
             if (!hasAuthentication) {
               // Trial user id
               const prefix =
-                  'MythX trial accounts have been deprecated. Please create a free account at https://dashboard.mythx.io\n';
+                  'Account-less use of MythX has been discontinued. Please create a free account at https://dashboard.mythx.io\n';
               log(prefix);
 
               process.exit(1);
