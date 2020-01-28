@@ -34,10 +34,10 @@ class APIClient {
         const ethAddress = process.env.MYTHX_ETH_ADDRESS;
         const password = process.env.MYTHX_PASSWORD;
         let apiUrl = process.env.MYTHX_API_URL;
+
         if (!apiUrl) {
           apiUrl = 'https://api.mythx.io/v1'
         }
-
 
         const options = { clientToolName };
 
@@ -60,7 +60,7 @@ class APIClient {
                 options.password,
                 'truffle',
                 apiUrl,
-                config.apiKey ? config.apiKey : '',
+                config.apiKey ? config.apiKey : process.env.MYTHX_API_KEY ? process.env.MYTHX_API_KEY : '',
             );
             break;
         }
@@ -98,7 +98,7 @@ class APIClient {
 
             let hasAuthentication = false;
 
-            if ((process.env.MYTHX_ETH_ADDRESS && process.env.MYTHX_PASSWORD) || config.apiKey) {
+            if ((process.env.MYTHX_ETH_ADDRESS && process.env.MYTHX_PASSWORD) || config.apiKey || process.env.MYTHX_API_KEY) {
               hasAuthentication = true;
             }
 
