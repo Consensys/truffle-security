@@ -39,7 +39,7 @@ module.exports = {
 
 ### MythX Account
 
-By default, the plugin is configured with a MythX trial account that allows a limited number of requests. You can set up a free account on the [MythX website](https://mythx.io) to get full access.
+You can set up a free account on the [MythX website](https://mythx.io) to get full access.
 
 After setting up an account, set the following enviromment variables to your ETH address and password (add this to your `.bashrc` or `.bash_profile` for added convenience):
 
@@ -53,6 +53,14 @@ And if you're using Windows OS with PowerShell:
 $env:MYTHX_ETH_ADDRESS="0x1234567891235678900000000000000000000000"
 $env:MYTHX_PASSWORD="Put your password in here!"
 ```
+
+### API Key
+
+This is the recommended way of authenticating with the MythX smart contract analysis API. In the tools section there is an elements labeled “MythX API Key”. To generate a new API key, the account password must be entered:
+
+This key can be passed to the MythX CLI either as an environment variable names MYTHX_API_KEY or as an explicit parameter --apiKey. For security reasons it is recommended to always pass the token through an environment variable, e.g. defined in the settings of a Continuous Integration (CI) server or a shell script that can be sourced from.
+
+
 
 ### Solc Version
 
