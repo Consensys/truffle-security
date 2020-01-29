@@ -31,40 +31,52 @@ const defaultAnalyzeRateLimit = 4;
  */
 class APIClient {
     constructor(apiClientType, config, clientToolName, test) {
-        const ethAddress = process.env.MYTHX_ETH_ADDRESS;
-        const password = process.env.MYTHX_PASSWORD;
+        this.username = process.env.MYTHX_USERNAME ? process.env.MYTHX_USERNAME : process.env.MYTHX_ETH_ADDRESS;
+        this.password = process.env.MYTHX_PASSWORD;
         let apiUrl = process.env.MYTHX_API_URL;
+        this.apiKey = config.apiKey ? config.apiKey : process.env.MYTHX_API_KEY ? process.env.MYTHX_API_KEY : '';
 
         if (!apiUrl) {
           apiUrl = 'https://api.mythx.io/v1'
         }
 
         const options = { clientToolName };
-
-        if (password && ethAddress) {
-            options.ethAddress = ethAddress;
-            options.password = password;
-        } else if (!password && !ethAddress) {
-            options.ethAddress = trialEthAddress;
-            options.password = trialPassword;
+        console.log(this.username);
+        if (this.password && this.username) {
+            options.username = this.username;
+            options.password = this.password;
         }
 
-        switch (apiClientType) {
-        case 'armlet':
-            this.apiClientType = 'Armlet';
-            this.client = new armlet.Client(options);
-            break;
-        default:
-            this.apiClientType = 'MythXJS';
-            this.client = new mythxjsClient(
-                options.ethAddress,
-                options.password,
-                'truffle',
-                apiUrl,
-                config.apiKey ? config.apiKey : process.env.MYTHX_API_KEY ? process.env.MYTHX_API_KEY : '',
-            );
-            break;
+        try {
+            switch (apiClientType) {
+                case 'armlet':
+                    this.apiClientType = 'Armlet';
+                    this.client = new armlet.Client(options);
+                    break;
+                default:
+                    this.apiClientType = 'MythXJS';
+                    this.client = new mythxjsClient(
+                        options.username,
+                        options.password,
+                        'truffle',
+                        apiUrl,
+                        this.apiKey,
+                    );
+                    break;
+                }
         }
+        catch(e) {
+            if (config.apiKey || process.env.MYTHX_API_KEY) {
+                console.log('Error: 400 Wrong credentials - check your api key is correct.');
+            }
+            else {
+                console.log('Error: 400 Wrong credentials - check your username and password.');
+            }
+
+            process.exit(1);
+
+        }
+
 
         this.clientToolName = clientToolName;
         this.verifyOptions = options;
@@ -99,12 +111,12 @@ class APIClient {
 
             let hasAuthentication = false;
 
-            if ((process.env.MYTHX_ETH_ADDRESS && process.env.MYTHX_PASSWORD) || config.apiKey || process.env.MYTHX_API_KEY) {
+            if ((this.username && this.password) || this.apiKey) {
               hasAuthentication = true;
             }
 
-            if ((process.env.MYTHX_ETH_ADDRESS && process.env.MYTHX_PASSWORD) && (!config.apiKey || process.env.MYTHX_API_KEY)) {
-              log('You are running Sabre with username/password auth which may be removed in a future version. Please use MYTHX_API_KEY instead.');
+            if ((this.username && this.password) && !this.apiKey) {
+              log('You are running MythX with username/password auth which may be removed in a future version. Please use MYTHX_API_KEY instead.');
             }
 
             if (!hasAuthentication) {
@@ -119,10 +131,11 @@ class APIClient {
 
             if (!config.apiKey) {
               try {
+                console.log(JSON.stringify(client));
                 await client.login();
               }
               catch(e) {
-                console.log('Error: 400 Wrong credentials - check your username and password');
+                console.log('Error: 400 Wrong credentials - check your username and password.');
                 process.exit(1);
               }
 

@@ -41,7 +41,14 @@ module.exports = {
 
 You can set up a free account on the [MythX website](https://mythx.io) to get full access.
 
-After setting up an account, set the following enviromment variables to your ETH address and password (add this to your `.bashrc` or `.bash_profile` for added convenience):
+After setting up an account, set the following enviromment variables to your ETH address or Username and password (add this to your `.bashrc` or `.bash_profile` for added convenience):
+
+```bash
+export MYTHX_USERNAME='email@email.com'
+export MYTHX_PASSWORD='Put your password in here!'
+```
+
+OR
 
 ```bash
 export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
@@ -49,6 +56,14 @@ export MYTHX_PASSWORD='Put your password in here!'
 ```
 
 And if you're using Windows OS with PowerShell:
+
+```bash
+$env:MYTHX_USERNAME='email@email.com'
+$env:MYTHX_PASSWORD="Put your password in here!"
+```
+
+OR
+
 ```bash
 $env:MYTHX_ETH_ADDRESS="0x1234567891235678900000000000000000000000"
 $env:MYTHX_PASSWORD="Put your password in here!"
