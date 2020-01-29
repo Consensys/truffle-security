@@ -59,8 +59,8 @@ Options:
   --all      Compile all contracts instead of only the contracts changed since last compile.
   --apiClient { mythxjs | armlet}
               Which api client to use. Default and recommended is mythxjs.
-  --mode { quick | full | deep}
-             Perform quick or in-depth (full) analysis.
+  --mode { quick | standard | deep}
+             Perform quick, in-depth (standard) or deep analysis. Default = quick.
   --style { stylish | json | table | tap | unix | markdown | ... },
              Output report in the given es-lint style style.
              See https://eslint.org/docs/user-guide/formatters/ for a full list.

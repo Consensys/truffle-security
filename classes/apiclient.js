@@ -48,6 +48,7 @@ class APIClient {
             options.ethAddress = trialEthAddress;
             options.password = trialPassword;
         }
+
         switch (apiClientType) {
         case 'armlet':
             this.apiClientType = 'Armlet';
@@ -102,10 +103,14 @@ class APIClient {
               hasAuthentication = true;
             }
 
+            if ((process.env.MYTHX_ETH_ADDRESS && process.env.MYTHX_PASSWORD) && (!config.apiKey || process.env.MYTHX_API_KEY)) {
+              log('You are running Sabre with username/password auth which may be removed in a future version. Please use MYTHX_API_KEY instead.');
+            }
+
             if (!hasAuthentication) {
               // Trial user id
               const prefix =
-                  'Account-less use of MythX has been discontinued. Please create a free account at https://dashboard.mythx.io\n';
+                  'Unauthenticated use of MythX has been discontinued. Sign up for a free a account at https://mythx.io/ and set the MYTHX_API_KEY environment variable.\n';
               log(prefix);
 
               process.exit(1);
