@@ -1,3 +1,15 @@
+Release 1.7.0
+================
+
+Can now use MYTHX_API_KEY environment variable for passing api key.
+
+Can now use MYTHX_USERNAME for authentication.
+
+Support for new MythX plans.
+
+Removal of trial mode.
+
+
 Release 1.6.2
 ================
 

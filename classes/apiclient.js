@@ -41,7 +41,6 @@ class APIClient {
         }
 
         const options = { clientToolName };
-        console.log(this.username);
         if (this.password && this.username) {
             options.username = this.username;
             options.password = this.password;
@@ -131,7 +130,7 @@ class APIClient {
 
             if (!config.apiKey) {
               try {
-                console.log(JSON.stringify(client));
+
                 await client.login();
               }
               catch(e) {
