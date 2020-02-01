@@ -2,7 +2,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-security/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-security?branch=master)
 [![ESDoc](https://doc.esdoc.org/github.com/ConsenSys/truffle-security/badge.svg)](https://doc.esdoc.org/github.com/ConsenSys/truffle-security)
 
-
 # MythX Security Analysis Plugin for Truffle Framework
 
 This plugin adds automated smart contract security analysis to the [Truffle framework](https://truffleframework.com/docs/truffle/overview). It is based on [MythX](https://mythx.io), the security analysis API for Ethereum smart contracts. The plugin is compatible with Truffle 5.0 or higher.
@@ -15,11 +14,6 @@ To install the latest stable version from NPM:
 $ npm install -g truffle-security
 ```
 
-If you're feeling adventurous, you can also install the from the master branch:
-
-```
-$ npm install -g git+https://git@github.com/ConsenSys/truffle-security.git
-```
 ### Windows only
 On Windows `node-gyp` dependency requires `windows-build-tools` to be installed from an elevated PowerShell or CMD.exe (run as Administrator).
 ```console
@@ -39,43 +33,21 @@ module.exports = {
 
 ### MythX Account
 
-You can set up a free account on the [MythX website](https://mythx.io) to get full access.
+You can set up a free account on the [MythX website](https://mythx.io) to get full access. Generate your API key in the tools section of the [MythX dashboard](https://dashboard.mythx.io/#/). 
 
-After setting up an account, set the following enviromment variables to your ETH address or Username and password (add this to your `.bashrc` or `.bash_profile` for added convenience):
+This key can be passed to the MythX CLI either via the `MYTHX_API_KEY` environment variable or the `--apiKey` command line argument. For security reasons it is recommended to always pass the token through an environment variable, e.g. defined in the settings of a Continuous Integration (CI) server or a shell script that can be sourced from.
 
-```bash
-export MYTHX_USERNAME='email@email.com'
-export MYTHX_PASSWORD='Put your password in here!'
-```
-
-OR
+Set the following enviromment variables to your API key (add this to your `.bashrc` or `.bash_profile` for added convenience):
 
 ```bash
-export MYTHX_ETH_ADDRESS=0x1234567891235678900000000000000000000000
-export MYTHX_PASSWORD='Put your password in here!'
+export MYTHX_API_KEY='Put your API key here!'
 ```
 
 And if you're using Windows OS with PowerShell:
 
 ```bash
-$env:MYTHX_USERNAME='email@email.com'
-$env:MYTHX_PASSWORD="Put your password in here!"
+$env:MYTHX_API_KEY='Put your API key here!'
 ```
-
-OR
-
-```bash
-$env:MYTHX_ETH_ADDRESS="0x1234567891235678900000000000000000000000"
-$env:MYTHX_PASSWORD="Put your password in here!"
-```
-
-### API Key
-
-This is the recommended way of authenticating with the MythX smart contract analysis API. In the tools section there is an elements labeled “MythX API Key”. To generate a new API key, the account password must be entered:
-
-This key can be passed to the MythX CLI either as an environment variable names MYTHX_API_KEY or as an explicit parameter --apiKey. For security reasons it is recommended to always pass the token through an environment variable, e.g. defined in the settings of a Continuous Integration (CI) server or a shell script that can be sourced from.
-
-
 
 ### Solc Version
 
@@ -94,10 +66,6 @@ module.exports = {
   }
 };
 ```
-## Armlet Deprecation Notice
-
-We will be deprecating Armlet in future versions of truffle-security in favour of MythXJS which is the new default. For now you can still use armlet with the parameter. 
-```truffle run verify --apiClient armlet``` 
 
 ## Running Security Analyses
 
