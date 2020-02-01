@@ -35,7 +35,7 @@ module.exports = {
 
 You can set up a free account on the [MythX website](https://mythx.io) to get full access. Generate your API key in the tools section of the [MythX dashboard](https://dashboard.mythx.io/#/). 
 
-This key can be passed to the MythX CLI either via the `MYTHX_API_KEY` environment variable or the `--apiKey` command line argument. For security reasons it is recommended to always pass the token through an environment variable, e.g. defined in the settings of a Continuous Integration (CI) server or a shell script that can be sourced from.
+The key can be passed to Truffle either via the `MYTHX_API_KEY` environment variable or the `--apiKey` command line argument. For security reasons it is recommended to always pass the token through an environment variable, e.g. defined in the settings of a Continuous Integration (CI) server or a shell script that can be sourced from.
 
 Set the following enviromment variables to your API key (add this to your `.bashrc` or `.bash_profile` for added convenience):
 
