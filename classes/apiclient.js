@@ -128,7 +128,7 @@ class APIClient {
 
             }
 
-            if (!config.apiKey) {
+            if (!this.apiKey) {
               try {
 
                 await client.login();
