@@ -1,3 +1,7 @@
+Release 1.7.2
+================
+Update parser to work with solcjs versions above v0.6.0
+
 Release 1.7.0
 ================
 
