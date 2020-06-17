@@ -45,7 +45,7 @@ describe('API Client Classes', function() {
             debuggerStub = sinon.stub();
 
             APIClient = require('../classes/mythx');
-            doAnalysisFromClientStub = sinon.stub(APIClient.prototype, "doAnalysisFromClient");
+            doAnalysisFromClientStub = sinon.stub(APIClient.prototype, 'doAnalysisFromClient');
 
         });
 
@@ -64,19 +64,14 @@ describe('API Client Classes', function() {
             const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
             const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
             const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-            const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
+            const objContracts = [ { contractName: 'SimpleDAO', contract: contracts[0] } ];
             const mythXInput = mythx.truffle2MythXJSON(objContracts[0].contract);
-            // console.log('check source here');
-            // console.log(mythXInput)
-
-            console.log(objContracts[0]);
-
 
             doAnalysisFromClientStub.resolves({
                 issues: [{
                     'sourceFormat': 'evm-byzantium-bytecode',
                     'sourceList': [
-                        `/test/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`
+                        '/test/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json'
                     ],
                     'sourceType': 'raw-bytecode',
                     'issues': [{
@@ -87,7 +82,7 @@ describe('API Client Classes', function() {
                         'locations': [{
                             'sourceMap': '444:1:0',
                             'sourceList': [
-                                `/test/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`
+                                '/test/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json'
                             ]
                         }],
                         'severity': 'High',
@@ -104,7 +99,7 @@ describe('API Client Classes', function() {
             });
 
             //pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
-            apiClient = new APIClient(config, "truffle");
+            apiClient = new APIClient(config, 'truffle');
 
             const group = { id: '5dd7fd009a44e30011e177d8',
             name: '',
@@ -117,10 +112,10 @@ describe('API Client Classes', function() {
             numAnalyses: { total: 0, queued: 0, running: 0, failed: 0, finished: 0 },
             numVulnerabilities: { high: 0, medium: 0, low: 0, none: 0 } };
 
-            createGroupStub = sinon.stub(apiClient.client, "createGroup");
+            createGroupStub = sinon.stub(apiClient.client, 'createGroup');
             createGroupStub.resolves(group);
 
-            groupOperationStub = sinon.stub(apiClient.client, "groupOperation");
+            groupOperationStub = sinon.stub(apiClient.client, 'groupOperation');
 
 
 
@@ -148,7 +143,7 @@ describe('API Client Classes', function() {
           const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
           const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
           const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-          const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
+          const objContracts = [ { contractName: 'SimpleDAO', contract: contracts[0] } ];
           const mythXInput = mythx.truffle2MythXJSON(objContracts[0].contract);
           doAnalysisFromClientStub.resolves({
             issues: [],
@@ -156,7 +151,7 @@ describe('API Client Classes', function() {
           });
 
           //pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
-          apiClient = new APIClient(config, "truffle");
+          apiClient = new APIClient(config, 'truffle');
 
           const group = { id: '5dd7fd009a44e30011e177d8',
           name: '',
@@ -169,10 +164,10 @@ describe('API Client Classes', function() {
           numAnalyses: { total: 0, queued: 0, running: 0, failed: 0, finished: 0 },
           numVulnerabilities: { high: 0, medium: 0, low: 0, none: 0 } };
 
-          createGroupStub = sinon.stub(apiClient.client, "createGroup");
+          createGroupStub = sinon.stub(apiClient.client, 'createGroup');
           createGroupStub.resolves(group);
 
-          groupOperationStub = sinon.stub(apiClient.client, "groupOperation");
+          groupOperationStub = sinon.stub(apiClient.client, 'groupOperation');
 
           const results = await apiClient.doAnalysis(objContracts);
 
@@ -202,7 +197,7 @@ describe('API Client Classes', function() {
         const jsonFile = `${__dirname}/sample-truffle/simple_dao/build/mythx/contracts/simple_dao.json`;
         const simpleDaoJSON = await util.promisify(fs.readFile)(jsonFile, 'utf8');
         const contracts = mythx.newTruffleObjToOldTruffleByContracts(JSON.parse(simpleDaoJSON));
-        const objContracts = [ { contractName: "SimpleDAO", contract: contracts[0] } ];
+        const objContracts = [ { contractName: 'SimpleDAO', contract: contracts[0] } ];
         const mythXInput = mythx.truffle2MythXJSON(objContracts[0].contract);
         doAnalysisFromClientStub.onFirstCall().resolves({
             issues: {},
@@ -236,7 +231,7 @@ describe('API Client Classes', function() {
           status: {status: 'Pending' },
       });
         //pathStub.resolve.returns("/build/contracts/mythx/contracts/contract.sol");
-        apiClient = new APIClient(config, "truffle");
+        apiClient = new APIClient(config, 'truffle');
 
         const group = { id: '5dd7fd009a44e30011e177d8',
         name: '',
@@ -249,10 +244,10 @@ describe('API Client Classes', function() {
         numAnalyses: { total: 0, queued: 0, running: 0, failed: 0, finished: 0 },
         numVulnerabilities: { high: 0, medium: 0, low: 0, none: 0 } };
 
-        createGroupStub = sinon.stub(apiClient.client, "createGroup");
+        createGroupStub = sinon.stub(apiClient.client, 'createGroup');
         createGroupStub.resolves(group);
 
-        groupOperationStub = sinon.stub(apiClient.client, "groupOperation");
+        groupOperationStub = sinon.stub(apiClient.client, 'groupOperation');
 
         const results = await apiClient.doAnalysis(objContracts);
         mythXInput.analysisMode = 'quick';

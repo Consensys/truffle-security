@@ -7,7 +7,7 @@
 
 const helpers = require('./helpers');
 
-
+console.log('Truffle Security is being deprecated, you should now use the MythX CLI, which also has full support for Truffle projects. Learn more at: https://github.com/dmuhs/mythx-cli')
 /**
  *
  * Main "truffle run verify" entry point.
