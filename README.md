@@ -2,6 +2,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/ConsenSys/truffle-security/badge.svg?branch=master)](https://coveralls.io/github/ConsenSys/truffle-security?branch=master)
 [![ESDoc](https://doc.esdoc.org/github.com/ConsenSys/truffle-security/badge.svg)](https://doc.esdoc.org/github.com/ConsenSys/truffle-security)
 
+> ⚠️ Truffle Security is being deprecated, you should now use the MythX CLI, which also has full support for Truffle projects. Learn more at: https://github.com/dmuhs/mythx-cli
+
 # MythX Security Analysis Plugin for Truffle Framework
 
 This plugin adds automated smart contract security analysis to the [Truffle framework](https://truffleframework.com/docs/truffle/overview). It is based on [MythX](https://mythx.io), the security analysis API for Ethereum smart contracts. The plugin is compatible with Truffle 5.0 or higher.
