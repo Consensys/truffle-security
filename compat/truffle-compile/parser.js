@@ -1,10 +1,13 @@
+const debug = require("debug")("compile:parser"); // eslint-disable-line no-unused-vars
+var CompileError = require("./compileerror");
+
 // Warning issued by a pre-release compiler version, ignored by this component.
-const preReleaseCompilerWarning =
+var preReleaseCompilerWarning =
   "This is a pre-release compiler version, please do not use it in production.";
 
 module.exports = {
   // This needs to be fast! It is fast (as of this writing). Keep it fast!
-  parseImports(body, solc) {
+  parseImports: function(body, solc, file) {
     // WARNING: Kind of a hack (an expedient one).
 
     // So we don't have to maintain a separate parser, we'll get all the imports
@@ -14,48 +17,74 @@ module.exports = {
     // statement right on the end; just to ensure it will error and we can parse
     // the imports speedily without doing extra work.
 
+    // If we're using docker/native, we'll still want to use solcjs to do this part.
+    if (solc.importsParser) solc = solc.importsParser;
+
+    // Helper to detect import errors with an easy regex.
+    var importErrorKey = "TRUFFLE_IMPORT";
+
     // Inject failing import.
-    const failingImportFileName = "__Truffle__NotFound.sol";
+    var failingImportFileName = "__Truffle__NotFound.sol";
 
-    body = `${body}\n\nimport '${failingImportFileName}';\n`;
+    body = body + "\n\nimport '" + failingImportFileName + "';\n";
 
-    const solcStandardInput = {
+    var solcStandardInput = {
       language: "Solidity",
       sources: {
-        "ParsedContract.sol": {
+        [`${file}`]: {
           content: body
         }
       },
       settings: {
         outputSelection: {
-          "ParsedContract.sol": {
+          [`${file}`]: {
             "*": [] // We don't need any output.
           }
         }
       }
     };
 
-    // By compiling only with ParsedContract.sol as the source, solc.compile returns file import errors for each import path.
-    let output = solc.compile(JSON.stringify(solcStandardInput));
+    var output = solc.compile(JSON.stringify(solcStandardInput), function() {
+      // The existence of this function ensures we get a parsable error message.
+      // Without this, we'll get an error message we *can* detect, but the key will make it easier.
+      // Note: This is not a normal callback. See docs here: https://github.com/ethereum/solc-js#from-version-021
+      return { error: importErrorKey };
+    });
+
     output = JSON.parse(output);
 
     // Filter out the "pre-release compiler" warning, if present.
-    const errors = output.errors.filter(
-      ({ message }) => !message.includes(preReleaseCompilerWarning)
-    );
+    var errors = output.errors.filter(function(solidity_error) {
+      return solidity_error.message.indexOf(preReleaseCompilerWarning) < 0;
+    });
 
+    var nonImportErrors = errors.filter(function(solidity_error) {
+      // If the import error key is not found, we must not have an import error.
+      // This means we have a *different* parsing error which we should show to the user.
+      // Note: solc can return multiple parsing errors at once.
+      // We ignore the "pre-release compiler" warning message.
+      return solidity_error.formattedMessage.indexOf(importErrorKey) < 0;
+    });
+
+    // Should we try to throw more than one? (aside; we didn't before)
+    if (nonImportErrors.length > 0) {
+      throw new CompileError(nonImportErrors[0].formattedMessage);
+    }
+
+    // Now, all errors must be import errors.
     // Filter out our forced import, then get the import paths of the rest.
-    const imports = errors
-      .filter(({ formattedMessage }) => !formattedMessage.includes(failingImportFileName))
-      .map(({ formattedMessage }) => {
-        const matches = formattedMessage.match(
-          /import[^'"]?.*("|')([^'"]+)("|')/
+    var imports = errors
+      .filter(function(solidity_error) {
+        return solidity_error.message.indexOf(failingImportFileName) < 0;
+      })
+      .map(function(solidity_error) {
+        var matches = solidity_error.formattedMessage.match(
+          /import[^'"]+("|')([^'"]+)("|')/
         );
 
         // Return the item between the quotes.
-        if (matches) return matches[2];
-      })
-      .filter(match => match !== undefined);
+        return matches[2];
+      });
 
     return imports;
   }
